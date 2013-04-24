@@ -7,6 +7,8 @@ using Emgu.CV;
 using Emgu.Util;
 using System.Collections;
 using System.Diagnostics;
+using System.Timers;
+using System.IO;
 
 namespace Wiimote3DTrackingLib
 {
@@ -15,6 +17,32 @@ namespace Wiimote3DTrackingLib
 
     public class StereoTracking
     {
+        // Timer object for data logging at set intervals
+        private System.Timers.Timer datalogtimer;
+
+        // File name to save data to
+        private string _logfilename;
+
+        // A streamWriter to write to the log file
+        private StreamWriter logStreamWriter;
+
+        // matrix to hold the 3D locations when logging data
+        private Matrix<double>[] logging3DPoints = new Matrix<double>[4];
+
+        // an object to use as a locker
+        private object _result3DLocker;
+
+        // boolean for deermining whether triangulation should be performed when 
+        // logging at set intervals
+        private bool DOTRIANGULATION = true;
+
+        // boolean to determine whether to undistort point when only capturing data
+        // and not performing a triangulation
+        private bool DOUNDISTORTPOINTS = false;
+
+        // wiimote objects for use when logging data
+        WiimoteLib.Wiimote loggingwm1, loggingwm2;
+
         // The size of the Wiimote camera view is fixed at 1024 x 768 pixels
         private static Size wiimoteCamSize = new System.Drawing.Size(1024, 768);
 
@@ -125,6 +153,8 @@ namespace Wiimote3DTrackingLib
 
             leftimagepoints.Initialize();
             rightimagepoints.Initialize();
+
+            Initialise();
         }
 
         /// <summary>
@@ -142,6 +172,8 @@ namespace Wiimote3DTrackingLib
 
             leftimagepoints.Initialize();
             rightimagepoints.Initialize();
+
+            Initialise();
         }
 
         /// <summary>
@@ -159,6 +191,18 @@ namespace Wiimote3DTrackingLib
 
             leftimagepoints.Initialize();
             rightimagepoints.Initialize();
+
+            Initialise();
+            
+        }
+
+        private void Initialise()
+        {
+
+            _logfilename = "data.log";
+
+            datalogtimer = new System.Timers.Timer();
+            datalogtimer.Elapsed += new ElapsedEventHandler(DataLogTimerEvent);
         }
 
         /// <summary>
@@ -1544,6 +1588,108 @@ namespace Wiimote3DTrackingLib
 
             return 0;
 
+        }
+
+
+        public void StartLogging(double interval, WiimoteLib.Wiimote wm1, WiimoteLib.Wiimote wm2)
+        {
+            // get the wiimotes we're using for logging
+            loggingwm1 = wm1;
+
+            loggingwm2 = wm2;
+
+            // start the StreamWriter so we're ready to go on the first tick
+            PrepareDataFile();
+
+            // initialize the 3D logging point matrix
+            for (int i = 0; i < 4; i++)
+            {
+                logging3DPoints[i] = new Matrix<double>(4, 1);
+            }
+
+            // set the timer interval and start it running
+            datalogtimer.Interval = interval;
+
+            datalogtimer.Enabled = true;
+        }
+
+        public void StartLogging(double interval, , WiimoteLib.Wiimote wm1, WiimoteLib.Wiimote wm2, bool dotriangulation)
+        {
+
+            DOTRIANGULATION = dotriangulation;
+
+            StartLogging(interval, wm1, wm2);
+
+        }
+
+        public void StopLogging()
+        {
+
+            datalogtimer.Enabled = false;
+
+            logStreamWriter.Close();
+
+        }
+
+        // Specify what you want to happen when the Elapsed event is 
+        // raised.
+        private void DataLogTimerEvent(object source, ElapsedEventArgs e)
+        {
+            //Console.WriteLine("The Elapsed event was raised at {0}", e.SignalTime);
+
+            if (DOTRIANGULATION)
+            {
+                lock (_result3DLocker)
+                {
+                    Location3D_2(logging3DPoints, loggingwm1, loggingwm2);
+
+                    logStreamWriter.Write(DateTime.Now.ToString("o"));
+
+                    for (int i = 0; i < MAX_NUM_IR_SRCS; i++)
+                    {
+                        // logStreamWriter.Write(",");
+
+                        logStreamWriter.Write(",%f,%f,%f,%f", leftimagepoints[i].X, leftimagepoints[i].Y, rightimagepoints[i].X, rightimagepoints[i].Y);
+
+                        logStreamWriter.Write(",%f,%f,%f", logging3DPoints[i].Data[i]);
+                    }
+
+                    logStreamWriter.Write("\n");
+                }
+            }
+            else
+            {
+                // capture an image of the IR points from both wiimote cameras
+                StereoCapture(loggingwm1, loggingwm2, leftimagepoints, rightimagepoints);
+
+                if (DOUNDISTORTPOINTS)
+                {
+                    // undistort the points before logging
+                }
+                else
+                {
+
+                    // log the raw data from the wiimotes
+
+                    logStreamWriter.Write(DateTime.Now.ToString("o"));
+
+                    for (int i = 0; i < MAX_NUM_IR_SRCS; i++)
+                    {
+                        // logStreamWriter.Write(",");
+
+                        logStreamWriter.Write(",%f,%f,%f,%f", leftimagepoints[i].X, leftimagepoints[i].Y, rightimagepoints[i].X, rightimagepoints[i].Y);
+                    }
+
+                    logStreamWriter.Write("\n");
+                    
+                }
+            }
+
+        }
+
+        private void PrepareDataFile()
+        {
+            logStreamWriter = new StreamWriter(_logfilename);
         }
 
     }
