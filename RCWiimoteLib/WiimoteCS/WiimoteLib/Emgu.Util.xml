@@ -26,7 +26,7 @@
             Create a binary File Storage
             </summary>
             <param name="fileName">The file name of the storage</param>
-            <param name="trunkSize">The data will be read in trunk of this size internally. Can be use to seed up the file read. A good number will be 100</param>
+            <param name="trunkSize">The data will be read in trunk of this size internally. Can be use to seed up the file read. A good number will be 4096</param>
         </member>
         <member name="M:Emgu.Util.BinaryFileStorage`1.#ctor(System.String,System.Collections.Generic.IEnumerable{`0})">
             <summary>
@@ -96,7 +96,7 @@
         </member>
         <member name="M:Emgu.Util.DisposableObject.ReleaseManagedResources">
             <summary>
-            Release the managed resouces. This function will be called during the disposal of the current object.
+            Release the managed resources. This function will be called during the disposal of the current object.
             override ride this function if you need to call the Dispose() function on any managed IDisposable object created by the current object
             </summary>
         </member>
@@ -109,6 +109,18 @@
             <summary>
             Destructor
             </summary>
+        </member>
+        <member name="T:Emgu.Util.EventArgs`1">
+            <summary>
+            A generic EventArgs
+            </summary>
+            <typeparam name="T">The type of arguments</typeparam>
+        </member>
+        <member name="T:Emgu.Util.EventArgs`2">
+            <summary>
+            A generic EventArgs
+            </summary>
+            <typeparam name="T">The type of arguments</typeparam>
         </member>
         <member name="T:Emgu.Util.ICodeGenerable">
             <summary>
