@@ -284,6 +284,12 @@ namespace TestWiimote3DTracking
 
             wiitrack.StereoCalibrate(wm1, wm2, wiitrack.tp1, wiitrack.tp2);
         }
+
+        private void StartTrackingButton_Click(object sender, EventArgs e)
+        {
+
+        }
+
         #endregion
 
         #region event handlers
@@ -417,16 +423,6 @@ namespace TestWiimote3DTracking
         }
 
         #endregion
-
-
-
-
-
-
-
-
-
-
 
 
     }
