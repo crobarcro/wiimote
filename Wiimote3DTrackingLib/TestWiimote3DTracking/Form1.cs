@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
@@ -20,17 +21,32 @@ namespace TestWiimote3DTracking
 
         Wiimote3DTrackingLib.StereoTracking wiitrack;
 
-        private static Double drawscale = 0.5;
-        private static Double drawx = drawscale * 1024;
-        private static Double drawy = drawscale * 768;
-        private Bitmap b = new Bitmap((int)drawx, (int)drawy, PixelFormat.Format24bppRgb);
-        private Graphics g;
+        private Double drawscale = 0.5;
+        private Double drawx = new Double();
+        private  Double drawy = new Double();
+        private Bitmap b1;
+        private Bitmap b2;
+        private Graphics g1;
+        private Graphics g2;
+
+        private Guid _wm1ID;
+        private Guid _wm2ID;
+
+        //public PointF[][] tp1 = new PointF[4] { new PointF[] { { 91, 460 }, { 124, 45 }, { 527, 101 }, { 495, 488 } }, new PointF[] { { 116, 447 }, { 161, 38 }, { 544, 110 }, { 510, 481 } }, new PointF[] { { 139, 444 }, { 193, 36 }, { 560, 120 }, { 522, 485 } }, new PointF[] { { 141, 441 }, { 197, 33 }, { 568, 120 }, { 523, 481 } } };
 
         #region form code
 
         public Form1()
         {
             InitializeComponent();
+
+            drawx = drawscale * 1024;
+            drawy = drawscale * 768;
+
+            b1 = new Bitmap((int)drawx, (int)drawy, PixelFormat.Format24bppRgb);
+            b2 = new Bitmap((int)drawx, (int)drawy, PixelFormat.Format24bppRgb);
+            g1 = Graphics.FromImage(b1);
+            g2 = Graphics.FromImage(b2);
 
             wm1 = new Wiimote();
 
@@ -45,12 +61,15 @@ namespace TestWiimote3DTracking
             this.wm1IRPictureBox.Size = tempsize;
             this.wm2IRPictureBox.Size = tempsize;
 
-            g = Graphics.FromImage(b);
-
             wm1IRLabel1.Text = "No IR";
             wm1IRLabel2.Text = "No IR";
             wm1IRLabel3.Text = "No IR";
             wm1IRLabel4.Text = "No IR";
+
+            wm2IRLabel1.Text = "No IR";
+            wm2IRLabel2.Text = "No IR";
+            wm2IRLabel3.Text = "No IR";
+            wm2IRLabel4.Text = "No IR";
 
             wiitrack = new Wiimote3DTrackingLib.StereoTracking();
 
@@ -64,15 +83,20 @@ namespace TestWiimote3DTracking
 		
 		private void Form1_Load(object sender, EventArgs e)
 		{
-			wm1.WiimoteChanged += wm_WiimoteChanged;
-            wm1.WiimoteExtensionChanged += wm_WiimoteExtensionChanged;
-
             this.Show();
 		}
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            wm1.Disconnect();
+            if (wm1.WiimoteState.ConnectionState == WiimoteLib.ConnectionState.Connected)
+            {
+                wm1.Disconnect();
+            }
+
+            if (wm2.WiimoteState.ConnectionState == WiimoteLib.ConnectionState.Connected)
+            {
+                wm2.Disconnect();
+            }
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -81,10 +105,12 @@ namespace TestWiimote3DTracking
             {
                 wm1.Connect();
                 wm1.SetReportType(InputReport.IRAccel, true);
+                _wm1ID = wm1.ID;
             }
             catch
             {
                 MessageBox.Show("Exception thrown by Connect() method.");
+                return;
             }
 
             if (wm1.WiimoteState.LEDState.LED1)
@@ -122,9 +148,140 @@ namespace TestWiimote3DTracking
             }
         }
 
+        private void dualcapturebutton_Click(object sender, EventArgs e)
+        {
+            if (wm1.WiimoteState.ConnectionState == WiimoteLib.ConnectionState.Connected &
+                wm2.WiimoteState.ConnectionState == WiimoteLib.ConnectionState.Connected)
+            {
+                wiitrack.StereoCalibCapture(wm1, wm2);
+
+                this.captureTwoCountabel.Text = "Captured " + wiitrack.StereoCalibrateImageCount.ToString() + " Image Pairs";
+            }
+            else
+            {
+                MessageBox.Show("Both wiimote are not connected!");
+            }
+
+
+        }
+
+        private void countsrcsbutton_Click(object sender, EventArgs e)
+        {
+            if (wm1.WiimoteState.ConnectionState == WiimoteLib.ConnectionState.Connected)
+            {
+                this.IRpointslabel.Text = "IR Sources: " + wm1.WiimoteState.IRPoints().ToString();
+            }
+            else
+            {
+                MessageBox.Show("Wiimote not connected!");
+            }
+        }
+
+        private void CalibrateWM1Button_Click(object sender, EventArgs e)
+        {
+            if (wiitrack.CalibrateImageCount > 4)
+            {
+                wiitrack.CalibrateCamera(wm1);
+            }
+            else
+            {
+                MessageBox.Show("At least 5 images are required for camera calibration");
+            }
+        }
+
+        private void CalibrateStereoButton_Click(object sender, EventArgs e)
+        {
+            if (wiitrack.StereoCalibrateImageCount > 14)
+            {
+                try
+                {
+                    wiitrack.StereoCalibrate(wm1, wm2);
+                }
+                catch
+                {
+
+                }
+            }
+            else
+            {
+                MessageBox.Show("At least 5 images are required for camera calibration");
+            }
+        }
+
+        private void ResetCalibButton_Click(object sender, EventArgs e)
+        {
+            wiitrack.ResetSingleCamCalibrateCapture();
+
+            captureOneCountLabel.Text = "Captured " + wiitrack.CalibrateImageCount.ToString() + " Images";
+        }
+
+        private void ResetDualCalibButton_Click(object sender, EventArgs e)
+        {
+            wiitrack.ResetStereoCamCalibrateCapture();
+
+            this.captureTwoCountabel.Text = "Captured " + wiitrack.CalibrateImageCount.ToString() + " Image Pairs";
+        }
+
+        private void StereoConnectButton_Click(object sender, EventArgs e)
+        {
+            // Get the device paths of all wiimotes in the HID device list
+            StringCollection devicePaths = Wiimote.FindAllWiiMotes();
+
+            if (devicePaths.Count >= 2)
+            {
+                try
+                {
+                    wm1.Connect(devicePaths[0]);
+                }
+                catch
+                {
+                    MessageBox.Show("Wiimote 1 could not be connected, Exception thrown by Connect() method.");
+                    return;
+                }
+
+                try
+                {
+                    wm2.Connect(devicePaths[1]);
+                }
+                catch
+                {
+                    MessageBox.Show("Wiimote 1 could not be connected, Exception thrown by Connect() method.");
+                    return;
+                }
+
+                wm1.SetReportType(InputReport.IRAccel, true);
+                _wm1ID = wm1.ID;
+                wm1.SetLEDs(true, false, false, false);
+
+                wm2.SetReportType(InputReport.IRAccel, true);
+                _wm2ID = wm2.ID;
+                wm2.SetLEDs(false, true, false, false);
+
+            }
+            else
+            {
+                MessageBox.Show("Not enough wiimotes were found in the HID device list, is there 2 connected?");
+            }
+        }
+
+        private void DisconnectAllButton_Click(object sender, EventArgs e)
+        {
+            wm1.Disconnect();
+            wm2.Disconnect();
+            wm1IRPictureBox.Image = null;
+            wm2IRPictureBox.Image = null;
+
+            wiitrack.Reset();
+        }
+
+        private void PrintPointsButton_Click(object sender, EventArgs e)
+        {
+            wiitrack.OutputCalibrationPoints();
+        }
+
         #endregion
 
-        #region Wiimote event handlers
+        #region event handlers
 
         private delegate void UpdateWiimoteStateDelegate(WiimoteChangedEventArgs args);
         private delegate void UpdateExtensionChangedDelegate(WiimoteExtensionChangedEventArgs args);
@@ -165,25 +322,55 @@ namespace TestWiimote3DTracking
         {
             WiimoteState ws = args.WiimoteState;
 
-            g.Clear(Color.White);
-
-            float penwidth = 2.0F;
-
-            UpdateIR(ws.IRState.IRSensors[0], wm1IRLabel1, Color.Red, penwidth);
-            UpdateIR(ws.IRState.IRSensors[1], wm1IRLabel2, Color.Blue, penwidth);
-            UpdateIR(ws.IRState.IRSensors[2], wm1IRLabel3, Color.Black, penwidth);
-            UpdateIR(ws.IRState.IRSensors[3], wm1IRLabel4, Color.Purple, penwidth);
-
-            if (ws.IRState.IRSensors[0].Found && ws.IRState.IRSensors[1].Found)
-                g.DrawEllipse(new Pen(Color.Green, 1.0F), (int)(drawscale * ws.IRState.RawMidpoint.X), (int)(drawscale * ws.IRState.RawMidpoint.Y), (int)(2 / drawscale), (int)(2 / drawscale));
-
-            if (ws.ID == 0 | ws.ID == 1)
+            if (ws.ID == _wm1ID)
             {
-                wm1IRPictureBox.Image = b;
+                if (ws.ConnectionState == WiimoteLib.ConnectionState.Connected)
+                {
+                    g1.Clear(Color.White);
+
+                    float penwidth = 2.0F;
+
+                    wm1IRSourceslabel.Text = "IR Sources: " + ws.IRPoints().ToString();
+
+                    UpdateIR(g1, ws.IRState.IRSensors[0], wm1IRLabel1, Color.Red, penwidth);
+                    UpdateIR(g1, ws.IRState.IRSensors[1], wm1IRLabel2, Color.Blue, penwidth);
+                    UpdateIR(g1, ws.IRState.IRSensors[2], wm1IRLabel3, Color.Black, penwidth);
+                    UpdateIR(g1, ws.IRState.IRSensors[3], wm1IRLabel4, Color.Purple, penwidth);
+
+                    if (ws.IRState.IRSensors[0].Found && ws.IRState.IRSensors[1].Found)
+                        g1.DrawEllipse(new Pen(Color.Green, 1.0F), (int)(drawscale * ws.IRState.RawMidpoint.X), (int)(drawscale * ws.IRState.RawMidpoint.Y), (int)(2 / drawscale), (int)(2 / drawscale));
+
+                    wm1IRPictureBox.Image = b1;
+                }
+                else
+                {
+                    wm1IRPictureBox.Image = null;
+                }
             }
-            else if (ws.ID == 2)
+            else if (ws.ID == _wm2ID)
             {
-                wm2IRPictureBox.Image = b;
+                if (ws.ConnectionState == WiimoteLib.ConnectionState.Connected)
+                {
+                    g2.Clear(Color.White);
+
+                    float penwidth = 2.0F;
+
+                    wm2IRSourceslabel.Text = "IR Sources: " + ws.IRPoints().ToString();
+
+                    UpdateIR(g2, ws.IRState.IRSensors[0], wm2IRLabel1, Color.Red, penwidth);
+                    UpdateIR(g2, ws.IRState.IRSensors[1], wm2IRLabel2, Color.Blue, penwidth);
+                    UpdateIR(g2, ws.IRState.IRSensors[2], wm2IRLabel3, Color.Black, penwidth);
+                    UpdateIR(g2, ws.IRState.IRSensors[3], wm2IRLabel4, Color.Purple, penwidth);
+
+                    if (ws.IRState.IRSensors[0].Found && ws.IRState.IRSensors[1].Found)
+                        g2.DrawEllipse(new Pen(Color.Green, 1.0F), (int)(drawscale * ws.IRState.RawMidpoint.X), (int)(drawscale * ws.IRState.RawMidpoint.Y), (int)(2 / drawscale), (int)(2 / drawscale));
+
+                    wm2IRPictureBox.Image = b2;
+                }
+                else
+                {
+                    wm2IRPictureBox.Image = null;
+                }
             }
 
             //pbBattery.Value = (ws.Battery > 0xc8 ? 0xc8 : (int)ws.Battery);
@@ -191,7 +378,7 @@ namespace TestWiimote3DTracking
             //lblDevicePath.Text = "Device Path: " + mWiimote.HIDDevicePath;
         }
 
-        private void UpdateIR(IRSensor irSensor, Label lblRaw, Color color, float penwidth)
+        private void UpdateIR(Graphics g, IRSensor irSensor, Label lblRaw, Color color, float penwidth)
         {
 
             if (irSensor.Found)
@@ -226,41 +413,14 @@ namespace TestWiimote3DTracking
 
         #endregion
 
-        private void countsrcsbutton_Click(object sender, EventArgs e)
-        {
-            if (wm1.WiimoteState.ConnectionState == WiimoteLib.ConnectionState.Connected)
-            {
-                this.IRpointslabel.Text = "IR Sources: " + wm1.WiimoteState.IRPoints().ToString();
-            }
-            else
-            {
-                MessageBox.Show("Wiimote not connected!");
-            }
-        }
 
-        private void CalibrateWM1Button_Click(object sender, EventArgs e)
-        {
-            if (wiitrack.CalibrateImageCount > 4)
-            {
-                wiitrack.CalibrateCamera(wm1);
-            }
-            else
-            {
-                MessageBox.Show("At least 5 images are required for camera calibration");
-            }
-        }
 
-        private void ResetCalibButton_Click(object sender, EventArgs e)
-        {
-            wiitrack.ResetCalibrateCapture();
 
-            captureOneCountLabel.Text = "Captured " + wiitrack.CalibrateImageCount.ToString() + " Images";
-        }
 
-        private void StereoConnectButton_Click(object sender, EventArgs e)
-        {
 
-        }
+
+
+
 
     }
 }

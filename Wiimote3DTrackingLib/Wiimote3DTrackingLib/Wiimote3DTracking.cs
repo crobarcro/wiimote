@@ -35,16 +35,19 @@ namespace Wiimote3DTrackingLib
         private Emgu.CV.Structure.MCvPoint3D32f[][] CalibObjectPoints = new Emgu.CV.Structure.MCvPoint3D32f[MAX_NUM_OF_CAL_IMAGES][];
 
         // We need an array of the same size to hold captured calibration images
-        // from the wiimote camera
+        // from the wiimote cameras
+        private System.Drawing.PointF[][] singlewmCapturedImages = new System.Drawing.PointF[MAX_NUM_OF_CAL_IMAGES][];
         private System.Drawing.PointF[][] wm1capturedImages = new System.Drawing.PointF[MAX_NUM_OF_CAL_IMAGES][];
+        private System.Drawing.PointF[][] wm2capturedImages = new System.Drawing.PointF[MAX_NUM_OF_CAL_IMAGES][];
 
-        // Delcare a counter to determine how many images have been captured
+        // Delcare counters to determine how many images have been captured
         // for a given calibration.
         private int capCount = 0;
+        private int stereoCapCount = 0;
 
         public StereoTracking()
         {
-            sqSideLength = (float)(136.0 / 1000.0);
+            sqSideLength = (float)(142.0 / 1000.0);
 
             InitializeStereoTrackingImages();
         }
@@ -73,7 +76,8 @@ namespace Wiimote3DTrackingLib
         }
 
         /// <summary>
-        /// Returns the number of calibration images that have captured.
+        /// Returns the number of single camera calibration images that 
+        /// have been captured.
         /// </summary>
         public float CalibrateImageCount
         {
@@ -81,11 +85,102 @@ namespace Wiimote3DTrackingLib
         }
 
         /// <summary>
-        /// Resets the calibration image capture process.
+        /// Returns the number of stereo camera calibration image pairs 
+        /// that have been captured.
         /// </summary>
-        public void ResetCalibrateCapture()
+        public float StereoCalibrateImageCount
+        {
+            get { return stereoCapCount; }
+        }
+
+
+        public void Reset()
         {
             capCount = 0;
+            stereoCapCount = 0;
+        }
+
+
+        /// <summary>
+        /// Resets the single camera calibration image capture process.
+        /// </summary>
+        public void ResetSingleCamCalibrateCapture()
+        {
+            capCount = 0;
+        }
+
+        /// <summary>
+        /// Resets the stereo calibration image capture process.
+        /// </summary>
+        public void ResetStereoCamCalibrateCapture()
+        {
+            stereoCapCount = 0;
+        }
+
+        public void OutputCalibrationPoints()
+        {
+
+            int i = 0;
+
+            if (capCount > 0)
+            {
+                Debug.WriteLine("Single camera calibration points:");
+
+                for (i = 0; i < capCount; i++)
+                {
+                    Debug.WriteLine(singlewmCapturedImages[i][0].ToString() +
+                        " " + singlewmCapturedImages[i][1].ToString() +
+                        " " + singlewmCapturedImages[i][2].ToString() +
+                        " " + singlewmCapturedImages[i][3].ToString());
+                }
+            }
+            else
+            {
+                Debug.WriteLine("No single calibration images captured yet");
+            }
+
+            if (stereoCapCount > 0)
+            {
+
+                Debug.WriteLine("Stereo camera calibration points:");
+
+                Debug.WriteLine("camera 1 calibration points:");
+
+                Debug.WriteLine("new PointF[" + stereoCapCount.ToString() + "] {");
+
+                for (i = 0; i < stereoCapCount; i++)
+                {
+                    Debug.WriteLine("new PointF[] {" + wm1capturedImages[i][0].ToString() +
+                        ", " + wm1capturedImages[i][1].ToString() +
+                        ", " + wm1capturedImages[i][2].ToString() +
+                        ", " + wm1capturedImages[i][3].ToString() + "}");
+
+                    //Debug.WriteLine(wm2capturedImages[i][0].ToString() +
+                    //    " " + wm2capturedImages[i][1].ToString() +
+                    //    " " + wm2capturedImages[i][2].ToString() +
+                    //    " " + wm2capturedImages[i][3].ToString());
+                }
+
+                Debug.WriteLine("}");
+
+                Debug.WriteLine("camera 2 calibration points:");
+
+                Debug.WriteLine("new PointF[" + stereoCapCount.ToString() + "] {");
+
+                for (i = 0; i < stereoCapCount; i++)
+                {
+                    Debug.WriteLine("new PointF[] {" + wm2capturedImages[i][0].ToString() +
+                        ", " + wm2capturedImages[i][1].ToString() +
+                        ", " + wm2capturedImages[i][2].ToString() +
+                        ", " + wm2capturedImages[i][3].ToString() + "},");
+                }
+
+                Debug.WriteLine("}");
+            }
+            else
+            {
+                Debug.WriteLine("No stereo calibration images captured yet");
+            }
         }
 
         /// <summary>
@@ -134,13 +229,19 @@ namespace Wiimote3DTrackingLib
 
             // Now initialize the array to hold the captured images 
             // from the camera
+            singlewmCapturedImages.Initialize();
             wm1capturedImages.Initialize();
+            wm2capturedImages.Initialize();
 
             // Now initialize each of the sub arrays for holding the sets of 4 points
             for (int i = 0; i < wm1capturedImages.Length; i++)
             {
+                singlewmCapturedImages[i] = new System.Drawing.PointF[4];
+                singlewmCapturedImages[i].Initialize();
                 wm1capturedImages[i] = new System.Drawing.PointF[4];
                 wm1capturedImages[i].Initialize();
+                wm2capturedImages[i] = new System.Drawing.PointF[4];
+                wm2capturedImages[i].Initialize();
             }
 
         }
@@ -156,7 +257,6 @@ namespace Wiimote3DTrackingLib
         /// <param name="wm">A Wiimote object for the wiimote camera to be calibrated.</param>
         public void CalibrateCamera(WiimoteLib.Wiimote wm)
         {
-//, System.Drawing.PointF[][] imagePoints)
             int i = 0;
 
             Emgu.CV.Structure.MCvPoint3D32f[][] objectPoints = new Emgu.CV.Structure.MCvPoint3D32f[capCount][];
@@ -178,7 +278,7 @@ namespace Wiimote3DTrackingLib
             }
 
             Array.Copy(CalibObjectPoints, objectPoints, capCount);
-            Array.Copy(wm1capturedImages, imagePoints, capCount);
+            Array.Copy(singlewmCapturedImages, imagePoints, capCount);
 
             Emgu.CV.CameraCalibration.CalibrateCamera(objectPoints,
                 imagePoints,
@@ -196,30 +296,85 @@ namespace Wiimote3DTrackingLib
 
         }
 
-
-        public void StereoCalibrate(Emgu.CV.Structure.MCvPoint3D32f[][] objectPoints, System.Drawing.PointF[][] leftImagePoints, System.Drawing.PointF[][] rightImagePoints, WiimoteLib.Wiimote leftwm, WiimoteLib.Wiimote rightwm)
+        public void CalibrateCamera(WiimoteLib.Wiimote wm, Emgu.CV.Structure.MCvPoint3D32f[][] objectPoints, System.Drawing.PointF[][] imagePoints)
         {
 
-            Matrix<double> fundMat = new Matrix<double>(2, 2);
+            Emgu.CV.CameraCalibration.CalibrateCamera(objectPoints,
+                imagePoints,
+                wiimoteCamSize,
+                wm.WiimoteState.CameraCalibInfo.CamIntrinsic,
+                Emgu.CV.CvEnum.CALIB_TYPE.DEFAULT,
+                out wm.WiimoteState.CameraCalibInfo.SingleCamExtrinsic);
+
+        }
+
+        public void StereoCalibrate(WiimoteLib.Wiimote wm1, WiimoteLib.Wiimote wm2)
+        {
+
+            Matrix<double> fundMat = new Matrix<double>(3, 3);
             Matrix<double> essentialMat = new Matrix<double>(3, 3);
 
-            int maxIters = 1000;
+            int maxIters = 50;
 
             Emgu.CV.Structure.MCvTermCriteria termCrit = new Emgu.CV.Structure.MCvTermCriteria(maxIters);
 
+            int i = 0;
+
+            // declare an array of 3D points to hold the locations of the points on the 
+            // calibration square in its coordinate frame
+            Emgu.CV.Structure.MCvPoint3D32f[][] objectPoints = new Emgu.CV.Structure.MCvPoint3D32f[stereoCapCount][];
+
+            // declare arrays to hold the calibration image points from the wiimotes
+            System.Drawing.PointF[][] wm1ImagePoints = new System.Drawing.PointF[stereoCapCount][];
+            System.Drawing.PointF[][] wm2ImagePoints = new System.Drawing.PointF[stereoCapCount][];
+
+            // Initialize the arrays of calibration and image points
+            for (i = 0; i < objectPoints.Length; i++)
+            {
+                objectPoints[i] = new Emgu.CV.Structure.MCvPoint3D32f[4];
+                wm1ImagePoints[i] = new System.Drawing.PointF[4];
+                wm2ImagePoints[i] = new System.Drawing.PointF[4];
+
+                for (int j = 0; j < 4; j++)
+                {
+                    objectPoints[i][j] = new Emgu.CV.Structure.MCvPoint3D32f();
+                    wm1ImagePoints[i][j] = new System.Drawing.PointF();
+                    wm2ImagePoints[i][j] = new System.Drawing.PointF();
+                }
+            }
+
+            Array.Copy(CalibObjectPoints, objectPoints, stereoCapCount);
+            Array.Copy(wm1capturedImages, wm1ImagePoints, stereoCapCount);
+            Array.Copy(wm2capturedImages, wm2ImagePoints, stereoCapCount);
+
+            // calibrate the wiimote cameras individually
+            CalibrateCamera(wm1, objectPoints, wm1ImagePoints);
+            CalibrateCamera(wm2, objectPoints, wm2ImagePoints);
+
             Emgu.CV.CameraCalibration.StereoCalibrate(objectPoints,
-                leftImagePoints,
-                rightImagePoints,
-                leftwm.WiimoteState.CameraCalibInfo.CamIntrinsic,
-                rightwm.WiimoteState.CameraCalibInfo.CamIntrinsic,
+                wm1ImagePoints,
+                wm2ImagePoints,
+                wm1.WiimoteState.CameraCalibInfo.CamIntrinsic,
+                wm2.WiimoteState.CameraCalibInfo.CamIntrinsic,
                 wiimoteCamSize,
                 Emgu.CV.CvEnum.CALIB_TYPE.CV_CALIB_USE_INTRINSIC_GUESS,
                 termCrit,
-                out leftwm.WiimoteState.CameraCalibInfo.StereoCamExtrinsic,
+                out wm1.WiimoteState.CameraCalibInfo.StereoCamExtrinsic,
                 out fundMat,
                 out essentialMat);
+
+            wm2.WiimoteState.CameraCalibInfo.StereoCamExtrinsic = wm1.WiimoteState.CameraCalibInfo.StereoCamExtrinsic;
         }
 
+        /// <summary>
+        /// Captures an image of the calibration square for use in calibration 
+        /// of a single wiimote camera.
+        /// </summary>
+        /// <param name="wm">Wiimote to be calibrated</param>
+        /// <returns>0 if successful, -1 if the maximum number of calibration
+        /// images have already been captured (in which case the image will not 
+        /// be captured, or -2 if four coordinates could not be captured for any 
+        /// reason</returns>
         public int SingleCalibCapture(WiimoteLib.Wiimote wm)
         {
             int i = 0;
@@ -248,7 +403,7 @@ namespace Wiimote3DTrackingLib
                     spointf[i] = coords[i].ToPointf();
                 }
 
-                this.wm1capturedImages[capCount] = spointf;
+                this.singlewmCapturedImages[capCount] = spointf;
 
                 // Increment the count of the number of 
                 // calibration images captured
@@ -259,6 +414,73 @@ namespace Wiimote3DTrackingLib
                 return -1;
             }
             
+            return 0;
+        }
+
+        public int StereoCalibCapture(WiimoteLib.Wiimote wm1, WiimoteLib.Wiimote wm2)
+        {
+            int i = 0;
+
+            int irpoints1 = wm1.WiimoteState.IRPoints();
+            int irpoints2 = wm2.WiimoteState.IRPoints();
+
+            if (irpoints1 != irpoints2)
+            {
+                return -1;
+            }
+
+            Wiimote3DTrackingLib.coord[] coords1 = new Wiimote3DTrackingLib.coord[irpoints1];
+            Wiimote3DTrackingLib.coord[] coords2 = new Wiimote3DTrackingLib.coord[irpoints2];
+
+            PointF[] spointf1 = new PointF[irpoints1];
+            PointF[] spointf2 = new PointF[irpoints2];
+
+            for (i = 0; i < coords1.Length; i++)
+            {
+                coords1[i] = new coord();
+                spointf1[i] = new PointF();
+                coords2[i] = new coord();
+                spointf2[i] = new PointF();
+            }
+
+            if (!(CaptureOneWM(wm1, coords1) == 0))
+            {
+                return -2;
+            }
+
+            if (!(CaptureOneWM(wm2, coords2) == 0))
+            {
+                return -3;
+            }
+
+            // Wii puts origin in bottom left, Y up; toolbox in top left, Y down.  Convert by subtracting y from 768.		
+            for (i = 0; i < NUM_IR_SRCS; i++)
+            {
+                //coords1[i].y = 768 - coords1[i].y;
+                //coords2[i].y = 768 - coords2[i].y;
+                Debug.WriteLine("coords1[" + i.ToString() + "] = " + coords1[i].ToString() + "  coords2[" + i.ToString() + "] = " + coords2[i].ToString());
+            }
+
+            if (stereoCapCount < MAX_NUM_OF_CAL_IMAGES)
+            {
+                for (i = 0; i < coords1.Length; i++)
+                {
+                    spointf1[i] = coords1[i].ToPointf();
+                    spointf2[i] = coords2[i].ToPointf();
+                }
+
+                this.wm1capturedImages[stereoCapCount] = spointf1;
+                this.wm2capturedImages[stereoCapCount] = spointf2;
+
+                // Increment the count of the number of 
+                // calibration images captured
+                stereoCapCount++;
+            }
+            else if (stereoCapCount >= MAX_NUM_OF_CAL_IMAGES)
+            {
+                return -4;
+            }
+
             return 0;
         }
 
@@ -304,8 +526,8 @@ namespace Wiimote3DTrackingLib
             }
 
             Array.Sort(coords, 0, 4, coord.compare_x());
-            Array.Sort(coords, 0, 2, coord.compare_x());
-            Array.Sort(coords, 2, 2, coord.compare_x());
+            Array.Sort(coords, 0, 2, coord.compare_y());
+            Array.Sort(coords, 2, 2, coord.compare_y_inv());
 
             // Wii puts origin in bottom left, Y up; toolbox in top left, Y down.  Convert by subtracting y from 768.		
             for (int i = 0; i < NUM_IR_SRCS; i++)
