@@ -1,0 +1,10 @@
+C:\Documents and Settings\Richard\My Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteLib\bin\Release\WiimoteLib.dll
+C:\Documents and Settings\Richard\My Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteLib\bin\Release\WiimoteLib.pdb
+C:\Documents and Settings\Richard\My Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteLib\obj\Release\ResolveAssemblyReference.cache
+C:\Documents and Settings\Richard\My Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteLib\obj\Release\WiimoteLib.dll
+C:\Documents and Settings\Richard\My Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteLib\obj\Release\WiimoteLib.pdb
+C:\Users\Richard\Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteLib\bin\Release\WiimoteLib.dll
+C:\Users\Richard\Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteLib\bin\Release\WiimoteLib.pdb
+C:\Users\Richard\Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteLib\obj\Release\ResolveAssemblyReference.cache
+C:\Users\Richard\Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteLib\obj\Release\WiimoteLib.dll
+C:\Users\Richard\Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteLib\obj\Release\WiimoteLib.pdb
