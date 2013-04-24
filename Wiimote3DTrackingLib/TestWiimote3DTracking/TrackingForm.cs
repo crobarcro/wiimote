@@ -7,6 +7,8 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using Emgu.CV;
+using Emgu.Util;
 using LocationPlot3D;
 
 namespace TestWiimote3DTracking
@@ -26,6 +28,23 @@ namespace TestWiimote3DTracking
         public TrackingForm()
         {
             InitializeComponent();
+
+            // Create a cube object, thix will be the plot area for the
+            // location plot
+            //mainCube = new Math3D.Cube((int)(plot3DPictureBox.Height), (int)(plot3DPictureBox.Height), (int)(2 * plot3DPictureBox.Height));
+
+            //Math3D.PlotPoint[] plotPoints = new Math3D.PlotPoint[2];
+            //plotPoints[0] = new Math3D.PlotPoint(0.1f, 0.1f, 0.1f);
+            //plotPoints[1] = new Math3D.PlotPoint(0.5f, 0.5f, 0.5f);
+
+            mainPlot = new Math3D.Plot3D((int)(plot3DPictureBox.Height), (int)(plot3DPictureBox.Height), (int)(2 * plot3DPictureBox.Height), 4);
+            //mainPlot.PlotPoints[0].SetPosition(0.1, 0.1, 0.1);
+            //mainPlot.PlotPoints[1].SetPosition(0.5, 0.5, 0.5);
+            //mainPlot.PlotPoints[2].SetPosition(0.9, 0.9, 0.9);
+
+            drawPlot();
+
+            //Render();
         }
 
         Math3D.Plot3D mainPlot;
@@ -55,26 +74,7 @@ namespace TestWiimote3DTracking
 
         private void TrackingForm_Load(object sender, EventArgs e)
         {
-
-            // Create a cube object, thix will be the plot area for the
-            // location plot
-            //mainCube = new Math3D.Cube((int)(plot3DPictureBox.Height), (int)(plot3DPictureBox.Height), (int)(2 * plot3DPictureBox.Height));
-            
-            //Math3D.PlotPoint[] plotPoints = new Math3D.PlotPoint[2];
-            //plotPoints[0] = new Math3D.PlotPoint(0.1f, 0.1f, 0.1f);
-            //plotPoints[1] = new Math3D.PlotPoint(0.5f, 0.5f, 0.5f);
-
-            mainPlot = new Math3D.Plot3D((int)(plot3DPictureBox.Height), (int)(plot3DPictureBox.Height), (int)(2 * plot3DPictureBox.Height), 4);
-            //mainPlot.PlotPoints[0].SetPosition(0.1, 0.1, 0.1);
-            //mainPlot.PlotPoints[1].SetPosition(0.5, 0.5, 0.5);
-            //mainPlot.PlotPoints[2].SetPosition(0.9, 0.9, 0.9);
-
-            drawPlot();
-
-            //Render();
-
             timer1.Start();
-
         }
 
         public void SetTrackingPointPos(double x, double y, double z, int ID)
@@ -202,6 +202,68 @@ namespace TestWiimote3DTracking
             {
                 do3Dplot = false;
             }
+        }
+
+        public void Display3DPointText(Matrix<double>[] result3DPoints)
+        {
+
+            if (!(result3DPoints[0].Data[0, 0] == -9999 && result3DPoints[0].Data[1, 0] == -9999 && result3DPoints[0].Data[2, 0] == -9999))
+                {
+                    this.XposLabel1.Text = "X: " + result3DPoints[0].Data[0, 0].ToString("f4");
+                    this.YposLabel1.Text = "Y: " + result3DPoints[0].Data[1, 0].ToString("f4");
+                    this.ZposLabel1.Text = "Z: " + result3DPoints[0].Data[2, 0].ToString("f4");
+                }
+                else
+                {
+                    this.XposLabel1.Text = "X: No IR";
+                    this.YposLabel1.Text = "Y: No IR";
+                    this.ZposLabel1.Text = "Z: No IR";
+                }
+
+                if (!(result3DPoints[1].Data[0, 0] == -9999 && result3DPoints[1].Data[1, 0] == -9999 && result3DPoints[1].Data[2, 0] == -9999))
+                {
+                    this.XposLabel2.Text = "X: " + result3DPoints[1].Data[0, 0].ToString("f4");
+                    this.YposLabel2.Text = "Y: " + result3DPoints[1].Data[1, 0].ToString("f4");
+                    this.ZposLabel2.Text = "Z: " + result3DPoints[1].Data[2, 0].ToString("f4");
+                }
+                else
+                {
+                    this.XposLabel2.Text = "X: No IR";
+                    this.YposLabel2.Text = "Y: No IR";
+                    this.ZposLabel2.Text = "Z: No IR";
+                }
+
+                if (!(result3DPoints[2].Data[0, 0] == -9999 && result3DPoints[2].Data[1, 0] == -9999 && result3DPoints[2].Data[2, 0] == -9999))
+                {
+                    this.XposLabel3.Text = "X: " + result3DPoints[2].Data[0, 0].ToString("f4");
+                    this.YposLabel3.Text = "Y: " + result3DPoints[2].Data[1, 0].ToString("f4");
+                    this.ZposLabel3.Text = "Z: " + result3DPoints[2].Data[2, 0].ToString("f4");
+                }
+                else
+                {
+                    this.XposLabel3.Text = "X: No IR";
+                    this.YposLabel3.Text = "Y: No IR";
+                    this.ZposLabel3.Text = "Z: No IR";
+                }
+
+                if (!(result3DPoints[3].Data[0, 0] == -9999 && result3DPoints[3].Data[1, 0] == -9999 && result3DPoints[3].Data[2, 0] == -9999))
+                {
+                    this.XposLabel4.Text = "X: " + result3DPoints[3].Data[0, 0].ToString("f4");
+                    this.YposLabel4.Text = "Y: " + result3DPoints[3].Data[1, 0].ToString("f4");
+                    this.ZposLabel4.Text = "Z: " + result3DPoints[3].Data[2, 0].ToString("f4");
+                }
+                else
+                {
+                    this.XposLabel4.Text = "X: No IR";
+                    this.YposLabel4.Text = "Y: No IR";
+                    this.ZposLabel4.Text = "Z: No IR";
+                }
+
+                for (int j = 0; j < result3DPoints.Length; j++)
+                {
+                    this.SetTrackingPointPos(result3DPoints[j].Data[0, 0],
+                        result3DPoints[j].Data[1, 0], -result3DPoints[j].Data[2, 0], j);
+                }
         }
     }
 }

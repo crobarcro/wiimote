@@ -53,8 +53,11 @@ namespace TestWiimote3DTracking
         {
             InitializeComponent();
 
-            drawx = drawscale * 1024;
-            drawy = drawscale * 768;
+            //drawx = drawscale * 1024;
+            //drawy = drawscale * 768;
+
+            drawx = drawscale * 1016;
+            drawy = drawscale * 760;
 
             b1 = new Bitmap((int)drawx, (int)drawy, PixelFormat.Format24bppRgb);
             b2 = new Bitmap((int)drawx, (int)drawy, PixelFormat.Format24bppRgb);
@@ -87,6 +90,7 @@ namespace TestWiimote3DTracking
             wm2IRLabel4.Text = "No IR";
 
             wiitrack = new Wiimote3DTrackingLib.StereoTracking();
+            wiitrack.LogTimerTick += new LogEventHandler(wiitrack_LogTimerTick);
 
             wm1.WiimoteChanged += wm_WiimoteChanged;
             wm1.WiimoteExtensionChanged += wm_WiimoteExtensionChanged;
@@ -219,7 +223,7 @@ namespace TestWiimote3DTracking
                 }
                 catch
                 {
-
+                    MessageBox.Show("Calibration failed");
                 }
             }
             else
@@ -304,7 +308,7 @@ namespace TestWiimote3DTracking
         {
             // Test Stereo Calibration button
 
-            wiitrack.StereoCalibrate(wm1, wm2, wiitrack.tp1, wiitrack.tp2);
+            //wiitrack.StereoCalibrate(wm1, wm2, wiitrack.tp1, wiitrack.tp2);
         }
 
         private void StartTrackingButton_Click(object sender, EventArgs e)
@@ -332,6 +336,28 @@ namespace TestWiimote3DTracking
             TForm.Hide();
             _tformloaded = false;
             _dotracking = false;
+        }
+
+
+        private void StartLoggingButton_Click(object sender, EventArgs e)
+        {
+            // clear the IR display
+            g1.Clear(Color.White);
+
+            //if (!_tformloaded)
+            //{
+            //    TForm.Show();
+            //    _tformloaded = true;
+            //}
+
+            //_dotracking = false;
+
+            wiitrack.StartLogging(500.0, wm1, wm2, true, "test_log.txt");
+        }
+
+        private void StopLoggingButton_Click(object sender, EventArgs e)
+        {
+            wiitrack.StopLogging();
         }
 
         #endregion
@@ -375,11 +401,14 @@ namespace TestWiimote3DTracking
 
         private void UpdateWiimoteChanged(WiimoteChangedEventArgs args)
         {
-            if (!_dologging)
+            
+
+            if (_dologging)
             {
-
-                // if we're not using the Wiimote3DTracking objects logging code
-
+                //g1.Clear(Color.White);
+            }
+            else
+            {
                 WiimoteState ws = args.WiimoteState;
 
                 if (ws.ID == _wm1ID)
@@ -446,19 +475,20 @@ namespace TestWiimote3DTracking
                     {
                         wiitrack.Location3D_2(result3DPoints, wm1, wm2);
 
-                        if (!(result3DPoints[0].Data[0, 0] == -9999 && result3DPoints[0].Data[1, 0] == -9999 && result3DPoints[0].Data[2, 0] == -9999))
+                        //wiitrack.Location3D(result3DPoints, wm1, wm2);                    
+                        
+                        if (!(result3DPoints[0].Data[0, 0] == -9999 && result3DPoints[0].Data[1, 0] == -9999 && result3DPoints[0].Data[2, 0] == -9999))        
                         {
                             TForm.XposLabel1.Text = "X: " + result3DPoints[0].Data[0, 0].ToString("f4");
-                            TForm.YposLabel1.Text = "Y: " + result3DPoints[0].Data[1, 0].ToString("f4");
-                            TForm.ZposLabel1.Text = "Z: " + result3DPoints[0].Data[2, 0].ToString("f4");
+                            TForm.YposLabel1.Text = "Y: " + result3DPoints[0].Data[1, 0].ToString("f4"); 
+                            TForm.ZposLabel1.Text = "Z: " + result3DPoints[0].Data[2, 0].ToString("f4"); 
+                        }                    
+                        else                    
+                        {                        
+                            TForm.XposLabel1.Text = "X: No IR";                        
+                            TForm.YposLabel1.Text = "Y: No IR";                        
+                            TForm.ZposLabel1.Text = "Z: No IR";                    
                         }
-                        else
-                        {
-                            TForm.XposLabel1.Text = "X: No IR";
-                            TForm.YposLabel1.Text = "Y: No IR";
-                            TForm.ZposLabel1.Text = "Z: No IR";
-                        }
-
                         if (!(result3DPoints[1].Data[0, 0] == -9999 && result3DPoints[1].Data[1, 0] == -9999 && result3DPoints[1].Data[2, 0] == -9999))
                         {
                             TForm.XposLabel2.Text = "X: " + result3DPoints[1].Data[0, 0].ToString("f4");
@@ -512,6 +542,295 @@ namespace TestWiimote3DTracking
             }
         }
 
+        // function to be called when a logging event occurs in the Stereotracking class
+        private void wiitrack_LogTimerTick(object sender, EventArgs e)
+        {
+            lock (_result3DLocker)
+            {
+                //wiitrack.Location3D_2(result3DPoints, wm1, wm2);
+                wiitrack.Get3DPoints().CopyTo(result3DPoints, 0);
+
+                this.Display3DPointText(result3DPoints);
+            }
+            
+        }
+
+        delegate void SetTextCallback(string text);
+
+        public void Display3DPointText(Matrix<double>[] result3DPoints)
+        {
+            //Form1.CheckForIllegalCrossThreadCalls = false;
+            string Xstring;
+            string Ystring;
+            string Zstring;
+
+            if (!(result3DPoints[0].Data[0, 0] == -9999 && result3DPoints[0].Data[1, 0] == -9999 && result3DPoints[0].Data[2, 0] == -9999))
+            {
+                Xstring = "X: " + result3DPoints[0].Data[0, 0].ToString("f4");
+                Ystring = "Y: " + result3DPoints[0].Data[1, 0].ToString("f4");
+                Zstring = "Z: " + result3DPoints[0].Data[2, 0].ToString("f4");
+            }
+            else
+            {
+                Xstring = "X: No IR";
+                Ystring = "Y: No IR";
+                Zstring = "Z: No IR";
+            }
+
+            if (this.XposLabel1.InvokeRequired)
+            {
+                // It's on a different thread, so use Invoke.
+                SetTextCallback d = new SetTextCallback(SetXposLabel1Text);
+                this.Invoke
+                    (d, new object[] { Xstring });
+            }
+            else
+            {
+                this.XposLabel1.Text = Xstring;
+            }
+
+            if (this.YposLabel1.InvokeRequired)
+            {
+                // It's on a different thread, so use Invoke.
+                SetTextCallback d = new SetTextCallback(SetYposLabel1Text);
+                this.Invoke
+                    (d, new object[] { Ystring });
+            }
+            else
+            {
+                this.YposLabel1.Text = Ystring;
+            }
+
+            if (this.ZposLabel1.InvokeRequired)
+            {
+                // It's on a different thread, so use Invoke.
+                SetTextCallback d = new SetTextCallback(SetZposLabel1Text);
+                this.Invoke
+                    (d, new object[] { Zstring });
+            }
+            else
+            {
+                this.ZposLabel1.Text = Zstring;
+            }
+
+            if (!(result3DPoints[1].Data[0, 0] == -9999 && result3DPoints[1].Data[1, 0] == -9999 && result3DPoints[1].Data[2, 0] == -9999))
+            {
+                Xstring = "X: " + result3DPoints[1].Data[0, 0].ToString("f4");
+                Ystring = "Y: " + result3DPoints[1].Data[1, 0].ToString("f4");
+                Zstring = "Z: " + result3DPoints[1].Data[2, 0].ToString("f4");
+            }
+            else
+            {
+                Xstring = "X: No IR";
+                Ystring = "Y: No IR";
+                Zstring = "Z: No IR";
+            }
+
+            if (this.XposLabel2.InvokeRequired)
+            {
+                // It's on a different thread, so use Invoke.
+                SetTextCallback d = new SetTextCallback(SetXposLabel2Text);
+                this.Invoke
+                    (d, new object[] { Xstring });
+            }
+            else
+            {
+                this.XposLabel2.Text = Xstring;
+            }
+
+            if (this.YposLabel2.InvokeRequired)
+            {
+                // It's on a different thread, so use Invoke.
+                SetTextCallback d = new SetTextCallback(SetYposLabel2Text);
+                this.Invoke
+                    (d, new object[] { Ystring });
+            }
+            else
+            {
+                this.YposLabel2.Text = Ystring;
+            }
+
+            if (this.ZposLabel2.InvokeRequired)
+            {
+                // It's on a different thread, so use Invoke.
+                SetTextCallback d = new SetTextCallback(SetZposLabel2Text);
+                this.Invoke
+                    (d, new object[] { Zstring });
+            }
+            else
+            {
+                this.ZposLabel2.Text = Zstring;
+            }
+
+            if (!(result3DPoints[2].Data[0, 0] == -9999 && result3DPoints[2].Data[1, 0] == -9999 && result3DPoints[2].Data[2, 0] == -9999))
+            {
+                Xstring = "X: " + result3DPoints[2].Data[0, 0].ToString("f4");
+                Ystring = "Y: " + result3DPoints[2].Data[1, 0].ToString("f4");
+                Zstring = "Z: " + result3DPoints[2].Data[2, 0].ToString("f4");
+            }
+            else
+            {
+                Xstring = "X: No IR";
+                Ystring = "Y: No IR";
+                Zstring = "Z: No IR";
+            }
+
+            if (this.XposLabel3.InvokeRequired)
+            {
+                // It's on a different thread, so use Invoke.
+                SetTextCallback d = new SetTextCallback(SetXposLabel3Text);
+                this.Invoke
+                    (d, new object[] { Xstring });
+            }
+            else
+            {
+                this.XposLabel3.Text = Xstring;
+            }
+
+            if (this.YposLabel3.InvokeRequired)
+            {
+                // It's on a different thread, so use Invoke.
+                SetTextCallback d = new SetTextCallback(SetYposLabel3Text);
+                this.Invoke
+                    (d, new object[] { Ystring });
+            }
+            else
+            {
+                this.YposLabel3.Text = Ystring;
+            }
+
+            if (this.ZposLabel3.InvokeRequired)
+            {
+                // It's on a different thread, so use Invoke.
+                SetTextCallback d = new SetTextCallback(SetZposLabel3Text);
+                this.Invoke
+                    (d, new object[] { Zstring });
+            }
+            else
+            {
+                this.ZposLabel3.Text = Zstring;
+            }
+
+            if (!(result3DPoints[3].Data[0, 0] == -9999 && result3DPoints[3].Data[1, 0] == -9999 && result3DPoints[3].Data[2, 0] == -9999))
+            {
+                Xstring = "X: " + result3DPoints[3].Data[0, 0].ToString("f4");
+                Ystring = "Y: " + result3DPoints[3].Data[1, 0].ToString("f4");
+                Zstring = "Z: " + result3DPoints[3].Data[2, 0].ToString("f4");
+            }
+            else
+            {
+                Xstring = "X: No IR";
+                Ystring = "Y: No IR";
+                Zstring = "Z: No IR";
+            }
+
+            if (this.XposLabel4.InvokeRequired)
+            {
+                // It's on a different thread, so use Invoke.
+                SetTextCallback d = new SetTextCallback(SetXposLabel4Text);
+                this.Invoke
+                    (d, new object[] { Xstring });
+            }
+            else
+            {
+                this.XposLabel4.Text = Xstring;
+            }
+
+            if (this.YposLabel4.InvokeRequired)
+            {
+                // It's on a different thread, so use Invoke.
+                SetTextCallback d = new SetTextCallback(SetYposLabel4Text);
+                this.Invoke
+                    (d, new object[] { Ystring });
+            }
+            else
+            {
+                this.YposLabel4.Text = Ystring;
+            }
+
+            if (this.ZposLabel4.InvokeRequired)
+            {
+                // It's on a different thread, so use Invoke.
+                SetTextCallback d = new SetTextCallback(SetZposLabel4Text);
+                this.Invoke
+                    (d, new object[] { Zstring });
+            }
+            else
+            {
+                this.ZposLabel4.Text = Zstring;
+            }
+
+            //for (int j = 0; j < result3DPoints.Length; j++)
+            //{
+            //    this.SetTrackingPointPos(result3DPoints[j].Data[0, 0],
+            //        result3DPoints[j].Data[1, 0], -result3DPoints[j].Data[2, 0], j);
+            //}
+            //Form1.CheckForIllegalCrossThreadCalls = true;
+        }
+
+        private void SetXposLabel1Text(string text)
+        {
+            this.XposLabel1.Text = text;
+        }
+
+        private void SetXposLabel2Text(string text)
+        {
+            this.XposLabel2.Text = text;
+        }
+
+        private void SetXposLabel3Text(string text)
+        {
+            this.XposLabel3.Text = text;
+        }
+
+        private void SetXposLabel4Text(string text)
+        {
+            this.XposLabel4.Text = text;
+        }
+
+        private void SetYposLabel1Text(string text)
+        {
+            this.YposLabel1.Text = text;
+        }
+
+        private void SetYposLabel2Text(string text)
+        {
+            this.YposLabel2.Text = text;
+        }
+
+        private void SetYposLabel3Text(string text)
+        {
+            this.YposLabel3.Text = text;
+        }
+
+        private void SetYposLabel4Text(string text)
+        {
+            this.YposLabel4.Text = text;
+        }
+
+        private void SetZposLabel1Text(string text)
+        {
+            this.ZposLabel1.Text = text;
+        }
+
+        private void SetZposLabel2Text(string text)
+        {
+            this.ZposLabel2.Text = text;
+        }
+
+        private void SetZposLabel3Text(string text)
+        {
+            this.ZposLabel3.Text = text;
+        }
+
+        private void SetZposLabel4Text(string text)
+        {
+            this.ZposLabel4.Text = text;
+        }
+
+
+    
+
         private void UpdateIR(Graphics g, IRSensor irSensor, Label lblRaw, Color color, float penwidth)
         {
 
@@ -519,8 +838,13 @@ namespace TestWiimote3DTracking
             {
                 //lblNorm.Text = irSensor.Position.ToString() + ", " + irSensor.Size;
                 lblRaw.Text = irSensor.RawPosition.ToString();
-                g.DrawEllipse(new Pen(color, penwidth), (int)(drawscale * irSensor.RawPosition.X), (int)(drawscale * (768 - irSensor.RawPosition.Y)),
+                g.DrawEllipse(new Pen(color, penwidth), (int)(drawscale * irSensor.RawPosition.X), (int)(drawscale * (760 - irSensor.RawPosition.Y)),
                              (int)((irSensor.Size + 1) / drawscale), (int)((irSensor.Size + 1) / drawscale));
+
+                if (irSensor.RawPosition.Y < 0)
+                {
+                    float temp = irSensor.Position.Y;
+                }
             }
             else
             {
@@ -580,9 +904,9 @@ namespace TestWiimote3DTracking
 
             wiitrack.setCalibObjSize(Width, Height);
 
+            this.captureTwoCountabel.Text = "Captured " + wiitrack.CalibrateImageCount.ToString() + " Image Pairs";
+
         }
-
-
 
 
     }

@@ -15,6 +15,9 @@ namespace Wiimote3DTrackingLib
     using cv = Emgu.CV.CvInvoke;
     using System.Threading;
 
+    // A delegate type for hooking up change notifications.
+    public delegate void LogEventHandler(object sender, EventArgs e);
+
     public class StereoTracking
     {
         // Timer object for data logging at set intervals
@@ -26,11 +29,15 @@ namespace Wiimote3DTrackingLib
         // A streamWriter to write to the log file
         private StreamWriter logStreamWriter;
 
+        // An event that clients can use to be notified whenever a
+        // logging event occurs
+        public event LogEventHandler LogTimerTick;
+
         // matrix to hold the 3D locations when logging data
         private Matrix<double>[] logging3DPoints = new Matrix<double>[4];
 
         // an object to use as a locker
-        private object _result3DLocker;
+        private object _result3DLocker = new object();
 
         // boolean for deermining whether triangulation should be performed when 
         // logging at set intervals
@@ -45,6 +52,10 @@ namespace Wiimote3DTrackingLib
 
         // The size of the Wiimote camera view is fixed at 1024 x 768 pixels
         private static Size wiimoteCamSize = new System.Drawing.Size(1024, 768);
+        //private static Size wiimoteCamSize = new System.Drawing.Size(1016, 760);
+
+        // // define a Y offset that takes account of the sensor bar position adjustment
+        private static int yWiiIROffset = 51;
 
         // The expected number of IR sources
         private static readonly int NUM_IR_SRCS = 4;
@@ -106,43 +117,43 @@ namespace Wiimote3DTrackingLib
         private bool _isStereoCalib = false;
 
         // Some test points for testing stereo calibration 
-        public PointF[][] tp1 = new PointF[17][] {
-            new PointF[] {new PointF(171,81), new PointF(174,440), new PointF(516,468), new PointF(542,105)},
-            new PointF[] {new PointF(59,135), new PointF(71,464), new PointF(385,507), new PointF(409,171)},
-            new PointF[] {new PointF(276,184), new PointF(318,570), new PointF(625,471), new PointF(616,124)},
-            new PointF[] {new PointF(293,61), new PointF(300,460), new PointF(631,415), new PointF(655,55)},
-            new PointF[] {new PointF(267,53), new PointF(206,479), new PointF(540,480), new PointF(603,120)},
-            new PointF[] {new PointF(119,75), new PointF(99,471), new PointF(400,572), new PointF(458,115)},
-            new PointF[] {new PointF(211,81), new PointF(81,450), new PointF(488,544), new PointF(587,161)},
-            new PointF[] {new PointF(153,137), new PointF(74,499), new PointF(446,608), new PointF(590,275)},
-            new PointF[] {new PointF(219,123), new PointF(192,566), new PointF(571,551), new PointF(610,161)},
-            new PointF[] {new PointF(226,207), new PointF(197,644), new PointF(576,614), new PointF(623,228)},
-            new PointF[] {new PointF(119,176), new PointF(76,632), new PointF(511,666), new PointF(575,235)},
-            new PointF[] {new PointF(103,132), new PointF(53,416), new PointF(338,433), new PointF(410,175)},
-            new PointF[] {new PointF(269,140), new PointF(315,454), new PointF(597,399), new PointF(567,101)},
-            new PointF[] {new PointF(164,328), new PointF(160,662), new PointF(479,650), new PointF(491,332)},
-            new PointF[] {new PointF(362,133), new PointF(411,479), new PointF(619,420), new PointF(577,127)},
-            new PointF[] {new PointF(158,222), new PointF(217,560), new PointF(533,496), new PointF(482,176)},
-            new PointF[] {new PointF(151,225), new PointF(173,562), new PointF(493,532), new PointF(475,212)}};
+        //public PointF[][] tp1 = new PointF[17][] {
+        //    new PointF[] {new PointF(171,81), new PointF(174,440), new PointF(516,468), new PointF(542,105)},
+        //    new PointF[] {new PointF(59,135), new PointF(71,464), new PointF(385,507), new PointF(409,171)},
+        //    new PointF[] {new PointF(276,184), new PointF(318,570), new PointF(625,471), new PointF(616,124)},
+        //    new PointF[] {new PointF(293,61), new PointF(300,460), new PointF(631,415), new PointF(655,55)},
+        //    new PointF[] {new PointF(267,53), new PointF(206,479), new PointF(540,480), new PointF(603,120)},
+        //    new PointF[] {new PointF(119,75), new PointF(99,471), new PointF(400,572), new PointF(458,115)},
+        //    new PointF[] {new PointF(211,81), new PointF(81,450), new PointF(488,544), new PointF(587,161)},
+        //    new PointF[] {new PointF(153,137), new PointF(74,499), new PointF(446,608), new PointF(590,275)},
+        //    new PointF[] {new PointF(219,123), new PointF(192,566), new PointF(571,551), new PointF(610,161)},
+        //    new PointF[] {new PointF(226,207), new PointF(197,644), new PointF(576,614), new PointF(623,228)},
+        //    new PointF[] {new PointF(119,176), new PointF(76,632), new PointF(511,666), new PointF(575,235)},
+        //    new PointF[] {new PointF(103,132), new PointF(53,416), new PointF(338,433), new PointF(410,175)},
+        //    new PointF[] {new PointF(269,140), new PointF(315,454), new PointF(597,399), new PointF(567,101)},
+        //    new PointF[] {new PointF(164,328), new PointF(160,662), new PointF(479,650), new PointF(491,332)},
+        //    new PointF[] {new PointF(362,133), new PointF(411,479), new PointF(619,420), new PointF(577,127)},
+        //    new PointF[] {new PointF(158,222), new PointF(217,560), new PointF(533,496), new PointF(482,176)},
+        //    new PointF[] {new PointF(151,225), new PointF(173,562), new PointF(493,532), new PointF(475,212)}};
 
-        public PointF[][] tp2 = new PointF[17][] {
-            new PointF[] {new PointF(466,72), new PointF(443,441), new PointF(795,477), new PointF(852,108)},
-            new PointF[] {new PointF(338,129), new PointF(326,463), new PointF(649,513), new PointF(702,174)},
-            new PointF[] {new PointF(612,185), new PointF(615,577), new PointF(900,481), new PointF(920,127)},
-            new PointF[] {new PointF(631,60), new PointF(597,465), new PointF(911,425), new PointF(966,58)},
-            new PointF[] {new PointF(612,49), new PointF(525,482), new PointF(823,490), new PointF(905,123)},
-            new PointF[] {new PointF(439,69), new PointF(391,471), new PointF(744,582), new PointF(835,116)},
-            new PointF[] {new PointF(518,78), new PointF(402,451), new PointF(828,555), new PointF(906,167)},
-            new PointF[] {new PointF(513,134), new PointF(375,498), new PointF(744,617), new PointF(941,282)},
-            new PointF[] {new PointF(573,121), new PointF(518,573), new PointF(872,565), new PointF(933,167)},
-            new PointF[] {new PointF(585,208), new PointF(522,651), new PointF(878,629), new PointF(952,234)},
-            new PointF[] {new PointF(479,172), new PointF(409,636), new PointF(840,680), new PointF(925,240)},
-            new PointF[] {new PointF(370,128), new PointF(288,415), new PointF(560,437), new PointF(656,177)},
-            new PointF[] {new PointF(534,138), new PointF(559,458), new PointF(834,407), new PointF(821,104)},
-            new PointF[] {new PointF(428,326), new PointF(412,666), new PointF(727,659), new PointF(745,336)},
-            new PointF[] {new PointF(642,134), new PointF(679,486), new PointF(857,428), new PointF(822,130)},
-            new PointF[] {new PointF(426,220), new PointF(475,562), new PointF(788,505), new PointF(744,178)},
-            new PointF[] {new PointF(415,223), new PointF(429,563), new PointF(745,539), new PointF(731,215)}};
+        //public PointF[][] tp2 = new PointF[17][] {
+        //    new PointF[] {new PointF(466,72), new PointF(443,441), new PointF(795,477), new PointF(852,108)},
+        //    new PointF[] {new PointF(338,129), new PointF(326,463), new PointF(649,513), new PointF(702,174)},
+        //    new PointF[] {new PointF(612,185), new PointF(615,577), new PointF(900,481), new PointF(920,127)},
+        //    new PointF[] {new PointF(631,60), new PointF(597,465), new PointF(911,425), new PointF(966,58)},
+        //    new PointF[] {new PointF(612,49), new PointF(525,482), new PointF(823,490), new PointF(905,123)},
+        //    new PointF[] {new PointF(439,69), new PointF(391,471), new PointF(744,582), new PointF(835,116)},
+        //    new PointF[] {new PointF(518,78), new PointF(402,451), new PointF(828,555), new PointF(906,167)},
+        //    new PointF[] {new PointF(513,134), new PointF(375,498), new PointF(744,617), new PointF(941,282)},
+        //    new PointF[] {new PointF(573,121), new PointF(518,573), new PointF(872,565), new PointF(933,167)},
+        //    new PointF[] {new PointF(585,208), new PointF(522,651), new PointF(878,629), new PointF(952,234)},
+        //    new PointF[] {new PointF(479,172), new PointF(409,636), new PointF(840,680), new PointF(925,240)},
+        //    new PointF[] {new PointF(370,128), new PointF(288,415), new PointF(560,437), new PointF(656,177)},
+        //    new PointF[] {new PointF(534,138), new PointF(559,458), new PointF(834,407), new PointF(821,104)},
+        //    new PointF[] {new PointF(428,326), new PointF(412,666), new PointF(727,659), new PointF(745,336)},
+        //    new PointF[] {new PointF(642,134), new PointF(679,486), new PointF(857,428), new PointF(822,130)},
+        //    new PointF[] {new PointF(426,220), new PointF(475,562), new PointF(788,505), new PointF(744,178)},
+        //    new PointF[] {new PointF(415,223), new PointF(429,563), new PointF(745,539), new PointF(731,215)}};
 
         public StereoTracking()
         {
@@ -220,6 +231,9 @@ namespace Wiimote3DTrackingLib
                 // Reinitialize the Image capture as the calibration 
                 // object has changed
                 InitializeStereoTrackingImages();
+
+                ResetStereoCamCalibrateCapture();
+
             }
         }
 
@@ -370,6 +384,22 @@ namespace Wiimote3DTrackingLib
                 // x  0  1  1  0 ;  
                 // y  0  0  1  1 ; 
                 // z  0  0  0  0
+                //CalibObjectPoints[i][0].x = 0;
+                //CalibObjectPoints[i][0].y = 0;
+                //CalibObjectPoints[i][0].z = 0;
+
+                //CalibObjectPoints[i][1].x = calibRectSize.Width;
+                //CalibObjectPoints[i][1].y = 0;
+                //CalibObjectPoints[i][1].z = 0;
+
+                //CalibObjectPoints[i][2].x = calibRectSize.Width;
+                //CalibObjectPoints[i][2].y = calibRectSize.Height;
+                //CalibObjectPoints[i][2].z = 0;
+
+                //CalibObjectPoints[i][3].x = 0;
+                //CalibObjectPoints[i][3].y = calibRectSize.Height;
+                //CalibObjectPoints[i][3].z = 0;
+
                 CalibObjectPoints[i][0].x = 0;
                 CalibObjectPoints[i][0].y = 0;
                 CalibObjectPoints[i][0].z = 0;
@@ -773,10 +803,14 @@ namespace Wiimote3DTrackingLib
                     // CvInvoke.cvPerspectiveTransform(XYDpoint.Ptr, result3DPoints[i].Ptr, Q.Ptr);
                     MatrixMult(Q, XYDpoint, result3DPoints[i]);
 
+                    double yOffset = yWiiIROffset / result3DPoints[i].Data[3, 0];
+
                     // Divide the X, Y and Z factors by the scaling factor
                     result3DPoints[i].Data[0, 0] = result3DPoints[i].Data[0, 0] / result3DPoints[i].Data[3, 0];
-                    result3DPoints[i].Data[1, 0] = result3DPoints[i].Data[1, 0] / result3DPoints[i].Data[3, 0];
+                    result3DPoints[i].Data[1, 0] = (result3DPoints[i].Data[1, 0] / result3DPoints[i].Data[3, 0]) - yOffset;
                     result3DPoints[i].Data[2, 0] = result3DPoints[i].Data[2, 0] / result3DPoints[i].Data[3, 0];
+
+                    
 
                 }
                 else
@@ -847,13 +881,15 @@ namespace Wiimote3DTrackingLib
                     rightimagepoints[i].Y <= wiimoteCamSize.Height)
                 {
                     tmpLeftPnt[0] = UDleftimagepoints[i];
-                    tmpRightPnt[0] = UDrightimagepoints[i];
+                    tmpRightPnt[0] = UDrightimagepoints[i]; //MatchPoint(UDleftimagepoints[i], UDrightimagepoints);
 
                     //cvCorrectMatches(tmpLeftPnt, tmpRightPnt);
 
                     triangulate(P1, P2, tmpLeftPnt, tmpRightPnt, XYDpoint);
 
                     XYDpoint[0].CopyTo(result3DPoints[i]);
+
+                    //double yOffset = yWiiIROffset / result3DPoints[i].Data[3, 0];
                 }
                 else
                 {
@@ -867,6 +903,29 @@ namespace Wiimote3DTrackingLib
 
             }
 
+        }
+
+        private System.Drawing.PointF MatchPoint(System.Drawing.PointF leftpoint, System.Drawing.PointF[] candidateMatches)
+        {
+            System.Drawing.PointF matchPoint = new System.Drawing.PointF();
+
+            double distance = Math.Sqrt(Math.Pow(((double)(candidateMatches[0].X) - (double)(leftpoint.X)), 2) +
+                                        Math.Pow((double)(candidateMatches[0].Y) - (double)(leftpoint.Y), 2));
+
+            matchPoint = candidateMatches[0];
+
+            for (int i = 1; i < candidateMatches.Length; i++)
+            {
+                double nextdistance = Math.Sqrt(Math.Pow((double)(candidateMatches[i].X) - (double)(leftpoint.X), 2) +
+                                                Math.Pow((double)(candidateMatches[i].Y) - (double)(leftpoint.Y), 2));
+
+                if (nextdistance < distance)
+                    matchPoint = candidateMatches[i];
+
+                distance = nextdistance;
+            }
+
+            return matchPoint;
         }
 
         private void cvCorrectMatches(System.Drawing.PointF[] points1, System.Drawing.PointF[] points2)
@@ -1325,8 +1384,8 @@ namespace Wiimote3DTrackingLib
             // Wii puts origin in bottom left, Y up; toolbox in top left, Y down.  Convert by subtracting y from 768.		
             for (i = 0; i < NUM_IR_SRCS; i++)
             {
-                //coords1[i].y = 768 - coords1[i].y;
-                //coords2[i].y = 768 - coords2[i].y;
+                coords1[i].y = wiimoteCamSize.Height - coords1[i].y;
+                coords2[i].y = wiimoteCamSize.Height - coords2[i].y;
                 //Debug.WriteLine("coords1[" + i.ToString() + "] = " + coords1[i].ToString() + "  coords2[" + i.ToString() + "] = " + coords2[i].ToString());
             }
 
@@ -1397,7 +1456,7 @@ namespace Wiimote3DTrackingLib
             // Wii puts origin in bottom left, Y up; toolbox in top left, Y down.  Convert by subtracting y from 768.		
             for (int i = 0; i < NUM_IR_SRCS; i++)
             {
-                coords[i].y = 768 - coords[i].y;
+                coords[i].y = wiimoteCamSize.Height - coords[i].y;
                 //Debug.WriteLine("coords[" + i.ToString() + "] = " + coords[i].ToString());
             }
 
@@ -1436,7 +1495,7 @@ namespace Wiimote3DTrackingLib
 
                     c.y = wm.WiimoteState.IRState.IRSensors[i].RawPosition.Y;
 
-                    if (c.x > 1024 || c.x < 0 || c.y > 768 || c.y < 0)
+                    if (c.x > wiimoteCamSize.Width || c.x < 0 || c.y > wiimoteCamSize.Height || c.y < 0)
                     {
                         // the IR data is invalid for this source
                         return 1;
@@ -1518,11 +1577,11 @@ namespace Wiimote3DTrackingLib
 
                 // Wii puts origin in bottom left, Y up; toolbox in top left, Y down.  
                 // Convert by subtracting y from 768.		
-                for (int i = 0; i < MAX_NUM_IR_SRCS; i++)
-                {
-                    coords[i].y = 768 - coords[i].y;
-                    //Debug.WriteLine("coords[" + i.ToString() + "] = " + coords[i].ToString());
-                }
+                //for (int i = 0; i < MAX_NUM_IR_SRCS; i++)
+                //{
+                //    coords[i].y = wiimoteCamSize.Height - coords[i].y;
+                //    //Debug.WriteLine("coords[" + i.ToString() + "] = " + coords[i].ToString());
+                //}
 
                 // sort the coordinates in x and y 
                 Array.Sort(coords, 0, MAX_NUM_IR_SRCS, coord.compare_xy());
@@ -1556,12 +1615,12 @@ namespace Wiimote3DTrackingLib
 
                         c.pt = i + 1;
 
-                        if (c.x > 1024 || c.x < 0 || c.y > 768 || c.y < 0)
+                        if (c.x > wiimoteCamSize.Width || c.x < 0 || c.y > wiimoteCamSize.Height || c.y < 0)
                         {
                             // the IR data is invalid for this source, put the 
                             // coordinate outside the view
-                            coords[i].x = wiimoteCamSize.Width + 1 + i;
-                            coords[i].y = wiimoteCamSize.Height + 1 + i;
+                            coords[i].x = 4*wiimoteCamSize.Width + 1 + i;
+                            coords[i].y = 4*wiimoteCamSize.Height + 1 + i;
                             coords[i].pt = c.pt;
                         }
                         else
@@ -1574,8 +1633,8 @@ namespace Wiimote3DTrackingLib
                     }
                     else
                     {
-                        coords[i].x = wiimoteCamSize.Width + 1 + i;
-                        coords[i].y = wiimoteCamSize.Height + 1 + i;
+                        coords[i].x = 4*wiimoteCamSize.Width + 1 + i;
+                        coords[i].y = 4*wiimoteCamSize.Height + 1 + i;
                         coords[i].pt = i+1;
                     }
                 }
@@ -1613,10 +1672,28 @@ namespace Wiimote3DTrackingLib
             datalogtimer.Enabled = true;
         }
 
-        public void StartLogging(double interval, , WiimoteLib.Wiimote wm1, WiimoteLib.Wiimote wm2, bool dotriangulation)
+        public void StartLogging(double interval, WiimoteLib.Wiimote wm1, WiimoteLib.Wiimote wm2, bool dotriangulation)
         {
 
             DOTRIANGULATION = dotriangulation;
+
+            StartLogging(interval, wm1, wm2);
+
+        }
+
+        public void StartLogging(double interval, WiimoteLib.Wiimote wm1, WiimoteLib.Wiimote wm2, bool dotriangulation, string filename)
+        {
+
+            _logfilename = filename;
+
+            StartLogging(interval, wm1, wm2, dotriangulation);
+
+        }
+
+        public void StartLogging(double interval, WiimoteLib.Wiimote wm1, WiimoteLib.Wiimote wm2, string filename)
+        {
+
+            _logfilename = filename;
 
             StartLogging(interval, wm1, wm2);
 
@@ -1631,6 +1708,16 @@ namespace Wiimote3DTrackingLib
 
         }
 
+        private void PrepareDataFile()
+        {
+            logStreamWriter = new StreamWriter(_logfilename);
+        }
+
+        public Matrix<double>[] Get3DPoints()
+        {
+            return logging3DPoints;
+        }
+
         // Specify what you want to happen when the Elapsed event is 
         // raised.
         private void DataLogTimerEvent(object source, ElapsedEventArgs e)
@@ -1639,57 +1726,104 @@ namespace Wiimote3DTrackingLib
 
             if (DOTRIANGULATION)
             {
-                lock (_result3DLocker)
+                if (this.IsStereoCalibrated)
                 {
-                    Location3D_2(logging3DPoints, loggingwm1, loggingwm2);
 
-                    logStreamWriter.Write(DateTime.Now.ToString("o"));
-
-                    for (int i = 0; i < MAX_NUM_IR_SRCS; i++)
+                    lock (_result3DLocker)
                     {
-                        // logStreamWriter.Write(",");
+                        Location3D_2(logging3DPoints, loggingwm1, loggingwm2);
 
-                        logStreamWriter.Write(",%f,%f,%f,%f", leftimagepoints[i].X, leftimagepoints[i].Y, rightimagepoints[i].X, rightimagepoints[i].Y);
+                        logStreamWriter.Write(DateTime.Now.ToString("o"));
 
-                        logStreamWriter.Write(",%f,%f,%f", logging3DPoints[i].Data[i]);
+                        for (int i = 0; i < MAX_NUM_IR_SRCS; i++)
+                        {
+                            // logStreamWriter.Write(",");
+
+                            logStreamWriter.Write(",{0},{1},{2},{3}", leftimagepoints[i].X, leftimagepoints[i].Y, rightimagepoints[i].X, rightimagepoints[i].Y);
+
+                            logStreamWriter.Write(",{0},{1},{2},{3}", logging3DPoints[i].Data[0, 0], logging3DPoints[i].Data[1, 0], logging3DPoints[i].Data[2, 0], logging3DPoints[i].Data[3, 0]);
+                        }
+
+                        logStreamWriter.Write("\n");
                     }
 
-                    logStreamWriter.Write("\n");
+                    // Raise the log timer tick event to let all concerned know that the 
+                    // logging event has occured and some 3D points are available
+                    LogTimerTick(this, EventArgs.Empty);
+                }
+                else
+                {
+                    StopLogging();
                 }
             }
             else
             {
+
+                long datetime = DateTime.Now.ToFileTime();
+
+                // write the time in a suitible format
+                //logStreamWriter.Write(DateTime.Now.ToString("o"));
+
+                //logStreamWriter.Write(datetime.ToString());
+
+                //logStreamWriter.Write("\n");
+
+                //Console.WriteLine(DateTime.Now.ToString("o"));
+
+                //Console.WriteLine(datetime.ToString());
+
+
                 // capture an image of the IR points from both wiimote cameras
                 StereoCapture(loggingwm1, loggingwm2, leftimagepoints, rightimagepoints);
 
                 if (DOUNDISTORTPOINTS)
                 {
-                    // undistort the points before logging
+
+                    if (loggingwm1.WiimoteState.CameraCalibInfo.IsCalibrated & loggingwm2.WiimoteState.CameraCalibInfo.IsCalibrated)
+                    {
+                        // undistort the points before logging
+                        UDleftimagepoints = loggingwm1.WiimoteState.CameraCalibInfo.CamIntrinsic.Undistort(leftimagepoints, R1, P1);
+
+                        // undistort the points in the right hand camera
+                        UDrightimagepoints = loggingwm2.WiimoteState.CameraCalibInfo.CamIntrinsic.Undistort(rightimagepoints, R2, P2);
+
+                        // write the time in a suitible format
+                        //logStreamWriter.Write(DateTime.Now.ToString("o"));
+                        logStreamWriter.Write(datetime.ToString());
+
+                        for (int i = 0; i < MAX_NUM_IR_SRCS; i++)
+                        {
+                            // logStreamWriter.Write(",");
+
+                            logStreamWriter.Write(",{0},{1},{2},{3}", UDleftimagepoints[i].X, UDleftimagepoints[i].Y, rightimagepoints[i].X, rightimagepoints[i].Y);
+                        }
+
+                        logStreamWriter.Write("\n");
+                    }
+                    else
+                    {
+                        StopLogging();
+                    }
                 }
                 else
                 {
-
                     // log the raw data from the wiimotes
 
-                    logStreamWriter.Write(DateTime.Now.ToString("o"));
+                    //logStreamWriter.Write(DateTime.Now.ToString("o"));
+                    logStreamWriter.Write(datetime.ToString());
 
                     for (int i = 0; i < MAX_NUM_IR_SRCS; i++)
                     {
                         // logStreamWriter.Write(",");
 
-                        logStreamWriter.Write(",%f,%f,%f,%f", leftimagepoints[i].X, leftimagepoints[i].Y, rightimagepoints[i].X, rightimagepoints[i].Y);
+                        logStreamWriter.Write(",{0},{1},{2},{3}", leftimagepoints[i].X, leftimagepoints[i].Y, rightimagepoints[i].X, rightimagepoints[i].Y);
                     }
 
                     logStreamWriter.Write("\n");
-                    
+
                 }
             }
 
-        }
-
-        private void PrepareDataFile()
-        {
-            logStreamWriter = new StreamWriter(_logfilename);
         }
 
     }
