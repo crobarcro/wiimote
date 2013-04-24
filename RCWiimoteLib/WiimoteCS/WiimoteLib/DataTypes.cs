@@ -247,6 +247,7 @@ namespace WiimoteLib
 
             return IRPoints;
         }
+
 	}
 
 	/// <summary>
@@ -802,10 +803,15 @@ namespace WiimoteLib
         [DataMember]
         public Emgu.CV.IntrinsicCameraParameters CamIntrinsic;
         /// <summary>
-        /// IR camera extrinsic parameters
+        /// Single IR camera extrinsic parameters
         /// </summary>
         [DataMember]
-        public Emgu.CV.ExtrinsicCameraParameters[] CamExtrinsic;
+        public Emgu.CV.ExtrinsicCameraParameters[] SingleCamExtrinsic;
+        /// <summary>
+        /// IR camera stereo rig extrinsic parameters
+        /// </summary>
+        [DataMember]
+        public Emgu.CV.ExtrinsicCameraParameters StereoCamExtrinsic;
         /// <summary>
         /// IR camera extrinsic parameters
         /// </summary>

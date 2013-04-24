@@ -234,15 +234,17 @@ namespace WiimoteTest
 			}
 
 			//g.Clear(Color.Black);
-            g.Clear(Color.Yellow);
+            g.Clear(Color.White);
 
-			UpdateIR(ws.IRState.IRSensors[0], lblIR1, lblIR1Raw, chkFound1, Color.Red);
-			UpdateIR(ws.IRState.IRSensors[1], lblIR2, lblIR2Raw, chkFound2, Color.Blue);
-			UpdateIR(ws.IRState.IRSensors[2], lblIR3, lblIR3Raw, chkFound3, Color.Yellow);
-			UpdateIR(ws.IRState.IRSensors[3], lblIR4, lblIR4Raw, chkFound4, Color.Orange);
+            float penwidth = 2.0F;
+
+            UpdateIR(ws.IRState.IRSensors[0], lblIR1, lblIR1Raw, chkFound1, Color.Red, penwidth);
+            UpdateIR(ws.IRState.IRSensors[1], lblIR2, lblIR2Raw, chkFound2, Color.Blue, penwidth);
+            UpdateIR(ws.IRState.IRSensors[2], lblIR3, lblIR3Raw, chkFound3, Color.Black, penwidth);
+            UpdateIR(ws.IRState.IRSensors[3], lblIR4, lblIR4Raw, chkFound4, Color.Purple, penwidth);
 
 			if(ws.IRState.IRSensors[0].Found && ws.IRState.IRSensors[1].Found)
-                g.DrawEllipse(new Pen(Color.Green), (int)(drawscale * ws.IRState.RawMidpoint.X), (int)(drawscale * ws.IRState.RawMidpoint.Y), (int)(2 / drawscale), (int)(2 / drawscale));
+                g.DrawEllipse(new Pen(Color.Green, 1.0F), (int)(drawscale * ws.IRState.RawMidpoint.X), (int)(drawscale * ws.IRState.RawMidpoint.Y), (int)(2 / drawscale), (int)(2 / drawscale));
 
 			pbIR.Image = b;
 
@@ -251,7 +253,7 @@ namespace WiimoteTest
 			lblDevicePath.Text = "Device Path: " + mWiimote.HIDDevicePath;
 		}
 
-		private void UpdateIR(IRSensor irSensor, Label lblNorm, Label lblRaw, CheckBox chkFound, Color color)
+        private void UpdateIR(IRSensor irSensor, Label lblNorm, Label lblRaw, CheckBox chkFound, Color color, float penwidth)
 		{
 			chkFound.Checked = irSensor.Found;
 
@@ -259,7 +261,7 @@ namespace WiimoteTest
 			{
 				lblNorm.Text = irSensor.Position.ToString() + ", " + irSensor.Size;
 				lblRaw.Text = irSensor.RawPosition.ToString();
-				g.DrawEllipse(new Pen(color), (int)(drawscale * irSensor.RawPosition.X), (int)(drawscale * irSensor.RawPosition.Y),
+				g.DrawEllipse(new Pen(color, penwidth), (int)(drawscale * irSensor.RawPosition.X), (int)(drawscale * irSensor.RawPosition.Y),
 							 (int)((irSensor.Size+1)/drawscale), (int)((irSensor.Size+1)/drawscale));
 			}
 		}
@@ -287,19 +289,33 @@ namespace WiimoteTest
 
         private void connectbutton_Click(object sender, EventArgs e)
         {
+            bool success = false;
+
             try
             {
                 mWiimote.Connect();
                 mWiimote.SetReportType(InputReport.IRAccel, true);
-                mWiimote.SetLEDs(true, false, false, false);
+                success = true;
             }
             catch
             {
                 MessageBox.Show("Exception thrown by Connect() method.");
             }
 
-            this.connectbutton.Enabled = false;
-            this.disconnectbutton.Enabled = true;
+            if (success)
+            {
+                if (mWiimote.WiimoteState.LEDState.LED1)
+                {
+                    mWiimote.SetLEDs(false, true, false, false);
+                }
+                else
+                {
+                    mWiimote.SetLEDs(true, false, false, false);
+                }
+
+                this.connectbutton.Enabled = false;
+                this.disconnectbutton.Enabled = true;
+            }
 
         }
 

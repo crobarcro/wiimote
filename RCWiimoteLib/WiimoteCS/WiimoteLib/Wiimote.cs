@@ -100,8 +100,8 @@ namespace WiimoteLib
 		// event for status report
 		private readonly AutoResetEvent mStatusDone = new AutoResetEvent(false);
 
-        // declare a mutex to protect the mWiimoteState object
-        private static Mutex mut = new Mutex();
+        // declare an object to protect the mWiimoteState object using the lock statement
+        static readonly object _wimoteStateLocker = new object();
 
 		// use a different method to write reports
 		private bool mAltWriteMethod;
@@ -136,10 +136,16 @@ namespace WiimoteLib
 		/// <exception cref="WiimoteNotFoundException">Wiimote not found in HID device list</exception>
 		public void Connect()
 		{
-			if(string.IsNullOrEmpty(mDevicePath))
-				FindWiimote(WiimoteFound);
-			else
-				OpenWiimoteDeviceHandle(mDevicePath);
+            if (string.IsNullOrEmpty(mDevicePath))
+            {
+                // if the device path string is empty, we must try to find a wiimote 
+                // and open the device handle
+                FindWiimote(WiimoteFound);
+            }
+            else
+            {
+                OpenWiimoteDeviceHandle(mDevicePath);
+            }
 		}
 
 		internal static void FindWiimote(WiimoteFoundDelegate wiimoteFound)
@@ -270,7 +276,7 @@ namespace WiimoteLib
                     mWiimoteState.ConnectionState = ConnectionState.Connected;
 
                     Debug.WriteLine("Now going to call the GetStatus() method");
-					// force a status check to get the state of any extensions plugged in at startup
+                    // force a status check to get the state of any extensions plugged in at startup
 					GetStatus();
 				}
 				else
@@ -308,7 +314,7 @@ namespace WiimoteLib
 			{
 				// setup the read and the callback
 				byte[] buff = new byte[REPORT_LENGTH];
-				mStream.BeginRead(buff, 0, REPORT_LENGTH, new AsyncCallback(OnReadData), buff);
+				IAsyncResult IA = mStream.BeginRead(buff, 0, REPORT_LENGTH, new AsyncCallback(OnReadData), buff);
 			}
 		}
 
@@ -328,7 +334,6 @@ namespace WiimoteLib
                     // end the current read
                     mStream.EndRead(ar);
 
-
                     // parse it
                     if (ParseInputReport(buff, mSize))
                     {
@@ -344,7 +349,7 @@ namespace WiimoteLib
 			catch(OperationCanceledException)
 			{
 				Debug.WriteLine("OperationCanceledException");
-			}
+            }
             catch (IOException)
             {
                 if (mStream != null)
@@ -355,7 +360,7 @@ namespace WiimoteLib
                 mWiimoteState.ConnectionState = ConnectionState.ReadError;
             }
 
-		}
+        }
 
 		/// <summary>
 		/// Parse a report sent by the Wiimote
@@ -390,46 +395,53 @@ namespace WiimoteLib
 					ParseAccel(buff);
 					ParseExtension(buff, 6);
 					break;
-				case InputReport.IRExtensionAccel:
-					ParseButtons(buff);
-					ParseAccel(buff);
-					ParseIR(buff);
-					ParseExtension(buff, 16);
-					break;
-				case InputReport.Status:
-					ParseButtons(buff);
-					mWiimoteState.BatteryRaw = buff[6];
-					mWiimoteState.Battery = (((100.0f * 48.0f * (float)((int)buff[6] / 48.0f))) / 192.0f);
+                case InputReport.IRExtensionAccel:
+                    ParseButtons(buff);
+                    ParseAccel(buff);
+                    ParseIR(buff);
+                    ParseExtension(buff, 16);
+                    break;
+                case InputReport.Status:
 
-					// get the real LED values in case the values from SetLEDs() 
+                    ParseButtons(buff);
+
+                    mWiimoteState.BatteryRaw = buff[6];
+                    mWiimoteState.Battery = (((100.0f * 48.0f * (float)((int)buff[6] / 48.0f))) / 192.0f);
+
+                    // get the real LED values in case the values from SetLEDs() 
                     // somehow becomes out of sync, which really shouldn't be 
                     // possible
-					mWiimoteState.LEDState.LED1 = (buff[3] & 0x10) != 0;
-					mWiimoteState.LEDState.LED2 = (buff[3] & 0x20) != 0;
-					mWiimoteState.LEDState.LED3 = (buff[3] & 0x40) != 0;
-					mWiimoteState.LEDState.LED4 = (buff[3] & 0x80) != 0;
+                    mWiimoteState.LEDState.LED1 = (buff[3] & 0x10) != 0;
+                    mWiimoteState.LEDState.LED2 = (buff[3] & 0x20) != 0;
+                    mWiimoteState.LEDState.LED3 = (buff[3] & 0x40) != 0;
+                    mWiimoteState.LEDState.LED4 = (buff[3] & 0x80) != 0;
 
-					// extension connected?
-					bool extension = (buff[3] & 0x02) != 0;
-					Debug.WriteLine("Extension: " + extension);
+                    // extension connected?
+                    bool extension = (buff[3] & 0x02) != 0;
+                    Debug.WriteLine("Extension: " + extension);
 
 					if(mWiimoteState.Extension != extension)
 					{
 						mWiimoteState.Extension = extension;
 
-						if(extension)
-						{
-							BeginAsyncRead();
-							InitializeExtension();
-						}
-						else
-							mWiimoteState.ExtensionType = ExtensionType.None;
+                        if (extension)
+                        {
+                            BeginAsyncRead();
+                            InitializeExtension();
+                        }
+                        else
+                        {
+                            mWiimoteState.ExtensionType = ExtensionType.None;
+                        }
 
 						// only fire the extension changed event if we have a real extension (i.e. not a balance board)
 						if(WiimoteExtensionChanged != null && mWiimoteState.ExtensionType != ExtensionType.BalanceBoard)
 							WiimoteExtensionChanged(this, new WiimoteExtensionChangedEventArgs(mWiimoteState.ExtensionType, mWiimoteState.Extension));
 					}
+
+                    // Set the mStatusDone event to release the thread
 					mStatusDone.Set();
+
 					break;
 				case InputReport.ReadData:
 					ParseButtons(buff);
@@ -945,7 +957,10 @@ namespace WiimoteLib
 
 			// if we've read it all, set the event
             if (mAddress + reqReadSize == offset + size)
-				mReadDone.Set();
+            {
+                Debug.WriteLine("Line 961: Setting the mReadDone event");
+                mReadDone.Set();
+            }
 		}
 
 		/// <summary>
@@ -986,10 +1001,9 @@ namespace WiimoteLib
 			// this appears to change the report type to 0x31
 			byte[] buff = ReadData(0x0016, 7);
 
-            // surely we should ensure we can't read to this at 
-            // the same time as the asynchonous thread?
-            //mut.WaitOne();
-            lock (mWiimoteState)
+            // lock the thread while we access the mWiimoteState 
+            // object
+            lock (_wimoteStateLocker)
             {
                 mWiimoteState.AccelCalibrationInfo.X0 = buff[0];
                 mWiimoteState.AccelCalibrationInfo.Y0 = buff[1];
@@ -998,7 +1012,6 @@ namespace WiimoteLib
                 mWiimoteState.AccelCalibrationInfo.YG = buff[5];
                 mWiimoteState.AccelCalibrationInfo.ZG = buff[6];
             }
-            //mut.ReleaseMutex();
 		}
 
 		/// <summary>
@@ -1058,7 +1071,7 @@ namespace WiimoteLib
 		{
             byte[] Buff = new byte[REPORT_LENGTH];
 
-            lock (this)
+            lock (_wimoteStateLocker)
             {
                 mWiimoteState.LEDState.LED1 = led1;
                 mWiimoteState.LEDState.LED2 = led2;
@@ -1089,7 +1102,7 @@ namespace WiimoteLib
 
             byte[] Buff = new byte[REPORT_LENGTH];
 
-            lock (mWiimoteState)
+            lock (_wimoteStateLocker)
             {
                 mWiimoteState.LEDState.LED1 = (leds & 0x01) > 0;
                 mWiimoteState.LEDState.LED2 = (leds & 0x02) > 0;
@@ -1112,21 +1125,22 @@ namespace WiimoteLib
 
 		/// <summary>
 		/// Toggle rumble
-		/// </summary>
-		/// <param name="on">On or off</param>
-		public void SetRumble(bool on)
-		{
-            lock (this)
+        /// </summary>
+        /// <param name="on">On or off</param>
+        public void SetRumble(bool on)
+        {
+            lock (_wimoteStateLocker)
             {
                 mWiimoteState.Rumble = on;
-
-                // the LED report also handles rumble
-                SetLEDs(mWiimoteState.LEDState.LED1,
-                        mWiimoteState.LEDState.LED2,
-                        mWiimoteState.LEDState.LED3,
-                        mWiimoteState.LEDState.LED4);
             }
-		}
+
+            // the LED report also handles rumble
+            SetLEDs(mWiimoteState.LEDState.LED1,
+                    mWiimoteState.LEDState.LED2,
+                    mWiimoteState.LEDState.LED3,
+                    mWiimoteState.LEDState.LED4);
+
+        }
 
 		/// <summary>
 		/// Retrieve the current status of the Wiimote and extensions.  Replaces GetBatteryLevel() since it was poorly named.
@@ -1161,7 +1175,10 @@ namespace WiimoteLib
 		{
             byte[] Buff = new byte[REPORT_LENGTH];
 
-			mWiimoteState.IRState.Mode = mode;
+            lock (_wimoteStateLocker)
+            {
+                mWiimoteState.IRState.Mode = mode;
+            }
 
 			Buff[0] = (byte)OutputReport.IR;
 			Buff[1] = (byte)(0x04 | GetRumbleBit());
@@ -1217,7 +1234,10 @@ namespace WiimoteLib
 		{
             byte[] Buff = new byte[REPORT_LENGTH];
 
-			mWiimoteState.IRState.Mode = IRMode.Off;
+            lock (_wimoteStateLocker)
+            {
+                mWiimoteState.IRState.Mode = IRMode.Off;
+            }
 
 			Buff[0] = (byte)OutputReport.IR;
 			Buff[1] = GetRumbleBit();
@@ -1265,7 +1285,7 @@ namespace WiimoteLib
 			if(mBuff[0] == (byte)OutputReport.WriteMemory)
 			{
 				Debug.WriteLine("Wait in WriteReport()");
-                if (!mWriteDone.WaitOne(1000, false))
+                if (!mWriteDone.WaitOne(3000, false))
                 {
                     Debug.WriteLine("Wait in WriteReport() failed");
                     throw new WiimoteException("Error writing data to Wiimote...is it connected?");
@@ -1279,21 +1299,26 @@ namespace WiimoteLib
         /// <param name="buff">Data buffer</param>
         private void WriteReport(byte[] buff)
         {
-            Debug.WriteLine("WriteReport mBuff Contents: " + buff[0].ToString("x"));
+            Debug.WriteLine("WriteReport(byte[] buff) buff Contents: " + buff[0].ToString("x"));
             if (mAltWriteMethod)
+            {
                 HIDImports.HidD_SetOutputReport(this.mHandle.DangerousGetHandle(), buff, (uint)buff.Length);
+            }
             else if (mStream != null)
+            {
                 mStream.Write(buff, 0, REPORT_LENGTH);
+            }
 
-            Debug.WriteLine("WriteReport - wrote mBuff to wiimote");
+            Debug.WriteLine("WriteReport - wrote buff to wiimote");
 
             if (buff[0] == (byte)OutputReport.WriteMemory)
             {
                 Debug.WriteLine("Wait in WriteReport()");
-                if (!mWriteDone.WaitOne(1000, false))
+
+                if (!mWriteDone.WaitOne(3000, false))
                 {
                     Debug.WriteLine("Wait in WriteReport() failed");
-                    throw new WiimoteException("Error writing data to Wiimote...is it connected?");
+                    //throw new WiimoteException("Error writing data to Wiimote...is it connected?");
                 }
             }
         }
@@ -1415,7 +1440,9 @@ namespace WiimoteLib
 		#endregion
 	}
 
-	/// <summary>
+    #region Exceptions
+
+    /// <summary>
 	/// Thrown when no Wiimotes are found in the HID device list
 	/// </summary>
 	[Serializable]
@@ -1494,4 +1521,6 @@ namespace WiimoteLib
 		{
 		}
 	}
+
+    #endregion
 }
