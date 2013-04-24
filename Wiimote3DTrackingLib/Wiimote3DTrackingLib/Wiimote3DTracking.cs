@@ -45,6 +45,9 @@ namespace Wiimote3DTrackingLib
         private int capCount = 0;
         private int stereoCapCount = 0;
 
+
+
+
         public StereoTracking()
         {
             sqSideLength = (float)(142.0 / 1000.0);
@@ -150,10 +153,10 @@ namespace Wiimote3DTrackingLib
 
                 for (i = 0; i < stereoCapCount; i++)
                 {
-                    Debug.WriteLine("new PointF[] {new PointF(" + wm1capturedImages[i][0].X.ToString() + "," + wm1capturedImages[i][0].Y.ToString() + "), new Pointf(" +
-                         wm1capturedImages[i][1].X.ToString() + "," + wm1capturedImages[i][1].Y.ToString() + "), new Pointf(" +
-                         wm1capturedImages[i][2].X.ToString() + "," + wm1capturedImages[i][2].Y.ToString() + "), new Pointf(" +
-                         wm1capturedImages[i][3].X.ToString() + "," + wm1capturedImages[i][3].Y.ToString() + ")" + "}, ");
+                    Debug.WriteLine("new PointF[] {new PointF(" + wm1capturedImages[i][0].X.ToString() + "," + wm1capturedImages[i][0].Y.ToString() + "), new PointF(" +
+                         wm1capturedImages[i][1].X.ToString() + "," + wm1capturedImages[i][1].Y.ToString() + "), new PointF(" +
+                         wm1capturedImages[i][2].X.ToString() + "," + wm1capturedImages[i][2].Y.ToString() + "), new PointF(" +
+                         wm1capturedImages[i][3].X.ToString() + "," + wm1capturedImages[i][3].Y.ToString() + ")" + "},");
 
                     //Debug.WriteLine(wm2capturedImages[i][0].ToString() +
                     //    " " + wm2capturedImages[i][1].ToString() +
@@ -169,10 +172,10 @@ namespace Wiimote3DTrackingLib
 
                 for (i = 0; i < stereoCapCount; i++)
                 {
-                    Debug.WriteLine("new PointF[] {new PointF(" + wm2capturedImages[i][0].X.ToString() + "," + wm2capturedImages[i][0].Y.ToString() + "), new Pointf(" +
-                         wm2capturedImages[i][1].X.ToString() + "," + wm2capturedImages[i][1].Y.ToString() + "), new Pointf(" +
-                         wm2capturedImages[i][2].X.ToString() + "," + wm2capturedImages[i][2].Y.ToString() + "), new Pointf(" +
-                         wm2capturedImages[i][3].X.ToString() + "," + wm2capturedImages[i][3].Y.ToString() + ")" + "}, ");
+                    Debug.WriteLine("new PointF[] {new PointF(" + wm2capturedImages[i][0].X.ToString() + "," + wm2capturedImages[i][0].Y.ToString() + "), new PointF(" +
+                         wm2capturedImages[i][1].X.ToString() + "," + wm2capturedImages[i][1].Y.ToString() + "), new PointF(" +
+                         wm2capturedImages[i][2].X.ToString() + "," + wm2capturedImages[i][2].Y.ToString() + "), new PointF(" +
+                         wm2capturedImages[i][3].X.ToString() + "," + wm2capturedImages[i][3].Y.ToString() + ")" + "},");
                 }
 
                 Debug.WriteLine("};");
@@ -214,16 +217,16 @@ namespace Wiimote3DTrackingLib
                 CalibObjectPoints[i][0].y = 0;
                 CalibObjectPoints[i][0].z = 0;
 
-                CalibObjectPoints[i][1].x = sqSideLength;
-                CalibObjectPoints[i][1].y = 0;
+                CalibObjectPoints[i][1].x = 0;
+                CalibObjectPoints[i][1].y = sqSideLength;
                 CalibObjectPoints[i][1].z = 0;
 
                 CalibObjectPoints[i][2].x = sqSideLength;
                 CalibObjectPoints[i][2].y = sqSideLength;
                 CalibObjectPoints[i][2].z = 0;
 
-                CalibObjectPoints[i][3].x = 0;
-                CalibObjectPoints[i][3].y = sqSideLength;
+                CalibObjectPoints[i][3].x = sqSideLength;
+                CalibObjectPoints[i][3].y = 0;
                 CalibObjectPoints[i][3].z = 0;
             }
 
@@ -314,9 +317,15 @@ namespace Wiimote3DTrackingLib
             Matrix<double> fundMat = new Matrix<double>(3, 3);
             Matrix<double> essentialMat = new Matrix<double>(3, 3);
 
-            int maxIters = 50;
+            Matrix<double> R1 = new Matrix<double>(3, 3);
+            Matrix<double> R2 = new Matrix<double>(3, 3);
+            Matrix<double> P1 = new Matrix<double>(3, 3);
+            Matrix<double> P2 = new Matrix<double>(3, 4);
+            Matrix<double> Q = new Matrix<double>(4, 4);
 
-            Emgu.CV.Structure.MCvTermCriteria termCrit = new Emgu.CV.Structure.MCvTermCriteria(maxIters);
+            int maxIters = 100;
+
+            Emgu.CV.Structure.MCvTermCriteria termCrit = new Emgu.CV.Structure.MCvTermCriteria(maxIters, 1e-5);
 
             int i = 0;
 
@@ -354,6 +363,75 @@ namespace Wiimote3DTrackingLib
             Emgu.CV.CameraCalibration.StereoCalibrate(objectPoints,
                 wm1ImagePoints,
                 wm2ImagePoints,
+                wm1.WiimoteState.CameraCalibInfo.CamIntrinsic,
+                wm2.WiimoteState.CameraCalibInfo.CamIntrinsic,
+                wiimoteCamSize,
+                Emgu.CV.CvEnum.CALIB_TYPE.CV_CALIB_USE_INTRINSIC_GUESS,
+                termCrit,
+                out wm1.WiimoteState.CameraCalibInfo.StereoCamExtrinsic,
+                out fundMat,
+                out essentialMat);
+
+            wm2.WiimoteState.CameraCalibInfo.StereoCamExtrinsic = wm1.WiimoteState.CameraCalibInfo.StereoCamExtrinsic;
+
+            Emgu.CV.CvInvoke.cvStereoRectify(wm1.WiimoteState.CameraCalibInfo.CamIntrinsic.IntrinsicMatrix.Ptr,
+                wm2.WiimoteState.CameraCalibInfo.CamIntrinsic.IntrinsicMatrix.Ptr,
+                wm1.WiimoteState.CameraCalibInfo.CamIntrinsic.DistortionCoeffs.Ptr,
+                wm2.WiimoteState.CameraCalibInfo.CamIntrinsic.DistortionCoeffs.Ptr,
+                wiimoteCamSize,
+                wm1.WiimoteState.CameraCalibInfo.StereoCamExtrinsic.RotationVector.Ptr,
+                wm1.WiimoteState.CameraCalibInfo.StereoCamExtrinsic.TranslationVector.Ptr,
+                R1.Ptr,
+                R2.Ptr,
+                P1.Ptr,
+                P2.Ptr,
+                Q.Ptr,
+                Emgu.CV.CvEnum.STEREO_RECTIFY_TYPE.CALIB_ZERO_DISPARITY);
+                
+        }
+
+        public void StereoCalibrate(WiimoteLib.Wiimote wm1, WiimoteLib.Wiimote wm2, System.Drawing.PointF[][] leftimagepoints, System.Drawing.PointF[][] rightimagepoints)
+        {
+
+            Matrix<double> fundMat = new Matrix<double>(3, 3);
+            Matrix<double> essentialMat = new Matrix<double>(3, 3);
+
+            int maxIters = 50;
+
+            Emgu.CV.Structure.MCvTermCriteria termCrit = new Emgu.CV.Structure.MCvTermCriteria(maxIters);
+
+            int i = 0;
+
+            // declare an array of 3D points to hold the locations of the points on the 
+            // calibration square in its coordinate frame
+            Emgu.CV.Structure.MCvPoint3D32f[][] objectPoints = new Emgu.CV.Structure.MCvPoint3D32f[stereoCapCount][];
+
+            // Initialize the arrays of calibration and image points
+            for (i = 0; i < objectPoints.Length; i++)
+            {
+                objectPoints[i] = new Emgu.CV.Structure.MCvPoint3D32f[4];
+                leftimagepoints[i] = new System.Drawing.PointF[4];
+                rightimagepoints[i] = new System.Drawing.PointF[4];
+
+                for (int j = 0; j < 4; j++)
+                {
+                    objectPoints[i][j] = new Emgu.CV.Structure.MCvPoint3D32f();
+                    leftimagepoints[i][j] = new System.Drawing.PointF();
+                    rightimagepoints[i][j] = new System.Drawing.PointF();
+                }
+            }
+
+            Array.Copy(CalibObjectPoints, objectPoints, stereoCapCount);
+            Array.Copy(wm1capturedImages, leftimagepoints, stereoCapCount);
+            Array.Copy(wm2capturedImages, rightimagepoints, stereoCapCount);
+
+            // calibrate the wiimote cameras individually
+            CalibrateCamera(wm1, objectPoints, leftimagepoints);
+            CalibrateCamera(wm2, objectPoints, rightimagepoints);
+
+            Emgu.CV.CameraCalibration.StereoCalibrate(objectPoints,
+                leftimagepoints,
+                rightimagepoints,
                 wm1.WiimoteState.CameraCalibInfo.CamIntrinsic,
                 wm2.WiimoteState.CameraCalibInfo.CamIntrinsic,
                 wiimoteCamSize,
@@ -525,16 +603,18 @@ namespace Wiimote3DTrackingLib
                 return -1;
             }
 
-            Array.Sort(coords, 0, 4, coord.compare_x());
-            Array.Sort(coords, 0, 2, coord.compare_y());
-            Array.Sort(coords, 2, 2, coord.compare_y_inv());
-
             // Wii puts origin in bottom left, Y up; toolbox in top left, Y down.  Convert by subtracting y from 768.		
             for (int i = 0; i < NUM_IR_SRCS; i++)
             {
                 coords[i].y = 768 - coords[i].y;
                 Debug.WriteLine("coords[" + i.ToString() + "] = " + coords[i].ToString());
             }
+
+            Array.Sort(coords, 0, 4, coord.compare_x());
+            Array.Sort(coords, 0, 2, coord.compare_y());
+            Array.Sort(coords, 2, 2, coord.compare_y_inv());
+
+            
 
             return 0;
 

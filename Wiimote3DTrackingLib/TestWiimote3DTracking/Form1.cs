@@ -32,8 +32,6 @@ namespace TestWiimote3DTracking
         private Guid _wm1ID;
         private Guid _wm2ID;
 
-        //public PointF[][] tp1 = new PointF[4] { new PointF[] { { 91, 460 }, { 124, 45 }, { 527, 101 }, { 495, 488 } }, new PointF[] { { 116, 447 }, { 161, 38 }, { 544, 110 }, { 510, 481 } }, new PointF[] { { 139, 444 }, { 193, 36 }, { 560, 120 }, { 522, 485 } }, new PointF[] { { 141, 441 }, { 197, 33 }, { 568, 120 }, { 523, 481 } } };
-
         #region form code
 
         public Form1()
@@ -279,6 +277,13 @@ namespace TestWiimote3DTracking
             wiitrack.OutputCalibrationPoints();
         }
 
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            // Test Stereo Calibration button
+
+            //wiitrack.StereoCalibrate(wm1, wm2, wiitrack.tp1, wiitrack.tp2);
+        }
         #endregion
 
         #region event handlers
@@ -337,8 +342,8 @@ namespace TestWiimote3DTracking
                     UpdateIR(g1, ws.IRState.IRSensors[2], wm1IRLabel3, Color.Black, penwidth);
                     UpdateIR(g1, ws.IRState.IRSensors[3], wm1IRLabel4, Color.Purple, penwidth);
 
-                    if (ws.IRState.IRSensors[0].Found && ws.IRState.IRSensors[1].Found)
-                        g1.DrawEllipse(new Pen(Color.Green, 1.0F), (int)(drawscale * ws.IRState.RawMidpoint.X), (int)(drawscale * ws.IRState.RawMidpoint.Y), (int)(2 / drawscale), (int)(2 / drawscale));
+                    //if (ws.IRState.IRSensors[0].Found && ws.IRState.IRSensors[1].Found)
+                    //    g1.DrawEllipse(new Pen(Color.Green, 1.0F), (int)(drawscale * ws.IRState.RawMidpoint.X), (int)(drawscale * ws.IRState.RawMidpoint.Y), (int)(2 / drawscale), (int)(2 / drawscale));
 
                     wm1IRPictureBox.Image = b1;
                 }
@@ -362,8 +367,8 @@ namespace TestWiimote3DTracking
                     UpdateIR(g2, ws.IRState.IRSensors[2], wm2IRLabel3, Color.Black, penwidth);
                     UpdateIR(g2, ws.IRState.IRSensors[3], wm2IRLabel4, Color.Purple, penwidth);
 
-                    if (ws.IRState.IRSensors[0].Found && ws.IRState.IRSensors[1].Found)
-                        g2.DrawEllipse(new Pen(Color.Green, 1.0F), (int)(drawscale * ws.IRState.RawMidpoint.X), (int)(drawscale * ws.IRState.RawMidpoint.Y), (int)(2 / drawscale), (int)(2 / drawscale));
+                    //if (ws.IRState.IRSensors[0].Found && ws.IRState.IRSensors[1].Found)
+                    //    g2.DrawEllipse(new Pen(Color.Green, 1.0F), (int)(drawscale * ws.IRState.RawMidpoint.X), (int)(drawscale * (768 - ws.IRState.RawMidpoint.Y)), (int)(2 / drawscale), (int)(2 / drawscale));
 
                     wm2IRPictureBox.Image = b2;
                 }
@@ -385,7 +390,7 @@ namespace TestWiimote3DTracking
             {
                 //lblNorm.Text = irSensor.Position.ToString() + ", " + irSensor.Size;
                 lblRaw.Text = irSensor.RawPosition.ToString();
-                g.DrawEllipse(new Pen(color, penwidth), (int)(drawscale * irSensor.RawPosition.X), (int)(drawscale * irSensor.RawPosition.Y),
+                g.DrawEllipse(new Pen(color, penwidth), (int)(drawscale * irSensor.RawPosition.X), (int)(drawscale * (768 - irSensor.RawPosition.Y)),
                              (int)((irSensor.Size + 1) / drawscale), (int)((irSensor.Size + 1) / drawscale));
             }
             else
@@ -412,6 +417,8 @@ namespace TestWiimote3DTracking
         }
 
         #endregion
+
+
 
 
 

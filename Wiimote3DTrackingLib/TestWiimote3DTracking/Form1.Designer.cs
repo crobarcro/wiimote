@@ -56,6 +56,7 @@
             this.wm1IRSourceslabel = new System.Windows.Forms.Label();
             this.wm2IRSourceslabel = new System.Windows.Forms.Label();
             this.PrintPointsButton = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.wm1IRPictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.wm2IRPictureBox)).BeginInit();
             this.groupBox1.SuspendLayout();
@@ -242,6 +243,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.button2);
             this.groupBox1.Controls.Add(this.CalibrateStereoButton);
             this.groupBox1.Controls.Add(this.captureTwoCountabel);
             this.groupBox1.Controls.Add(this.ResetDualCalibButton);
@@ -337,11 +339,21 @@
             this.PrintPointsButton.UseVisualStyleBackColor = true;
             this.PrintPointsButton.Click += new System.EventHandler(this.PrintPointsButton_Click);
             // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(7, 180);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(173, 23);
+            this.button2.TabIndex = 18;
+            this.button2.Text = "Test Stereo Calibration";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(876, 796);
+            this.ClientSize = new System.Drawing.Size(876, 778);
             this.Controls.Add(this.PrintPointsButton);
             this.Controls.Add(this.wm2IRSourceslabel);
             this.Controls.Add(this.wm1IRSourceslabel);
@@ -401,6 +413,7 @@
         private System.Windows.Forms.Label wm1IRSourceslabel;
         private System.Windows.Forms.Label wm2IRSourceslabel;
         private System.Windows.Forms.Button PrintPointsButton;
+        private System.Windows.Forms.Button button2;
     }
 }
 
