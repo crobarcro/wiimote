@@ -18,13 +18,16 @@ namespace Wiimote3DTrackingLib
         private static Size wiimoteCamSize = new System.Drawing.Size(1024, 768);
 
         // The expected number of IR sources
-        private static int NUM_IR_SRCS = 4;
+        private static readonly int NUM_IR_SRCS = 4;
+
+        // The maximum number of IR sources we can expect to see
+        private static readonly int MAX_NUM_IR_SRCS = 4;
 
         /// <summary>
         /// the maximum number of calibration images (or sets of four
         /// coordinates in this case
         /// </summary>
-        private static int MAX_NUM_OF_CAL_IMAGES = 100;
+        private static readonly int MAX_NUM_OF_CAL_IMAGES = 100;
 
         // The length of a side of the calibration square
         private float sqSideLength;
@@ -45,12 +48,32 @@ namespace Wiimote3DTrackingLib
         private int capCount = 0;
         private int stereoCapCount = 0;
 
+        // The rotation and perspective matrices for the 
+        Matrix<double> R1 = new Matrix<double>(3, 3);
+        Matrix<double> R2 = new Matrix<double>(3, 3);
+        Matrix<double> P1 = new Matrix<double>(3, 4);
+        Matrix<double> P2 = new Matrix<double>(3, 4);
+
         // The Q matrix will be generated during the stereo calibration
         // and used to reconstruct the 3D location of an IR point from 
         // its location in the viewer
         Matrix<double> Q = new Matrix<double>(4, 4);
 
+        Matrix<float> lmapx = new Matrix<float>(wiimoteCamSize.Height, wiimoteCamSize.Width);
+        Matrix<float> rmapx = new Matrix<float>(wiimoteCamSize.Height, wiimoteCamSize.Width);
+        Matrix<float> lmapy = new Matrix<float>(wiimoteCamSize.Height, wiimoteCamSize.Width);
+        Matrix<float> rmapy = new Matrix<float>(wiimoteCamSize.Height, wiimoteCamSize.Width);
 
+
+        // variables for left and right image points that will be used for 
+        // stereo tracking
+        private System.Drawing.PointF[] leftimagepoints = new System.Drawing.PointF[MAX_NUM_IR_SRCS];
+        private System.Drawing.PointF[] rightimagepoints = new System.Drawing.PointF[MAX_NUM_IR_SRCS];
+        private System.Drawing.PointF[] UDleftimagepoints = new System.Drawing.PointF[MAX_NUM_IR_SRCS];
+        private System.Drawing.PointF[] UDrightimagepoints = new System.Drawing.PointF[MAX_NUM_IR_SRCS];
+
+        // boolean value determining if the system has been calibrated
+        private bool _isStereoCalib = false;
 
         // Some test points for testing stereo calibration 
         public PointF[][] tp1 = new PointF[17][] {
@@ -96,6 +119,9 @@ namespace Wiimote3DTrackingLib
             sqSideLength = (float)(142.0 / 1000.0);
 
             InitializeStereoTrackingImages();
+
+            leftimagepoints.Initialize();
+            rightimagepoints.Initialize();
         }
 
         /// <summary>
@@ -108,6 +134,9 @@ namespace Wiimote3DTrackingLib
             sqSideLength = sWidth;
 
             InitializeStereoTrackingImages();
+
+            leftimagepoints.Initialize();
+            rightimagepoints.Initialize();
         }
 
         /// <summary>
@@ -165,6 +194,11 @@ namespace Wiimote3DTrackingLib
         public void ResetStereoCamCalibrateCapture()
         {
             stereoCapCount = 0;
+        }
+
+        public bool IsStereoCalibrated
+        {
+            get { return _isStereoCalib; }
         }
 
 
@@ -375,10 +409,6 @@ namespace Wiimote3DTrackingLib
             Matrix<double> fundMat = new Matrix<double>(3, 3);
             Matrix<double> essentialMat = new Matrix<double>(3, 3);
 
-            Matrix<double> R1 = new Matrix<double>(3, 3);
-            Matrix<double> R2 = new Matrix<double>(3, 3);
-            Matrix<double> P1 = new Matrix<double>(3, 4);
-            Matrix<double> P2 = new Matrix<double>(3, 4);
             //Matrix<double> Q = new Matrix<double>(4, 4);
 
             int maxIters = 100;
@@ -452,6 +482,24 @@ namespace Wiimote3DTrackingLib
                 Size.Empty,
                 ref roi1,
                 ref roi2);
+
+            
+            //Emgu.CV.CvInvoke.cvInitUndistortRectifyMap(wm1.WiimoteState.CameraCalibInfo.CamIntrinsic.IntrinsicMatrix.Ptr,
+            //    wm1.WiimoteState.CameraCalibInfo.CamIntrinsic.DistortionCoeffs.Ptr,
+            //    R1.Ptr,
+            //    P1.Ptr,
+            //    lmapx.Ptr,
+            //    lmapy.Ptr);
+
+            //Emgu.CV.CvInvoke.cvInitUndistortRectifyMap(wm1.WiimoteState.CameraCalibInfo.CamIntrinsic.IntrinsicMatrix.Ptr,
+            //    wm2.WiimoteState.CameraCalibInfo.CamIntrinsic.DistortionCoeffs.Ptr,
+            //    R2.Ptr,
+            //    P2.Ptr,
+            //    rmapx.Ptr,
+            //    rmapy.Ptr);
+
+
+            _isStereoCalib = true;
                 
         }
 
@@ -461,10 +509,6 @@ namespace Wiimote3DTrackingLib
             Matrix<double> fundMat = new Matrix<double>(3, 3);
             Matrix<double> essentialMat = new Matrix<double>(3, 3);
 
-            Matrix<double> R1 = new Matrix<double>(3, 3);
-            Matrix<double> R2 = new Matrix<double>(3, 3);
-            Matrix<double> P1 = new Matrix<double>(3, 4);
-            Matrix<double> P2 = new Matrix<double>(3, 4);
             //Matrix<double> Q = new Matrix<double>(4, 4);
 
             int maxIters = 100;
@@ -508,20 +552,6 @@ namespace Wiimote3DTrackingLib
 
             wm2.WiimoteState.CameraCalibInfo.StereoCamExtrinsic = wm1.WiimoteState.CameraCalibInfo.StereoCamExtrinsic;
 
-            //Emgu.CV.CvInvoke.cvStereoRectify(wm1.WiimoteState.CameraCalibInfo.CamIntrinsic.IntrinsicMatrix.Ptr,
-            //    wm2.WiimoteState.CameraCalibInfo.CamIntrinsic.IntrinsicMatrix.Ptr,
-            //    wm1.WiimoteState.CameraCalibInfo.CamIntrinsic.DistortionCoeffs.Ptr,
-            //    wm2.WiimoteState.CameraCalibInfo.CamIntrinsic.DistortionCoeffs.Ptr,
-            //    wiimoteCamSize,
-            //    wm1.WiimoteState.CameraCalibInfo.StereoCamExtrinsic.RotationVector.Ptr,
-            //    wm1.WiimoteState.CameraCalibInfo.StereoCamExtrinsic.TranslationVector.Ptr,
-            //    R1.Ptr,
-            //    R2.Ptr,
-            //    P1.Ptr,
-            //    P2.Ptr,
-            //    Q.Ptr,
-            //    Emgu.CV.CvEnum.STEREO_RECTIFY_TYPE.CALIB_ZERO_DISPARITY);
-
             Rectangle roi1 = new Rectangle();
             Rectangle roi2 = new Rectangle();
 
@@ -543,41 +573,110 @@ namespace Wiimote3DTrackingLib
                             ref roi1,
                             ref roi2);
 
+            //Emgu.CV.CvInvoke.cvInitUndistortRectifyMap(wm1.WiimoteState.CameraCalibInfo.CamIntrinsic.IntrinsicMatrix.Ptr,
+            //    wm1.WiimoteState.CameraCalibInfo.CamIntrinsic.DistortionCoeffs.Ptr,
+            //    R1.Ptr,
+            //    P1.Ptr,
+            //    lmapx.Ptr,
+            //    lmapy.Ptr);
+
+            //Emgu.CV.CvInvoke.cvInitUndistortRectifyMap(wm1.WiimoteState.CameraCalibInfo.CamIntrinsic.IntrinsicMatrix.Ptr,
+            //    wm2.WiimoteState.CameraCalibInfo.CamIntrinsic.DistortionCoeffs.Ptr,
+            //    R2.Ptr,
+            //    P2.Ptr,
+            //    rmapx.Ptr,
+            //    rmapy.Ptr);
+
+            _isStereoCalib = true;
+
         }
 
-        public void Location3D(Matrix<float>[] result3DPoints, PointF[] leftimagepoints, PointF[] rightimagepoints)
+        /// <summary>
+        /// Get the 3D location of all points in the view of the stereo rig
+        /// </summary>
+        /// <param name="result3DPoints"></param>
+        /// <param name="wm1"></param>
+        /// <param name="wm2"></param>
+        public void Location3D(Matrix<double>[] result3DPoints, WiimoteLib.Wiimote wm1, WiimoteLib.Wiimote wm2)
         {
+
+            //PointF[] leftimagepoints = new PointF[MAX_NUM_IR_SRCS];
+            //PointF[] rightimagepoints = new PointF[MAX_NUM_IR_SRCS];
+
+            StereoCapture(wm1, wm2, leftimagepoints, rightimagepoints);
 
             int i = 0;
 
             //Emgu.CV.CvArray<float> XYDpoint;
 
-            Matrix<float> XYDpoint = new Matrix<float>(1, 3);
+            Matrix<double> XYDpoint = new Matrix<double>(4, 1);
 
-            //Matrix<float>[] result3DPoints = new Matrix<float>[leftimagepoints.Length];
+            UDleftimagepoints = wm1.WiimoteState.CameraCalibInfo.CamIntrinsic.Undistort(leftimagepoints, R1, P1);
 
-            //Emgu.CV.Structure.MCvPoint3D32f[] result3DPoints = new Emgu.CV.Structure.MCvPoint3D32f[imagepoints.Length];
+            UDrightimagepoints = wm2.WiimoteState.CameraCalibInfo.CamIntrinsic.Undistort(rightimagepoints, R2, P2);
 
-            
-            for (i = 0; i < leftimagepoints.Length; i++)
+            Emgu.CV.Structure.MCvScalar fillval = new Emgu.CV.Structure.MCvScalar(0);
+
+            for (i = 0; i < MAX_NUM_IR_SRCS; i++)
             {
                 //result3DPoints[i] = new Matrix<float>(1, 3);
 
-                // get the x-coordinate in the left camera
-                XYDpoint.Data[0, 0] = leftimagepoints[i].X;
+                if (leftimagepoints[i].X <= wiimoteCamSize.Width &&
+                    leftimagepoints[i].Y < wiimoteCamSize.Height &&
+                    rightimagepoints[i].X <= wiimoteCamSize.Width &&
+                    rightimagepoints[i].Y <= wiimoteCamSize.Height)
+                {
 
-                // get the y-coordinate in the right camera
-                XYDpoint.Data[0, 1] = leftimagepoints[i].Y;
+                    // get the undistorted x-coordinate in the left camera
+                    XYDpoint.Data[0, 0] = (double)(UDleftimagepoints[i].X);
 
-                // the disparity between the points is the right camera x-coordinate
-                // subtracted from the left x-coordinate
-                XYDpoint.Data[0, 2] = leftimagepoints[i].X - rightimagepoints[i].X;
+                    //Debug.WriteLine("XYDpoint.Data[0, 0] = " + XYDpoint.Data[0, 0].ToString());
 
-                // Call cvPerspectiveTransform to ge the 3D location
-                CvInvoke.cvPerspectiveTransform(XYDpoint.Ptr, result3DPoints[i].Ptr, Q.Ptr);
+                    // get the undistorted y-coordinate in the right camera
+                    XYDpoint.Data[1, 0] = (double)(UDleftimagepoints[i].Y);
+
+                    //Debug.WriteLine("XYDpoint.Data[0, 1] = " + XYDpoint.Data[1, 0].ToString());
+
+                    // the disparity between the points is the right camera x-coordinate
+                    // subtracted from the left x-coordinate
+                    XYDpoint.Data[2, 0] = (double)(UDleftimagepoints[i].X - UDrightimagepoints[i].X);
+
+                    //Debug.WriteLine("XYDpoint.Data[0, 2] = " + XYDpoint.Data[2, 0].ToString());
+
+                    XYDpoint.Data[3, 0] = (double)(1);
+
+                    // Call cvPerspectiveTransform to get the 3D location
+                    // CvInvoke.cvPerspectiveTransform(XYDpoint.Ptr, result3DPoints[i].Ptr, Q.Ptr);
+                    MatrixMult(Q, XYDpoint, result3DPoints[i]);
+
+                    // Divide the X, Y and Z factors by the scaling factor
+                    result3DPoints[i].Data[0, 0] = result3DPoints[i].Data[0, 0] / result3DPoints[i].Data[3, 0];
+                    result3DPoints[i].Data[1, 0] = result3DPoints[i].Data[1, 0] / result3DPoints[i].Data[3, 0];
+                    result3DPoints[i].Data[2, 0] = result3DPoints[i].Data[2, 0] / result3DPoints[i].Data[3, 0];
+
+                }
+                else
+                {
+                    result3DPoints[i].Data[0, 0] = -1;
+                    result3DPoints[i].Data[1, 0] = -1;
+                    result3DPoints[i].Data[2, 0] = -1;
+                }
                 
             }
 
+        }
+
+        private void MatrixMult(Emgu.CV.Matrix<double> mat1, Emgu.CV.Matrix<double> mat2, Emgu.CV.Matrix<double> outMat)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                outMat.Data[i, 0] = 0;
+
+                for (int j = 0; j < 4; j++)
+                {
+                    outMat.Data[i, 0] = outMat.Data[i, 0] + (mat1.Data[i, j] * mat2.Data[j, 0]);
+                }
+            }
         }
 
 
@@ -606,7 +705,7 @@ namespace Wiimote3DTrackingLib
                 spointf[i] = new PointF();
             }
 
-            if (!(CaptureOneWM(wm, coords) == 0))
+            if (!(CalibCaptureOneWM(wm, coords) == 0))
             {
                 return -2;
             }
@@ -658,12 +757,12 @@ namespace Wiimote3DTrackingLib
                 spointf2[i] = new PointF();
             }
 
-            if (!(CaptureOneWM(wm1, coords1) == 0))
+            if (!(CalibCaptureOneWM(wm1, coords1) == 0))
             {
                 return -2;
             }
 
-            if (!(CaptureOneWM(wm2, coords2) == 0))
+            if (!(CalibCaptureOneWM(wm2, coords2) == 0))
             {
                 return -3;
             }
@@ -673,7 +772,7 @@ namespace Wiimote3DTrackingLib
             {
                 //coords1[i].y = 768 - coords1[i].y;
                 //coords2[i].y = 768 - coords2[i].y;
-                Debug.WriteLine("coords1[" + i.ToString() + "] = " + coords1[i].ToString() + "  coords2[" + i.ToString() + "] = " + coords2[i].ToString());
+                //Debug.WriteLine("coords1[" + i.ToString() + "] = " + coords1[i].ToString() + "  coords2[" + i.ToString() + "] = " + coords2[i].ToString());
             }
 
             if (stereoCapCount < MAX_NUM_OF_CAL_IMAGES)
@@ -717,7 +816,7 @@ namespace Wiimote3DTrackingLib
             {
                 for (i = 0; i < wmarray.Length; i++)
                 {
-                    CaptureOneWM(wmarray[i], coords[i]);
+                    CalibCaptureOneWM(wmarray[i], coords[i]);
                 }
             }
 
@@ -725,7 +824,7 @@ namespace Wiimote3DTrackingLib
 
         }
 
-        public int CaptureOneWM(WiimoteLib.Wiimote wm, coord[] coords)
+        public int CalibCaptureOneWM(WiimoteLib.Wiimote wm, coord[] coords)
         {
             // Captures the IR sensor output from the wiimotes and prints 
             // the output in a form readable by MATLAB, i.e. creates MATLAB
@@ -735,7 +834,7 @@ namespace Wiimote3DTrackingLib
 
             //coord[] coords = new coord[NUM_IR_SRCS];
 
-            if (!(get_coords(wm, coords) == 0))
+            if (!(GetCalibCoords(wm, coords) == 0))
             {
                 return -1;
             }
@@ -744,7 +843,7 @@ namespace Wiimote3DTrackingLib
             for (int i = 0; i < NUM_IR_SRCS; i++)
             {
                 coords[i].y = 768 - coords[i].y;
-                Debug.WriteLine("coords[" + i.ToString() + "] = " + coords[i].ToString());
+                //Debug.WriteLine("coords[" + i.ToString() + "] = " + coords[i].ToString());
             }
 
             Array.Sort(coords, 0, 4, coord.compare_x());
@@ -766,7 +865,7 @@ namespace Wiimote3DTrackingLib
         /// <param name="wm">Wiimote object.</param>
         /// <param name="coords">Array of four coord objects for storing the coordinates.</param>
         /// <returns>Integer indicating success, 0 if successful, otherwise 1.</returns>
-        int get_coords(WiimoteLib.Wiimote wm, coord[] coords)
+        int GetCalibCoords(WiimoteLib.Wiimote wm, coord[] coords)
         {
 
             int i = 0;
@@ -805,6 +904,127 @@ namespace Wiimote3DTrackingLib
             return 0;
 
         }
+
+        public int StereoCapture(WiimoteLib.Wiimote wm1, WiimoteLib.Wiimote wm2, PointF[] points1, PointF[] points2)
+        {
+
+            int i = 0;
+
+            coord[] coords1 = new coord[MAX_NUM_IR_SRCS];
+            coord[] coords2 = new coord[MAX_NUM_IR_SRCS];
+
+            // initialise the coordinates
+            for (i = 0; i < MAX_NUM_IR_SRCS; i++)
+            {
+                coords1[i] = new coord();
+                coords2[i] = new coord();
+            }
+
+            if (CaptureOneWM(wm1, coords1) == 0 && CaptureOneWM(wm2, coords2)==0)
+            {
+                for (i = 0; i < MAX_NUM_IR_SRCS; i++)
+                {
+                    points1[i].X = (float)(coords1[i].x);
+                    points1[i].Y = (float)(coords1[i].y);
+
+                    points2[i].X = (float)(coords2[i].x);
+                    points2[i].Y = (float)(coords2[i].y);
+                }
+
+                return 0;
+            }
+
+            return -1;
+
+        }
+
+        public int CaptureOneWM(WiimoteLib.Wiimote wm, coord[] coords)
+        {
+            // Captures the IR sensor output from the wiimotes
+
+            //coord[] coords = new coord[NUM_IR_SRCS];
+            if (coords.Length == MAX_NUM_IR_SRCS)
+            {
+
+                if (!(GetCoords(wm, coords) == 0))
+                {
+                    return -1;
+                }
+
+                // Wii puts origin in bottom left, Y up; toolbox in top left, Y down.  Convert by subtracting y from 768.		
+                for (int i = 0; i < MAX_NUM_IR_SRCS; i++)
+                {
+                    coords[i].y = 768 - coords[i].y;
+                    //Debug.WriteLine("coords[" + i.ToString() + "] = " + coords[i].ToString());
+                }
+
+                // sort the coordinates in x and y 
+                Array.Sort(coords, 0, MAX_NUM_IR_SRCS, coord.compare_xy());
+
+                return 0;
+            }
+            else
+            {
+                return -1;
+            }
+
+        }
+
+        int GetCoords(WiimoteLib.Wiimote wm, coord[] coords)
+        {
+
+            int i = 0;
+            coord c = new coord();
+
+            // Check if the wiimote is connected and 4 IR sources can be found
+            if (wm.WiimoteState.ConnectionState == WiimoteLib.ConnectionState.Connected)
+            {
+                // get the coordinates of each IR source
+                for (i = 0; i < MAX_NUM_IR_SRCS; i++)
+                {
+                    if (wm.WiimoteState.IRState.IRSensors[i].Found)
+                    {
+                        c.x = wm.WiimoteState.IRState.IRSensors[i].RawPosition.X;
+
+                        c.y = wm.WiimoteState.IRState.IRSensors[i].RawPosition.Y;
+
+                        c.pt = i + 1;
+
+                        if (c.x > 1024 || c.x < 0 || c.y > 768 || c.y < 0)
+                        {
+                            // the IR data is invalid for this source, put the 
+                            // coordinate outside the view
+                            coords[i].x = wiimoteCamSize.Width + 1 + i;
+                            coords[i].y = wiimoteCamSize.Height + 1 + i;
+                            coords[i].pt = c.pt;
+                        }
+                        else
+                        {
+                            // store the captured coordinate in the array
+                            coords[i].x = c.x;
+                            coords[i].y = c.y;
+                            coords[i].pt = c.pt;
+                        }
+                    }
+                    else
+                    {
+                        coords[i].x = wiimoteCamSize.Width + 1 + i;
+                        coords[i].y = wiimoteCamSize.Height + 1 + i;
+                        coords[i].pt = i+1;
+                    }
+                }
+            }
+            else
+            {
+                // return 1 as we could not get info from controller, it may be disconnected
+                return -2;
+            }
+
+            return 0;
+
+        }
+
+
 
 
     }
@@ -876,6 +1096,30 @@ namespace Wiimote3DTrackingLib
 
                 else
                     return 0;
+            }
+        }
+
+        // Nested class to do ascending sort on both x and y coordinates.
+        private class compare_xyHelper : IComparer
+        {
+            int IComparer.Compare(object a, object b)
+            {
+                coord c1 = (coord)a;
+                coord c2 = (coord)b;
+
+                if (c1._x > c2._x)
+                    return 1;
+                else if (c1._x < c2._x)
+                    return -1;
+                else
+                {
+                    if (c1._y > c2._y)
+                        return 1;
+                    else if (c1._y < c2._y)
+                        return -1;
+                    else
+                        return 0;
+                }
             }
         }
 
@@ -969,6 +1213,12 @@ namespace Wiimote3DTrackingLib
         public static IComparer compare_y_inv()
         {
             return (IComparer)new compare_y_invHelper();
+        }
+
+        // Method to return IComparer object for sort helper.
+        public static IComparer compare_xy()
+        {
+            return (IComparer)new compare_xyHelper();
         }
 
 

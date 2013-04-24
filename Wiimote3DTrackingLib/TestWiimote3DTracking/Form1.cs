@@ -10,6 +10,8 @@ using System.Text;
 using System.Windows.Forms;
 using WiimoteLib;
 using Wiimote3DTrackingLib;
+using Emgu.CV;
+using Emgu.Util;
 
 namespace TestWiimote3DTracking
 {
@@ -31,6 +33,13 @@ namespace TestWiimote3DTracking
 
         private Guid _wm1ID;
         private Guid _wm2ID;
+
+        private bool _dotracking = false;
+        private Matrix<double>[] result3DPoints = new Matrix<double>[4];
+        
+
+        TrackingForm TForm = new TrackingForm();
+        private bool _tformloaded = false;
 
         #region form code
 
@@ -77,9 +86,14 @@ namespace TestWiimote3DTracking
             wm2.WiimoteChanged += wm_WiimoteChanged;
             wm2.WiimoteExtensionChanged += wm_WiimoteExtensionChanged;
 
+            for (int i = 0; i < 4; i++)
+            {
+                result3DPoints[i] = new Matrix<double>(4, 1);
+            }
+
         }
-		
-		private void Form1_Load(object sender, EventArgs e)
+
+        private void Form1_Load(object sender, EventArgs e)
 		{
             this.Show();
 		}
@@ -287,7 +301,29 @@ namespace TestWiimote3DTracking
 
         private void StartTrackingButton_Click(object sender, EventArgs e)
         {
+            if (wiitrack.IsStereoCalibrated)
+            {
+                // check if form has already been loaded
+                if (!_tformloaded)
+                {
+                    TForm.Show();
+                    _tformloaded = true;
+                }
 
+                _dotracking = true;
+
+            }
+            else
+            {
+                MessageBox.Show("Stereo rig has not yet been calibrated");
+            }
+        }
+
+        private void StopTrackingButton_Click(object sender, EventArgs e)
+        {
+            TForm.Hide();
+            _tformloaded = false;
+            _dotracking = false;
         }
 
         #endregion
@@ -337,6 +373,7 @@ namespace TestWiimote3DTracking
             {
                 if (ws.ConnectionState == WiimoteLib.ConnectionState.Connected)
                 {
+                    // first draw the positions in the graphic
                     g1.Clear(Color.White);
 
                     float penwidth = 2.0F;
@@ -384,6 +421,64 @@ namespace TestWiimote3DTracking
                 }
             }
 
+            // now get the info from wm1 that is required for 3D tracking
+            if (_dotracking)
+            {
+                wiitrack.Location3D(result3DPoints, wm1, wm2);
+
+                if (!(result3DPoints[0].Data[0, 0] == -1 && result3DPoints[0].Data[1, 0] == -1 && result3DPoints[0].Data[2, 0] == -1))
+                {
+                    TForm.XposLabel1.Text = "X: " + result3DPoints[0].Data[0, 0].ToString("f4");
+                    TForm.YposLabel1.Text = "Y: " + result3DPoints[0].Data[1, 0].ToString("f4");
+                    TForm.ZposLabel1.Text = "Z: " + result3DPoints[0].Data[2, 0].ToString("f4");
+                }
+                else
+                {
+                    TForm.XposLabel1.Text = "X: No IR";
+                    TForm.YposLabel1.Text = "Y: No IR";
+                    TForm.ZposLabel1.Text = "Z: No IR";
+                }
+
+                if (!(result3DPoints[1].Data[0, 0] == -1 && result3DPoints[1].Data[1, 0] == -1 && result3DPoints[1].Data[2, 0] == -1))
+                {
+                    TForm.XposLabel2.Text = "X: " + result3DPoints[1].Data[0, 0].ToString("f4");
+                    TForm.YposLabel2.Text = "Y: " + result3DPoints[1].Data[1, 0].ToString("f4");
+                    TForm.ZposLabel2.Text = "Z: " + result3DPoints[1].Data[2, 0].ToString("f4");
+                }
+                else
+                {
+                    TForm.XposLabel2.Text = "X: No IR";
+                    TForm.YposLabel2.Text = "Y: No IR";
+                    TForm.ZposLabel2.Text = "Z: No IR";
+                }
+
+                if (!(result3DPoints[2].Data[0, 0] == -1 && result3DPoints[2].Data[1, 0] == -1 && result3DPoints[2].Data[2, 0] == -1))
+                {
+                    TForm.XposLabel3.Text = "X: " + result3DPoints[2].Data[0, 0].ToString("f4");
+                    TForm.YposLabel3.Text = "Y: " + result3DPoints[2].Data[1, 0].ToString("f4");
+                    TForm.ZposLabel3.Text = "Z: " + result3DPoints[2].Data[2, 0].ToString("f4");
+                }
+                else
+                {
+                    TForm.XposLabel3.Text = "X: No IR";
+                    TForm.YposLabel3.Text = "Y: No IR";
+                    TForm.ZposLabel3.Text = "Z: No IR";
+                }
+
+                if (!(result3DPoints[3].Data[0, 0] == -1 && result3DPoints[3].Data[1, 0] == -1 && result3DPoints[3].Data[2, 0] == -1))
+                {
+                    TForm.XposLabel4.Text = "X: " + result3DPoints[3].Data[0, 0].ToString("f4");
+                    TForm.YposLabel4.Text = "Y: " + result3DPoints[3].Data[1, 0].ToString("f4");
+                    TForm.ZposLabel4.Text = "Z: " + result3DPoints[3].Data[2, 0].ToString("f4");
+                }
+                else
+                {
+                    TForm.XposLabel4.Text = "X: No IR";
+                    TForm.YposLabel4.Text = "Y: No IR";
+                    TForm.ZposLabel4.Text = "Z: No IR";
+                }
+
+            }
             //pbBattery.Value = (ws.Battery > 0xc8 ? 0xc8 : (int)ws.Battery);
             //lblBattery.Text = ws.Battery.ToString();
             //lblDevicePath.Text = "Device Path: " + mWiimote.HIDDevicePath;
@@ -423,6 +518,8 @@ namespace TestWiimote3DTracking
         }
 
         #endregion
+
+
 
 
     }
