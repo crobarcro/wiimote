@@ -558,6 +558,24 @@ namespace Wiimote3DTrackingLib
             Rectangle roi1 = new Rectangle();
             Rectangle roi2 = new Rectangle();
 
+            //Emgu.CV.CvInvoke.cvStereoRectify(wm1.WiimoteState.CameraCalibInfo.CamIntrinsic.IntrinsicMatrix.Ptr,
+            //                wm2.WiimoteState.CameraCalibInfo.CamIntrinsic.IntrinsicMatrix.Ptr,
+            //                wm1.WiimoteState.CameraCalibInfo.CamIntrinsic.DistortionCoeffs.Ptr,
+            //                wm2.WiimoteState.CameraCalibInfo.CamIntrinsic.DistortionCoeffs.Ptr,
+            //                wiimoteCamSize,
+            //                wm1.WiimoteState.CameraCalibInfo.StereoCamExtrinsic.RotationVector.Ptr,
+            //                wm1.WiimoteState.CameraCalibInfo.StereoCamExtrinsic.TranslationVector.Ptr,
+            //                R1.Ptr,
+            //                R2.Ptr,
+            //                P1.Ptr,
+            //                P2.Ptr,
+            //                Q.Ptr,
+            //                Emgu.CV.CvEnum.STEREO_RECTIFY_TYPE.CALIB_ZERO_DISPARITY,
+            //                -1.0,
+            //                Size.Empty,
+            //                ref roi1,
+            //                ref roi2);
+
             Emgu.CV.CvInvoke.cvStereoRectify(wm1.WiimoteState.CameraCalibInfo.CamIntrinsic.IntrinsicMatrix.Ptr,
                             wm2.WiimoteState.CameraCalibInfo.CamIntrinsic.IntrinsicMatrix.Ptr,
                             wm1.WiimoteState.CameraCalibInfo.CamIntrinsic.DistortionCoeffs.Ptr,
@@ -570,7 +588,7 @@ namespace Wiimote3DTrackingLib
                             P1.Ptr,
                             P2.Ptr,
                             Q.Ptr,
-                            Emgu.CV.CvEnum.STEREO_RECTIFY_TYPE.CALIB_ZERO_DISPARITY,
+                            Emgu.CV.CvEnum.STEREO_RECTIFY_TYPE.DEFAULT,
                             -1.0,
                             Size.Empty,
                             ref roi1,
@@ -615,6 +633,12 @@ namespace Wiimote3DTrackingLib
             // undistort the points in the right hand camera
             UDrightimagepoints = wm2.WiimoteState.CameraCalibInfo.CamIntrinsic.Undistort(rightimagepoints, R2, P2);
 
+            // Get the adjustment necessary if the principle points of each camera 
+            // are not equal, for instance if we have not set the STEREO_RECTIFY_TYPE
+            // flag to CALIB_ZERO_DISPARITY as the cameras are pointing slightly toward 
+            // each other
+            Double cadjust = P1.Data[0, 2] - P2.Data[0, 2];
+
             // check for up to four points, the max number of sources currently
             for (i = 0; i < MAX_NUM_IR_SRCS; i++)
             {
@@ -639,6 +663,9 @@ namespace Wiimote3DTrackingLib
                     // the disparity between the points is the right camera x-coordinate
                     // subtracted from the left x-coordinate
                     XYDpoint.Data[2, 0] = (double)(UDleftimagepoints[i].X - UDrightimagepoints[i].X);
+
+                    // We adjust the disparity if required
+                    XYDpoint.Data[2, 0] = XYDpoint.Data[2, 0] - cadjust;
 
                     // add a one to the end of the array
                     XYDpoint.Data[3, 0] = (double)(1);
