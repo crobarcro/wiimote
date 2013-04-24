@@ -1,5 +1,0 @@
-C:\Users\Richard\Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteLib\bin\x86\Release\WiimoteLib.dll
-C:\Users\Richard\Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteLib\bin\x86\Release\WiimoteLib.pdb
-C:\Users\Richard\Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteLib\obj\x86\Release\ResolveAssemblyReference.cache
-C:\Users\Richard\Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteLib\obj\x86\Release\WiimoteLib.dll
-C:\Users\Richard\Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteLib\obj\x86\Release\WiimoteLib.pdb
