@@ -12,6 +12,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.IO;
+using System.Collections.Specialized;
 using System.Runtime.Serialization;
 using Microsoft.Win32.SafeHandles;
 using System.Threading;
@@ -123,6 +124,7 @@ namespace WiimoteLib
 		/// </summary>
 		public Wiimote()
 		{
+            WiimoteState.ID = this.ID;
 		}
 
 		internal Wiimote(string devicePath)
@@ -146,6 +148,44 @@ namespace WiimoteLib
             {
                 OpenWiimoteDeviceHandle(mDevicePath);
             }
+		}
+
+        /// <summary>
+        /// Connect to a specific Wiimote, specified by its device path.
+        /// </summary>
+        /// <param name="devicePath">String containing the device path of the wiimote, as found by FindAllWiimotes</param>
+        /// <exception cref="WiimoteNotFoundException">Wiimote not found in HID device list</exception>
+        public void Connect(string devicePath)
+        {
+            mDevicePath = devicePath;
+            OpenWiimoteDeviceHandle(mDevicePath);
+        }
+
+        // Declare a string collection to hold the device paths
+        private static StringCollection devicePaths = new StringCollection();
+
+        /// <summary>
+        /// Attempts to find the device paths of all wiimotes.
+        /// </summary>
+        /// <returns>A String Collection consisting of the device paths of all wiimote present in the HID device list.</returns>
+        public static StringCollection FindAllWiiMotes()
+        {
+            // clear the list of device paths
+            devicePaths.Clear();
+
+            // Call FindWiiMote with the FindAllWiimoteFound function as the 
+            // delegate function
+            FindWiimote(FindAllWiimoteFound);
+
+            // return the string collection
+            return devicePaths;
+        }
+         
+        private static bool FindAllWiimoteFound(string devicePath)
+		{
+            devicePaths.Add(devicePath);
+
+			return true;
 		}
 
 		internal static void FindWiimote(WiimoteFoundDelegate wiimoteFound)

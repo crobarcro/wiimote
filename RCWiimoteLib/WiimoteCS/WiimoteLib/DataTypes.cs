@@ -220,6 +220,11 @@ namespace WiimoteLib
         /// </summary>
         [DataMember]
         public CameraCalibInfo CameraCalibInfo;
+        /// <summary>
+        /// Wiimote ID
+        /// </summary>
+        [DataMember]
+        public Guid ID;
 
 		/// <summary>
 		/// Constructor for WiimoteState class
@@ -231,6 +236,7 @@ namespace WiimoteLib
             CameraCalibInfo.IsCalibrated = false;
             CameraCalibInfo.CamIntrinsic = new Emgu.CV.IntrinsicCameraParameters();
             //CameraCalibInfo.CamExtrinsic = new Emgu.CV.ExtrinsicCameraParameters();
+            ID = new Guid();
 		}
 
         public int IRPoints()
