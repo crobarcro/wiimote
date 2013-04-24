@@ -357,7 +357,7 @@ namespace LocationPlot3D
         public class Plot3D
         {
             public Cube plotArea;
-            public PlotPoint[] _plotPoints;
+            public PlotPoint[] PlotPoints;
             public Vector3D plotOrigin;
             private int _width = 0;
             private int _height = 0;
@@ -380,39 +380,41 @@ namespace LocationPlot3D
                 plotOrigin = new Math3D.Vector3D(_width / 2, _height / 2, _depth / 2);
 
                 // declare an array of plot points to be drawn 
-                _plotPoints = new PlotPoint[numPlotPoints];
+                PlotPoints = new PlotPoint[numPlotPoints];
 
-                for (int i = 0; i < _plotPoints.Length; i++)
+                for (int i = 0; i < PlotPoints.Length; i++)
                 {
-                    _plotPoints[i] = new PlotPoint(0, 0, 0, plotOrigin);
+                    PlotPoints[i] = new PlotPoint(0.0f, 0.0f, 0.0f, _width, _height, _depth, plotOrigin);
+                    PlotPoints[i].ID = i;
                 }
 
                 InitialisePlotPoints();
             }
 
-            public Plot3D(int Width, int Height, int Depth, PlotPoint[] plotPoints)
-            {
-                _width = Width;
-                _height = Height;
-                _depth = Depth;
+            //public Plot3D(int Width, int Height, int Depth, PlotPoint[] plotPoints)
+            //{
+            //    _width = Width;
+            //    _height = Height;
+            //    _depth = Depth;
 
-                // Declare a cube to make a plotting area
-                plotArea = new Cube(_width, _height, _depth);
+            //    // Declare a cube to make a plotting area
+            //    plotArea = new Cube(_width, _height, _depth);
 
-                // determine the origin of the plot object
-                plotOrigin = new Math3D.Vector3D(_width / 2, _height / 2, _depth / 2);
+            //    // determine the origin of the plot object
+            //    plotOrigin = new Math3D.Vector3D(_width / 2, _height / 2, _depth / 2);
 
-                // declare an array of plot points to be drawn 
-                _plotPoints = plotPoints;
+            //    // declare an array of plot points to be drawn 
+            //    _plotPoints = plotPoints;
 
-                InitialisePlotPoints();
-            }
+            //    InitialisePlotPoints();
+            //}
 
             private void InitialisePlotPoints()
             {
-                for (int i = 0; i < _plotPoints.Length; i++)
+                for (int i = 0; i < PlotPoints.Length; i++)
                 {
-                    _plotPoints[i].SetOrigin = plotOrigin;
+                    PlotPoints[i].SetPlotSize(_width, _height, _depth);
+                    PlotPoints[i].SetOrigin = plotOrigin;
                 }
             }
 
@@ -430,9 +432,9 @@ namespace LocationPlot3D
                 // Do the drawing
                 plotArea.DrawCube(drawOrigin, g, finalBmp);
 
-                for (int i = 0; i < _plotPoints.Length; i++)
+                for (int i = 0; i < PlotPoints.Length; i++)
                 {
-                    _plotPoints[i].DrawPlotPoint(drawOrigin, g, finalBmp);
+                    PlotPoints[i].DrawPlotPoint(drawOrigin, g, finalBmp);
                 }
 
                 g.Dispose();
@@ -442,17 +444,21 @@ namespace LocationPlot3D
 
             public void ResizePlot(int Width, int Height, int Depth, Point Origin)
             {
-                float scale = 0;
+                _width = Width;
+                _height = Height;
+                _depth = Depth;
 
-                scale = Math.Max(Width / _width, Depth / _depth);
+                plotArea.ResizeCube(_width, _height, _depth, Origin);
 
-                //for (int i = 0; i < _plotPoints.Length; i++)
-                //{
-                   
-                //}
+                plotOrigin.x = _width / 2;
+                plotOrigin.y = _height / 2;
+                plotOrigin.z = _depth / 2;
 
-                plotArea.ResizeCube(Width, Height, Depth, Origin);
-
+                for (int i = 0; i < PlotPoints.Length; i++)
+                {
+                    PlotPoints[i].SetPlotSize(Width, Height, Depth);
+                    PlotPoints[i].SetOrigin = plotOrigin;
+                }
             }
 
             public float RotateX
@@ -463,11 +469,11 @@ namespace LocationPlot3D
                     //rotate the difference between this rotation and last rotation
                     //RotateX(value - xRotation);
                     plotArea.RotateX = value;
-                    
+
                     //rotate the plot points
-                    for (int i=0;i <_plotPoints.Length;i++)
+                    for (int i = 0; i < PlotPoints.Length; i++)
                     {
-                        _plotPoints[i].RotateX = value;
+                        PlotPoints[i].RotateX = value;
                     }
 
                     xRotation = value;
@@ -482,9 +488,9 @@ namespace LocationPlot3D
                     plotArea.RotateY = value;
 
                     //rotate the plot points
-                    for (int i = 0; i < _plotPoints.Length; i++)
+                    for (int i = 0; i < PlotPoints.Length; i++)
                     {
-                        _plotPoints[i].RotateY = value;
+                        PlotPoints[i].RotateY = value;
                     }
 
                     yRotation = value;
@@ -499,9 +505,9 @@ namespace LocationPlot3D
                     plotArea.RotateZ = value;
 
                     //rotate the plot points
-                    for (int i = 0; i < _plotPoints.Length; i++)
+                    for (int i = 0; i < PlotPoints.Length; i++)
                     {
-                        _plotPoints[i].RotateZ = value;
+                        PlotPoints[i].RotateZ = value;
                     }
 
                     zRotation = value;
@@ -1094,140 +1100,89 @@ namespace LocationPlot3D
             }
         }
 
-        public static Vector3D RotateX(Vector3D point3D, float degrees)
-        {
-            //[ a  b  c ] [ x ]   [ x*a + y*b + z*c ]
-            //[ d  e  f ] [ y ] = [ x*d + y*e + z*f ]
-            //[ g  h  i ] [ z ]   [ x*g + y*h + z*i ]
-
-            //[ 1    0        0   ]
-            //[ 0   cos(x)  sin(x)]
-            //[ 0   -sin(x) cos(x)]
-
-            double cDegrees = degrees * PIOVER180;
-            double cosDegrees = Math.Cos(cDegrees);
-            double sinDegrees = Math.Sin(cDegrees);
-
-            double y = (point3D.y * cosDegrees) + (point3D.z * sinDegrees);
-            double z = (point3D.y * -sinDegrees) + (point3D.z * cosDegrees);
-
-            return new Vector3D(point3D.x, y, z);
-        }
-
-        public static Vector3D RotateY(Vector3D point3D, float degrees)
-        {
-            //[ cos(x)   0    sin(x)]
-            //[   0      1      0   ]
-            //[-sin(x)   0    cos(x)]
-
-            double cDegrees = degrees * PIOVER180;
-            double cosDegrees = Math.Cos(cDegrees);
-            double sinDegrees = Math.Sin(cDegrees);
-
-            double x = (point3D.x * cosDegrees) + (point3D.z * sinDegrees);
-            double z = (point3D.x * -sinDegrees) + (point3D.z * cosDegrees);
-
-            return new Vector3D(x, point3D.y, z);
-        }
-
-        public static Vector3D RotateZ(Vector3D point3D, float degrees)
-        {
-            //[ cos(x)  sin(x) 0]
-            //[ -sin(x) cos(x) 0]
-            //[    0     0     1]
-
-            double cDegrees = degrees * PIOVER180;
-            double cosDegrees = Math.Cos(cDegrees);
-            double sinDegrees = Math.Sin(cDegrees);
-
-            double x = (point3D.x * cosDegrees) + (point3D.y * sinDegrees);
-            double y = (point3D.x * -sinDegrees) + (point3D.y * cosDegrees);
-
-            return new Vector3D(x, y, point3D.z);
-        }
-
-        public static Vector3D Translate(Vector3D points3D, Vector3D oldOrigin, Vector3D newOrigin)
-        {
-            Vector3D difference = new Vector3D(newOrigin.x - oldOrigin.x, newOrigin.y - oldOrigin.y, newOrigin.z - oldOrigin.z);
-            points3D.x += difference.x;
-            points3D.y += difference.y;
-            points3D.z += difference.z;
-            return points3D;
-        }
-
-        public static Vector3D[] RotateX(Vector3D[] points3D, float degrees)
-        {
-            for (int i = 0; i < points3D.Length; i++)
-            {
-                points3D[i] = RotateX((Vector3D)points3D[i], degrees);
-            }
-            return points3D;
-        }
-
-        public static Vector3D[] RotateY(Vector3D[] points3D, float degrees)
-        {
-            for (int i = 0; i < points3D.Length; i++)
-            {
-                points3D[i] = RotateY((Vector3D)points3D[i], degrees);
-            }
-            return points3D;
-        }
-
-        public static Vector3D[] RotateZ(Vector3D[] points3D, float degrees)
-        {
-            for (int i = 0; i < points3D.Length; i++)
-            {
-                points3D[i] = RotateZ((Vector3D)points3D[i], degrees);
-            }
-            return points3D;
-        }
-
-        public static Vector3D[] Translate(Vector3D[] points3D, Vector3D oldOrigin, Vector3D newOrigin)
-        {
-            for (int i = 0; i < points3D.Length; i++)
-            {
-                points3D[i] = Translate(points3D[i], oldOrigin, newOrigin);
-            }
-            return points3D;
-        }
-
         // Plotting point object
         public class PlotPoint
         {
             bool drawPoint = true;
 
-            float xRotation = 0.0f;
-            float yRotation = 0.0f;
-            float zRotation = 0.0f;
+            private float xRotation = 0.0f;
+            private float yRotation = 0.0f;
+            private float zRotation = 0.0f;
 
             public Vector3D centre;
             public Vector3D plotOrigin;
+            private double plotWidth;
+            private double plotHeight;
+            private double plotDepth;
+            private double _x = 0;
+            private double _y = 0;
+            private double _z = 0;
 
             private line3D[] plotPointLines = new line3D[3];
 
             private int pointSize = 5;
 
-            public PlotPoint(int x, int y, int z)
+            private int _id = -1;
+
+            //public PlotPoint(int x, int y, int z)
+            //{
+            //    centre = new Vector3D(x, y, z);
+
+            //    plotOrigin = new Vector3D();
+
+            //    InitializePoint();
+            //}
+
+            //public PlotPoint(int x, int y, int z, Vector3D origin)
+            //{
+            //    centre = new Vector3D(x, y, z);
+
+            //    plotOrigin = origin;
+
+            //    InitializePoint();
+            //}
+
+            public PlotPoint(double x, double y, double z, int width, int height, int depth)
             {
-                centre = new Vector3D(x, y, z);
+                plotWidth = width;
+                plotHeight = height;
+                plotDepth = depth;
+
+                _x = x;
+                _y = y;
+                _z = z;
+
+                centre = new Vector3D(x * plotWidth, y * plotHeight, z * plotDepth);
 
                 plotOrigin = new Vector3D();
 
                 InitializePoint();
             }
 
-            public PlotPoint(int x, int y, int z, Vector3D origin)
+            public PlotPoint(double x, double y, double z, int width, int height, int depth, Vector3D origin)
             {
-                centre = new Vector3D(x, y, z);
+                plotWidth = width;
+                plotHeight = height;
+                plotDepth = depth;
+
+                _x = x;
+                _y = y;
+                _z = z;
 
                 plotOrigin = origin;
 
+                centre = new Vector3D(x * plotWidth, y * plotHeight, z * plotDepth);
+                
                 InitializePoint();
             }
 
             public PlotPoint(Vector3D point)
             {
                 centre = point;
+
+                _x = centre.x;
+                _y = centre.y;
+                _z = centre.z;
 
                 plotOrigin = new Vector3D();
 
@@ -1238,6 +1193,10 @@ namespace LocationPlot3D
             {
                 centre = point;
 
+                _x = centre.x;
+                _y = centre.y;
+                _z = centre.z;
+
                 plotOrigin = origin;
 
                 InitializePoint();
@@ -1246,12 +1205,78 @@ namespace LocationPlot3D
             private void InitializePoint()
             {
 
+                //centre = centre + plotOrigin;
+                centre.x = _x * plotWidth;
+                centre.y = _y * plotHeight;
+                centre.z = _z * plotDepth;
+
                 plotPointLines[0] = new line3D(centre, pointSize, new Vector3D(1.0, 0.0, 0.0), plotOrigin);
 
                 plotPointLines[1] = new line3D(centre, pointSize, new Vector3D(0.0, 1.0, 0.0), plotOrigin);
 
                 plotPointLines[2] = new line3D(centre, pointSize, new Vector3D(0.0, 0.0, 1.0), plotOrigin);
 
+                for (int i = 0; i < plotPointLines.Length; i++)
+                {
+                    plotPointLines[i].RotateX = xRotation;
+                    plotPointLines[i].RotateY = yRotation;
+                    plotPointLines[i].RotateZ = zRotation;
+                }
+
+            }
+
+            public void SetPlotSize(int width, int height, int depth)
+            {
+                plotWidth = width;
+                plotHeight = height;
+                plotDepth = depth;
+
+                centre.x = _x * plotWidth;
+                centre.y = _y * plotHeight;
+                centre.z = _z * plotDepth;
+
+                InitializePoint();
+            }
+
+            public void SetPosition(double x, double y, double z)
+            {
+                _x = x;
+                _y = y;
+                _z = z;
+
+                centre.x = x * plotWidth;
+                centre.y = y * plotHeight; 
+                centre.z = z * plotDepth;
+
+                InitializePoint();
+            }
+
+            public void SetPosition(double x, double y, double z, int width, int height, int depth)
+            {
+                plotWidth = width;
+                plotHeight = height;
+                plotDepth = depth;
+
+                _x = x;
+                _y = y;
+                _z = z;
+
+                centre.x = x * plotWidth;
+                centre.y = y * plotHeight;
+                centre.z = z * plotDepth;
+
+                InitializePoint();
+            }
+
+            public void SetPosition(Vector3D position)
+            {
+                centre = position;
+
+                _x = centre.x;
+                _y = centre.y;
+                _z = centre.z;
+
+                InitializePoint();
             }
 
             public Vector3D SetOrigin
@@ -1262,12 +1287,20 @@ namespace LocationPlot3D
                 {
                     plotOrigin = value;
 
-                    for (int i = 0; i < plotPointLines.Length; i++)
-                    {
-                        plotPointLines[i].lineOrigin = plotOrigin;
-                    }
-                }
+                    InitializePoint();
 
+                    //for (int i = 0; i < plotPointLines.Length; i++)
+                    //{
+                    //    plotPointLines[i].lineOrigin = plotOrigin;
+                    //}
+                }
+            }
+
+            public int ID
+            {
+                get { return _id; }
+
+                set { _id = value; }
             }
 
             public float RotateX
@@ -1530,5 +1563,104 @@ namespace LocationPlot3D
                 UpdateLine();
             }
         }
+
+        public static Vector3D RotateX(Vector3D point3D, float degrees)
+        {
+            //[ a  b  c ] [ x ]   [ x*a + y*b + z*c ]
+            //[ d  e  f ] [ y ] = [ x*d + y*e + z*f ]
+            //[ g  h  i ] [ z ]   [ x*g + y*h + z*i ]
+
+            //[ 1    0        0   ]
+            //[ 0   cos(x)  sin(x)]
+            //[ 0   -sin(x) cos(x)]
+
+            double cDegrees = degrees * PIOVER180;
+            double cosDegrees = Math.Cos(cDegrees);
+            double sinDegrees = Math.Sin(cDegrees);
+
+            double y = (point3D.y * cosDegrees) + (point3D.z * sinDegrees);
+            double z = (point3D.y * -sinDegrees) + (point3D.z * cosDegrees);
+
+            return new Vector3D(point3D.x, y, z);
+        }
+
+        public static Vector3D RotateY(Vector3D point3D, float degrees)
+        {
+            //[ cos(x)   0    sin(x)]
+            //[   0      1      0   ]
+            //[-sin(x)   0    cos(x)]
+
+            double cDegrees = degrees * PIOVER180;
+            double cosDegrees = Math.Cos(cDegrees);
+            double sinDegrees = Math.Sin(cDegrees);
+
+            double x = (point3D.x * cosDegrees) + (point3D.z * sinDegrees);
+            double z = (point3D.x * -sinDegrees) + (point3D.z * cosDegrees);
+
+            return new Vector3D(x, point3D.y, z);
+        }
+
+        public static Vector3D RotateZ(Vector3D point3D, float degrees)
+        {
+            //[ cos(x)  sin(x) 0]
+            //[ -sin(x) cos(x) 0]
+            //[    0     0     1]
+
+            double cDegrees = degrees * PIOVER180;
+            double cosDegrees = Math.Cos(cDegrees);
+            double sinDegrees = Math.Sin(cDegrees);
+
+            double x = (point3D.x * cosDegrees) + (point3D.y * sinDegrees);
+            double y = (point3D.x * -sinDegrees) + (point3D.y * cosDegrees);
+
+            return new Vector3D(x, y, point3D.z);
+        }
+
+        public static Vector3D Translate(Vector3D points3D, Vector3D oldOrigin, Vector3D newOrigin)
+        {
+            Vector3D difference = new Vector3D(newOrigin.x - oldOrigin.x, newOrigin.y - oldOrigin.y, newOrigin.z - oldOrigin.z);
+            points3D.x += difference.x;
+            points3D.y += difference.y;
+            points3D.z += difference.z;
+            return points3D;
+        }
+
+        public static Vector3D[] RotateX(Vector3D[] points3D, float degrees)
+        {
+            for (int i = 0; i < points3D.Length; i++)
+            {
+                points3D[i] = RotateX((Vector3D)points3D[i], degrees);
+            }
+            return points3D;
+        }
+
+        public static Vector3D[] RotateY(Vector3D[] points3D, float degrees)
+        {
+            for (int i = 0; i < points3D.Length; i++)
+            {
+                points3D[i] = RotateY((Vector3D)points3D[i], degrees);
+            }
+            return points3D;
+        }
+
+        public static Vector3D[] RotateZ(Vector3D[] points3D, float degrees)
+        {
+            for (int i = 0; i < points3D.Length; i++)
+            {
+                points3D[i] = RotateZ((Vector3D)points3D[i], degrees);
+            }
+            return points3D;
+        }
+
+        public static Vector3D[] Translate(Vector3D[] points3D, Vector3D oldOrigin, Vector3D newOrigin)
+        {
+            for (int i = 0; i < points3D.Length; i++)
+            {
+                points3D[i] = Translate(points3D[i], oldOrigin, newOrigin);
+            }
+            return points3D;
+        }
+
+
     }
 }

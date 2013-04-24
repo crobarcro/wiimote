@@ -12,6 +12,7 @@ using WiimoteLib;
 using Wiimote3DTrackingLib;
 using Emgu.CV;
 using Emgu.Util;
+using LocationPlot3D;
 
 namespace TestWiimote3DTracking
 {
@@ -36,7 +37,7 @@ namespace TestWiimote3DTracking
 
         private bool _dotracking = false;
         private Matrix<double>[] result3DPoints = new Matrix<double>[4];
-        
+
 
         TrackingForm TForm = new TrackingForm();
         private bool _tformloaded = false;
@@ -479,6 +480,12 @@ namespace TestWiimote3DTracking
                     TForm.XposLabel4.Text = "X: No IR";
                     TForm.YposLabel4.Text = "Y: No IR";
                     TForm.ZposLabel4.Text = "Z: No IR";
+                }
+
+                for (int j = 0; j < result3DPoints.Length; j++)
+                {
+                    TForm.SetTrackingPointPos(result3DPoints[j].Data[0, 0], 
+                        result3DPoints[j].Data[1, 0], -result3DPoints[j].Data[2, 0], j);
                 }
 
             }

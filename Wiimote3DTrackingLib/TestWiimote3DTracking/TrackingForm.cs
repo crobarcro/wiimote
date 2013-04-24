@@ -22,17 +22,19 @@ namespace TestWiimote3DTracking
         [System.Runtime.InteropServices.DllImportAttribute("user32.dll")]
         public static extern IntPtr ReleaseDC(IntPtr hwnd, IntPtr hdc);
 
+
         public TrackingForm()
         {
             InitializeComponent();
         }
 
-        Math3D.Cube mainCube;
         Math3D.Plot3D mainPlot;
         Point drawOrigin;
         double cubeWidth;
         double cubeHeight;
         double cubeDepth;
+
+        private bool do3Dplot = false;
 
         private void TrackingForm_Load(object sender, EventArgs e)
         {
@@ -41,22 +43,37 @@ namespace TestWiimote3DTracking
             // location plot
             //mainCube = new Math3D.Cube((int)(plot3DPictureBox.Height), (int)(plot3DPictureBox.Height), (int)(2 * plot3DPictureBox.Height));
             
-            Math3D.PlotPoint[] plotPoints = new Math3D.PlotPoint[2];
-            plotPoints[0] = new Math3D.PlotPoint(50, 50, 50);
-            plotPoints[1] = new Math3D.PlotPoint(50, 100, 50);
+            //Math3D.PlotPoint[] plotPoints = new Math3D.PlotPoint[2];
+            //plotPoints[0] = new Math3D.PlotPoint(0.1f, 0.1f, 0.1f);
+            //plotPoints[1] = new Math3D.PlotPoint(0.5f, 0.5f, 0.5f);
 
-            mainPlot = new Math3D.Plot3D((int)(plot3DPictureBox.Height), (int)(plot3DPictureBox.Height), (int)(2 * plot3DPictureBox.Height), plotPoints);
+            mainPlot = new Math3D.Plot3D((int)(plot3DPictureBox.Height), (int)(plot3DPictureBox.Height), (int)(2 * plot3DPictureBox.Height), 4);
+            //mainPlot.PlotPoints[0].SetPosition(0.1, 0.1, 0.1);
+            //mainPlot.PlotPoints[1].SetPosition(0.5, 0.5, 0.5);
+            //mainPlot.PlotPoints[2].SetPosition(0.9, 0.9, 0.9);
 
-            drawCube();
+            drawPlot();
 
-            Render();
+            //Render();
+
+            timer1.Start();
 
         }
 
-        private void drawCube()
+        public void SetTrackingPointPos(double x, double y, double z, int ID)
+        {
+            x = x + 0.5;
+            y = y + 0.5;
+
+            z = z * cubeWidth / cubeDepth; 
+
+            mainPlot.PlotPoints[ID].SetPosition(x, y, z);
+        }
+
+        private void drawPlot()
         {
 
-            Debug.WriteLine("PictureBox Width & Height: " + plot3DPictureBox.Width.ToString() + "  " + plot3DPictureBox.Height.ToString());
+            //Debug.WriteLine("PictureBox Width & Height: " + plot3DPictureBox.Width.ToString() + "  " + plot3DPictureBox.Height.ToString());
 
             double xzdiagonal = plot3DPictureBox.Width * 0.95;
             double xydiagonal = plot3DPictureBox.Height * 0.95;
@@ -70,7 +87,7 @@ namespace TestWiimote3DTracking
             else
                 cubeDepth = Math.Sqrt(Math.Pow(cubeWidth, 2.0) - Math.Pow(xzdiagonal, 2.0));
 
-            Debug.WriteLine("Cube Width, Height & Depth: " + cubeWidth.ToString() + "  " + cubeHeight.ToString() + "  " + cubeDepth.ToString());
+            //Debug.WriteLine("Cube Width, Height & Depth: " + cubeWidth.ToString() + "  " + cubeHeight.ToString() + "  " + cubeDepth.ToString());
 
             // determine the origin of the drawing in the picureBox
             drawOrigin = new Point(plot3DPictureBox.Width / 2, plot3DPictureBox.Height / 2);
@@ -82,7 +99,7 @@ namespace TestWiimote3DTracking
 
         private void Render()
         {
-            drawCube();
+            drawPlot();
 
             // get the values of the track bar rotation values
             //mainCube.RotateX = (float)rXTrackBar.Value;
@@ -101,13 +118,13 @@ namespace TestWiimote3DTracking
         private void TrackingForm_Resize(object sender, EventArgs e)
         {
             // keep the image in the middle when we resize the form
-            drawCube();
+            drawPlot();
             //drawOrigin = new Point(plot3DPictureBox.Width / 2, plot3DPictureBox.Height / 2);
 
             //mainCube.ResizeCube((int)(cubeWidth), (int)(cubeHeight), (int)(cubeDepth), drawOrigin);
             mainPlot.ResizePlot((int)(cubeWidth), (int)(cubeHeight), (int)(cubeDepth), drawOrigin);
 
-            Render();
+            //Render();
         }
 
         private void AxisTrackBar_Scroll(object sender, EventArgs e)
@@ -118,14 +135,14 @@ namespace TestWiimote3DTracking
 
         private void TrackingForm_Paint(object sender, PaintEventArgs e)
         {
-            Render();
+            //Render();
         }
 
-        protected override void OnClosing(CancelEventArgs e)
-        {
-            e.Cancel = true;
-            this.Hide();
-        }
+        //protected override void OnClosing(CancelEventArgs e)
+        //{
+        //    e.Cancel = true;
+        //    this.Hide();
+        //}
 
         private void send2MatCheckBox_CheckedChanged(object sender, EventArgs e)
         {
@@ -149,6 +166,24 @@ namespace TestWiimote3DTracking
             else
             {
 
+            }
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            if (do3Dplot)
+                Render();
+        }
+
+        private void do3DPlotCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (do3DPlotCheckBox.Checked)
+            {
+                do3Dplot = true;
+            }
+            else
+            {
+                do3Dplot = false;
             }
         }
     }

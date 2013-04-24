@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.XposLabel1 = new System.Windows.Forms.Label();
             this.YposLabel1 = new System.Windows.Forms.Label();
             this.ZposLabel1 = new System.Windows.Forms.Label();
@@ -49,6 +50,8 @@
             this.plot3DPictureBox = new System.Windows.Forms.PictureBox();
             this.optionsTabPage = new System.Windows.Forms.TabPage();
             this.send2MatCheckBox = new System.Windows.Forms.CheckBox();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.do3DPlotCheckBox = new System.Windows.Forms.CheckBox();
             this.trackingTabControl.SuspendLayout();
             this.textTrackingTabPage.SuspendLayout();
             this.plotTrackingTabPage.SuspendLayout();
@@ -283,6 +286,7 @@
             // 
             // optionsTabPage
             // 
+            this.optionsTabPage.Controls.Add(this.do3DPlotCheckBox);
             this.optionsTabPage.Controls.Add(this.send2MatCheckBox);
             this.optionsTabPage.Location = new System.Drawing.Point(4, 22);
             this.optionsTabPage.Name = "optionsTabPage";
@@ -302,6 +306,22 @@
             this.send2MatCheckBox.Text = "Send Tracking Data To MATLAB";
             this.send2MatCheckBox.UseVisualStyleBackColor = true;
             this.send2MatCheckBox.CheckedChanged += new System.EventHandler(this.send2MatCheckBox_CheckedChanged);
+            // 
+            // timer1
+            // 
+            this.timer1.Interval = 200;
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            // 
+            // do3DPlotCheckBox
+            // 
+            this.do3DPlotCheckBox.AutoSize = true;
+            this.do3DPlotCheckBox.Location = new System.Drawing.Point(20, 51);
+            this.do3DPlotCheckBox.Name = "do3DPlotCheckBox";
+            this.do3DPlotCheckBox.Size = new System.Drawing.Size(78, 17);
+            this.do3DPlotCheckBox.TabIndex = 1;
+            this.do3DPlotCheckBox.Text = "Do 3D Plot";
+            this.do3DPlotCheckBox.UseVisualStyleBackColor = true;
+            this.do3DPlotCheckBox.CheckedChanged += new System.EventHandler(this.do3DPlotCheckBox_CheckedChanged);
             // 
             // TrackingForm
             // 
@@ -352,6 +372,8 @@
         private System.Windows.Forms.TrackBar rXTrackBar;
         private System.Windows.Forms.TrackBar rYTrackBar;
         private System.Windows.Forms.PictureBox plot3DPictureBox;
+        private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.CheckBox do3DPlotCheckBox;
 
 
     }
