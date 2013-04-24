@@ -282,7 +282,7 @@ namespace TestWiimote3DTracking
         {
             // Test Stereo Calibration button
 
-            //wiitrack.StereoCalibrate(wm1, wm2, wiitrack.tp1, wiitrack.tp2);
+            wiitrack.StereoCalibrate(wm1, wm2, wiitrack.tp1, wiitrack.tp2);
         }
         #endregion
 

@@ -45,8 +45,43 @@ namespace Wiimote3DTrackingLib
         private int capCount = 0;
         private int stereoCapCount = 0;
 
+        public PointF[][] tp1 = new PointF[17][] {
+new PointF[] {new PointF(171,81), new PointF(174,440), new PointF(516,468), new PointF(542,105)},
+new PointF[] {new PointF(59,135), new PointF(71,464), new PointF(385,507), new PointF(409,171)},
+new PointF[] {new PointF(276,184), new PointF(318,570), new PointF(625,471), new PointF(616,124)},
+new PointF[] {new PointF(293,61), new PointF(300,460), new PointF(631,415), new PointF(655,55)},
+new PointF[] {new PointF(267,53), new PointF(206,479), new PointF(540,480), new PointF(603,120)},
+new PointF[] {new PointF(119,75), new PointF(99,471), new PointF(400,572), new PointF(458,115)},
+new PointF[] {new PointF(211,81), new PointF(81,450), new PointF(488,544), new PointF(587,161)},
+new PointF[] {new PointF(153,137), new PointF(74,499), new PointF(446,608), new PointF(590,275)},
+new PointF[] {new PointF(219,123), new PointF(192,566), new PointF(571,551), new PointF(610,161)},
+new PointF[] {new PointF(226,207), new PointF(197,644), new PointF(576,614), new PointF(623,228)},
+new PointF[] {new PointF(119,176), new PointF(76,632), new PointF(511,666), new PointF(575,235)},
+new PointF[] {new PointF(103,132), new PointF(53,416), new PointF(338,433), new PointF(410,175)},
+new PointF[] {new PointF(269,140), new PointF(315,454), new PointF(597,399), new PointF(567,101)},
+new PointF[] {new PointF(164,328), new PointF(160,662), new PointF(479,650), new PointF(491,332)},
+new PointF[] {new PointF(362,133), new PointF(411,479), new PointF(619,420), new PointF(577,127)},
+new PointF[] {new PointF(158,222), new PointF(217,560), new PointF(533,496), new PointF(482,176)},
+new PointF[] {new PointF(151,225), new PointF(173,562), new PointF(493,532), new PointF(475,212)}};
 
-
+        public PointF[][] tp2 = new PointF[17][] {
+new PointF[] {new PointF(466,72), new PointF(443,441), new PointF(795,477), new PointF(852,108)},
+new PointF[] {new PointF(338,129), new PointF(326,463), new PointF(649,513), new PointF(702,174)},
+new PointF[] {new PointF(612,185), new PointF(615,577), new PointF(900,481), new PointF(920,127)},
+new PointF[] {new PointF(631,60), new PointF(597,465), new PointF(911,425), new PointF(966,58)},
+new PointF[] {new PointF(612,49), new PointF(525,482), new PointF(823,490), new PointF(905,123)},
+new PointF[] {new PointF(439,69), new PointF(391,471), new PointF(744,582), new PointF(835,116)},
+new PointF[] {new PointF(518,78), new PointF(402,451), new PointF(828,555), new PointF(906,167)},
+new PointF[] {new PointF(513,134), new PointF(375,498), new PointF(744,617), new PointF(941,282)},
+new PointF[] {new PointF(573,121), new PointF(518,573), new PointF(872,565), new PointF(933,167)},
+new PointF[] {new PointF(585,208), new PointF(522,651), new PointF(878,629), new PointF(952,234)},
+new PointF[] {new PointF(479,172), new PointF(409,636), new PointF(840,680), new PointF(925,240)},
+new PointF[] {new PointF(370,128), new PointF(288,415), new PointF(560,437), new PointF(656,177)},
+new PointF[] {new PointF(534,138), new PointF(559,458), new PointF(834,407), new PointF(821,104)},
+new PointF[] {new PointF(428,326), new PointF(412,666), new PointF(727,659), new PointF(745,336)},
+new PointF[] {new PointF(642,134), new PointF(679,486), new PointF(857,428), new PointF(822,130)},
+new PointF[] {new PointF(426,220), new PointF(475,562), new PointF(788,505), new PointF(744,178)},
+new PointF[] {new PointF(415,223), new PointF(429,563), new PointF(745,539), new PointF(731,215)}};
 
         public StereoTracking()
         {
@@ -319,7 +354,7 @@ namespace Wiimote3DTrackingLib
 
             Matrix<double> R1 = new Matrix<double>(3, 3);
             Matrix<double> R2 = new Matrix<double>(3, 3);
-            Matrix<double> P1 = new Matrix<double>(3, 3);
+            Matrix<double> P1 = new Matrix<double>(3, 4);
             Matrix<double> P2 = new Matrix<double>(3, 4);
             Matrix<double> Q = new Matrix<double>(4, 4);
 
@@ -396,34 +431,34 @@ namespace Wiimote3DTrackingLib
             Matrix<double> fundMat = new Matrix<double>(3, 3);
             Matrix<double> essentialMat = new Matrix<double>(3, 3);
 
-            int maxIters = 50;
+            Matrix<double> R1 = new Matrix<double>(3, 3);
+            Matrix<double> R2 = new Matrix<double>(3, 3);
+            Matrix<double> P1 = new Matrix<double>(3, 4);
+            Matrix<double> P2 = new Matrix<double>(3, 4);
+            Matrix<double> Q = new Matrix<double>(4, 4);
 
-            Emgu.CV.Structure.MCvTermCriteria termCrit = new Emgu.CV.Structure.MCvTermCriteria(maxIters);
+            int maxIters = 100;
+
+            Emgu.CV.Structure.MCvTermCriteria termCrit = new Emgu.CV.Structure.MCvTermCriteria(maxIters, 1e-5);
 
             int i = 0;
 
             // declare an array of 3D points to hold the locations of the points on the 
             // calibration square in its coordinate frame
-            Emgu.CV.Structure.MCvPoint3D32f[][] objectPoints = new Emgu.CV.Structure.MCvPoint3D32f[stereoCapCount][];
+            Emgu.CV.Structure.MCvPoint3D32f[][] objectPoints = new Emgu.CV.Structure.MCvPoint3D32f[leftimagepoints.Length][];
 
             // Initialize the arrays of calibration and image points
             for (i = 0; i < objectPoints.Length; i++)
             {
                 objectPoints[i] = new Emgu.CV.Structure.MCvPoint3D32f[4];
-                leftimagepoints[i] = new System.Drawing.PointF[4];
-                rightimagepoints[i] = new System.Drawing.PointF[4];
 
                 for (int j = 0; j < 4; j++)
                 {
                     objectPoints[i][j] = new Emgu.CV.Structure.MCvPoint3D32f();
-                    leftimagepoints[i][j] = new System.Drawing.PointF();
-                    rightimagepoints[i][j] = new System.Drawing.PointF();
                 }
             }
 
-            Array.Copy(CalibObjectPoints, objectPoints, stereoCapCount);
-            Array.Copy(wm1capturedImages, leftimagepoints, stereoCapCount);
-            Array.Copy(wm2capturedImages, rightimagepoints, stereoCapCount);
+            Array.Copy(CalibObjectPoints, objectPoints, objectPoints.Length);
 
             // calibrate the wiimote cameras individually
             CalibrateCamera(wm1, objectPoints, leftimagepoints);
@@ -442,6 +477,21 @@ namespace Wiimote3DTrackingLib
                 out essentialMat);
 
             wm2.WiimoteState.CameraCalibInfo.StereoCamExtrinsic = wm1.WiimoteState.CameraCalibInfo.StereoCamExtrinsic;
+
+            Emgu.CV.CvInvoke.cvStereoRectify(wm1.WiimoteState.CameraCalibInfo.CamIntrinsic.IntrinsicMatrix.Ptr,
+                wm2.WiimoteState.CameraCalibInfo.CamIntrinsic.IntrinsicMatrix.Ptr,
+                wm1.WiimoteState.CameraCalibInfo.CamIntrinsic.DistortionCoeffs.Ptr,
+                wm2.WiimoteState.CameraCalibInfo.CamIntrinsic.DistortionCoeffs.Ptr,
+                wiimoteCamSize,
+                wm1.WiimoteState.CameraCalibInfo.StereoCamExtrinsic.RotationVector.Ptr,
+                wm1.WiimoteState.CameraCalibInfo.StereoCamExtrinsic.TranslationVector.Ptr,
+                R1.Ptr,
+                R2.Ptr,
+                P1.Ptr,
+                P2.Ptr,
+                Q.Ptr,
+                Emgu.CV.CvEnum.STEREO_RECTIFY_TYPE.CALIB_ZERO_DISPARITY);
+
         }
 
         /// <summary>
