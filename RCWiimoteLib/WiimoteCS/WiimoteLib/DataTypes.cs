@@ -230,8 +230,23 @@ namespace WiimoteLib
             ConnectionState = ConnectionState.NotConnected;
             CameraCalibInfo.IsCalibrated = false;
             CameraCalibInfo.CamIntrinsic = new Emgu.CV.IntrinsicCameraParameters();
-            CameraCalibInfo.CamExtrinsic = new Emgu.CV.ExtrinsicCameraParameters();
+            //CameraCalibInfo.CamExtrinsic = new Emgu.CV.ExtrinsicCameraParameters();
 		}
+
+        public int IRPoints()
+        {
+            int IRPoints = 0;
+
+            for (int i = 0; i < 4; i++)
+            {
+                if (IRState.IRSensors[i].Found)
+                {
+                    IRPoints++;
+                }
+            }
+
+            return IRPoints;
+        }
 	}
 
 	/// <summary>
@@ -790,7 +805,7 @@ namespace WiimoteLib
         /// IR camera extrinsic parameters
         /// </summary>
         [DataMember]
-        public Emgu.CV.ExtrinsicCameraParameters CamExtrinsic;
+        public Emgu.CV.ExtrinsicCameraParameters[] CamExtrinsic;
         /// <summary>
         /// IR camera extrinsic parameters
         /// </summary>

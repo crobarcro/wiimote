@@ -104,9 +104,9 @@
             // groupBox8
             // 
             this.groupBox8.Controls.Add(this.clbButtons);
-            this.groupBox8.Location = new System.Drawing.Point(0, 0);
+            this.groupBox8.Location = new System.Drawing.Point(0, 11);
             this.groupBox8.Name = "groupBox8";
-            this.groupBox8.Size = new System.Drawing.Size(72, 220);
+            this.groupBox8.Size = new System.Drawing.Size(72, 247);
             this.groupBox8.TabIndex = 37;
             this.groupBox8.TabStop = false;
             this.groupBox8.Text = "Wiimote";
@@ -126,9 +126,9 @@
             "Down",
             "Left",
             "Right"});
-            this.clbButtons.Location = new System.Drawing.Point(8, 16);
+            this.clbButtons.Location = new System.Drawing.Point(8, 21);
             this.clbButtons.Name = "clbButtons";
-            this.clbButtons.Size = new System.Drawing.Size(56, 184);
+            this.clbButtons.Size = new System.Drawing.Size(56, 214);
             this.clbButtons.TabIndex = 1;
             // 
             // lblTriggerR
@@ -197,7 +197,7 @@
             this.groupBox5.Controls.Add(this.chkFound4);
             this.groupBox5.Controls.Add(this.chkFound1);
             this.groupBox5.Controls.Add(this.chkFound2);
-            this.groupBox5.Location = new System.Drawing.Point(184, 0);
+            this.groupBox5.Location = new System.Drawing.Point(78, 12);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Size = new System.Drawing.Size(176, 188);
             this.groupBox5.TabIndex = 34;
@@ -300,9 +300,9 @@
             // 
             // pbIR
             // 
-            this.pbIR.Location = new System.Drawing.Point(698, 8);
+            this.pbIR.Location = new System.Drawing.Point(8, 264);
             this.pbIR.Name = "pbIR";
-            this.pbIR.Size = new System.Drawing.Size(256, 192);
+            this.pbIR.Size = new System.Drawing.Size(512, 384);
             this.pbIR.TabIndex = 28;
             this.pbIR.TabStop = false;
             // 
@@ -322,7 +322,7 @@
             this.groupBox7.Controls.Add(this.lblGuitarWhammy);
             this.groupBox7.Controls.Add(this.lblGuitarJoy);
             this.groupBox7.Controls.Add(this.clbGuitarButtons);
-            this.groupBox7.Location = new System.Drawing.Point(364, 272);
+            this.groupBox7.Location = new System.Drawing.Point(526, 16);
             this.groupBox7.Name = "groupBox7";
             this.groupBox7.Size = new System.Drawing.Size(188, 176);
             this.groupBox7.TabIndex = 36;
@@ -385,7 +385,7 @@
             this.groupBox6.Controls.Add(this.lblCCJoy2);
             this.groupBox6.Controls.Add(this.lblCCJoy1);
             this.groupBox6.Controls.Add(this.clbCCButtons);
-            this.groupBox6.Location = new System.Drawing.Point(364, 0);
+            this.groupBox6.Location = new System.Drawing.Point(526, 198);
             this.groupBox6.Name = "groupBox6";
             this.groupBox6.Size = new System.Drawing.Size(188, 268);
             this.groupBox6.TabIndex = 35;
@@ -420,7 +420,7 @@
             // 
             this.groupBox4.Controls.Add(this.pbBattery);
             this.groupBox4.Controls.Add(this.lblBattery);
-            this.groupBox4.Location = new System.Drawing.Point(184, 188);
+            this.groupBox4.Location = new System.Drawing.Point(78, 206);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Size = new System.Drawing.Size(176, 52);
             this.groupBox4.TabIndex = 33;
@@ -452,7 +452,7 @@
             this.groupBox3.Controls.Add(this.chkLED3);
             this.groupBox3.Controls.Add(this.chkLED1);
             this.groupBox3.Controls.Add(this.chkRumble);
-            this.groupBox3.Location = new System.Drawing.Point(76, 218);
+            this.groupBox3.Location = new System.Drawing.Point(262, 94);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Size = new System.Drawing.Size(96, 120);
             this.groupBox3.TabIndex = 32;
@@ -548,7 +548,7 @@
             this.groupBox2.Controls.Add(this.chkC);
             this.groupBox2.Controls.Add(this.lblChuk);
             this.groupBox2.Controls.Add(this.lblChukJoy);
-            this.groupBox2.Location = new System.Drawing.Point(76, 76);
+            this.groupBox2.Location = new System.Drawing.Point(668, 472);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(104, 136);
             this.groupBox2.TabIndex = 31;
@@ -566,7 +566,7 @@
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.lblAccel);
-            this.groupBox1.Location = new System.Drawing.Point(76, 0);
+            this.groupBox1.Location = new System.Drawing.Point(260, 16);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(104, 72);
             this.groupBox1.TabIndex = 30;
@@ -584,11 +584,11 @@
             // chkExtension
             // 
             this.chkExtension.AutoSize = true;
-            this.chkExtension.Location = new System.Drawing.Point(4, 224);
+            this.chkExtension.Location = new System.Drawing.Point(385, 21);
             this.chkExtension.Name = "chkExtension";
-            this.chkExtension.Size = new System.Drawing.Size(52, 17);
+            this.chkExtension.Size = new System.Drawing.Size(119, 17);
             this.chkExtension.TabIndex = 29;
-            this.chkExtension.Text = "None";
+            this.chkExtension.Text = "No Ext Connected?";
             this.chkExtension.UseVisualStyleBackColor = true;
             // 
             // groupBox9
@@ -600,7 +600,7 @@
             this.groupBox9.Controls.Add(this.lblBBBL);
             this.groupBox9.Controls.Add(this.lblBBTotal);
             this.groupBox9.Controls.Add(this.lblBBTL);
-            this.groupBox9.Location = new System.Drawing.Point(556, 0);
+            this.groupBox9.Location = new System.Drawing.Point(526, 472);
             this.groupBox9.Name = "groupBox9";
             this.groupBox9.Size = new System.Drawing.Size(136, 112);
             this.groupBox9.TabIndex = 38;
@@ -673,8 +673,10 @@
             // 
             // lblDevicePath
             // 
+            this.lblDevicePath.AutoEllipsis = true;
             this.lblDevicePath.AutoSize = true;
-            this.lblDevicePath.Location = new System.Drawing.Point(12, 504);
+            this.lblDevicePath.Location = new System.Drawing.Point(9, 680);
+            this.lblDevicePath.MaximumSize = new System.Drawing.Size(200, 13);
             this.lblDevicePath.Name = "lblDevicePath";
             this.lblDevicePath.Size = new System.Drawing.Size(63, 13);
             this.lblDevicePath.TabIndex = 39;
@@ -685,7 +687,7 @@
             this.groupBox10.Controls.Add(this.lbDrumVelocity);
             this.groupBox10.Controls.Add(this.lblDrumJoy);
             this.groupBox10.Controls.Add(this.clbDrums);
-            this.groupBox10.Location = new System.Drawing.Point(556, 112);
+            this.groupBox10.Location = new System.Drawing.Point(375, 44);
             this.groupBox10.Name = "groupBox10";
             this.groupBox10.Size = new System.Drawing.Size(136, 180);
             this.groupBox10.TabIndex = 40;
@@ -727,7 +729,7 @@
             // 
             // connectbutton
             // 
-            this.connectbutton.Location = new System.Drawing.Point(15, 478);
+            this.connectbutton.Location = new System.Drawing.Point(8, 654);
             this.connectbutton.Name = "connectbutton";
             this.connectbutton.Size = new System.Drawing.Size(75, 23);
             this.connectbutton.TabIndex = 41;
@@ -738,7 +740,7 @@
             // disconnectbutton
             // 
             this.disconnectbutton.Enabled = false;
-            this.disconnectbutton.Location = new System.Drawing.Point(96, 478);
+            this.disconnectbutton.Location = new System.Drawing.Point(89, 654);
             this.disconnectbutton.Name = "disconnectbutton";
             this.disconnectbutton.Size = new System.Drawing.Size(75, 23);
             this.disconnectbutton.TabIndex = 42;
@@ -750,7 +752,8 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1285, 526);
+            this.AutoSize = true;
+            this.ClientSize = new System.Drawing.Size(779, 701);
             this.Controls.Add(this.disconnectbutton);
             this.Controls.Add(this.connectbutton);
             this.Controls.Add(this.groupBox10);

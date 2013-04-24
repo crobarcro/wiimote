@@ -21,10 +21,10 @@ namespace WiimoteTest
 		private delegate void UpdateWiimoteStateDelegate(WiimoteChangedEventArgs args);
 		private delegate void UpdateExtensionChangedDelegate(WiimoteExtensionChangedEventArgs args);
 
-        private static int drawscale = 2;
-        private static int drawx = drawscale * 256;
-        private static int drawy = drawscale * 192;
-		private Bitmap b = new Bitmap(drawx, drawy, PixelFormat.Format24bppRgb);
+        private static Double drawscale = 0.5;
+        private static Double drawx = drawscale * 1024;
+        private static Double drawy = drawscale * 768;
+		private Bitmap b = new Bitmap((int) drawx, (int) drawy, PixelFormat.Format24bppRgb);
 		private Graphics g;
 
         //Wiimote mWiimote = new Wiimote();
@@ -38,8 +38,8 @@ namespace WiimoteTest
             InitializeComponent();
 
             tempsize = this.pbIR.Size;
-            tempsize.Width = drawx;
-            tempsize.Height = drawy;
+            tempsize.Width = (int) drawx;
+            tempsize.Height = (int) drawy;
 
             this.pbIR.Size = tempsize;
 
@@ -233,7 +233,8 @@ namespace WiimoteTest
 					break;
 			}
 
-			g.Clear(Color.Black);
+			//g.Clear(Color.Black);
+            g.Clear(Color.Yellow);
 
 			UpdateIR(ws.IRState.IRSensors[0], lblIR1, lblIR1Raw, chkFound1, Color.Red);
 			UpdateIR(ws.IRState.IRSensors[1], lblIR2, lblIR2Raw, chkFound2, Color.Blue);
@@ -241,7 +242,7 @@ namespace WiimoteTest
 			UpdateIR(ws.IRState.IRSensors[3], lblIR4, lblIR4Raw, chkFound4, Color.Orange);
 
 			if(ws.IRState.IRSensors[0].Found && ws.IRState.IRSensors[1].Found)
-                g.DrawEllipse(new Pen(Color.Green), (int)(drawscale * ws.IRState.RawMidpoint.X / 4), (int)(drawscale * ws.IRState.RawMidpoint.Y / 4), drawscale * 2, drawscale * 2);
+                g.DrawEllipse(new Pen(Color.Green), (int)(drawscale * ws.IRState.RawMidpoint.X), (int)(drawscale * ws.IRState.RawMidpoint.Y), (int)(2 / drawscale), (int)(2 / drawscale));
 
 			pbIR.Image = b;
 
@@ -258,8 +259,8 @@ namespace WiimoteTest
 			{
 				lblNorm.Text = irSensor.Position.ToString() + ", " + irSensor.Size;
 				lblRaw.Text = irSensor.RawPosition.ToString();
-				g.DrawEllipse(new Pen(color), (int)(drawscale * irSensor.RawPosition.X / 4), (int)(drawscale * irSensor.RawPosition.Y / 4),
-							 drawscale*(irSensor.Size+1), drawscale*(irSensor.Size+1));
+				g.DrawEllipse(new Pen(color), (int)(drawscale * irSensor.RawPosition.X), (int)(drawscale * irSensor.RawPosition.Y),
+							 (int)((irSensor.Size+1)/drawscale), (int)((irSensor.Size+1)/drawscale));
 			}
 		}
 

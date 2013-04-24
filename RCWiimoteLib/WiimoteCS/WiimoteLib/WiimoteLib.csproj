@@ -122,18 +122,17 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Emgu.CV">
-      <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\emgucv 2.1.0.793\bin\Emgu.CV.dll</HintPath>
+    <Reference Include="Emgu.CV, Version=2.1.0.793, Culture=neutral, PublicKeyToken=7281126722ab4438, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\Emgu.CV.dll</HintPath>
     </Reference>
-    <Reference Include="Emgu.Util">
-      <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\emgucv 2.1.0.793\bin\Emgu.Util.dll</HintPath>
+    <Reference Include="Emgu.Util, Version=2.1.0.793, Culture=neutral, PublicKeyToken=7281126722ab4438, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\Emgu.Util.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="zlib.net">
-      <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\emgucv 2.1.0.793\bin\zlib.net.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataTypes.cs" />
@@ -144,6 +143,10 @@
     <Compile Include="WiimoteCollection.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Emgu.CV.dll" />
+    <Content Include="Emgu.CV.xml" />
+    <Content Include="Emgu.Util.dll" />
+    <Content Include="Emgu.Util.xml" />
     <Content Include="highgui210.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -178,6 +181,7 @@
     <None Include="docs\APIHelp\WiimoteLib.shfb" />
     <None Include="docs\APIHelp\WiimoteLib.sitemap" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

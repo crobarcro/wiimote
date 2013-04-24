@@ -67,7 +67,6 @@ namespace WiimoteTest
                 MessageBox.Show("Exception thrown by Connect() method.");
             }
 
-
         }
 
         private void setledsbutton_Click(object sender, EventArgs e)
