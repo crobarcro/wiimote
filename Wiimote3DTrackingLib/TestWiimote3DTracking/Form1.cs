@@ -37,6 +37,10 @@ namespace TestWiimote3DTracking
 
         private bool _dotracking = false;
         private bool _dologging = false;
+        private bool _displayirpoints = true;
+
+        private int calibimageviewidx = 0;
+
         private Matrix<double>[] result3DPoints = new Matrix<double>[4];
 
         // declare an object to protect the Location array while we access 
@@ -341,8 +345,25 @@ namespace TestWiimote3DTracking
 
         private void StartLoggingButton_Click(object sender, EventArgs e)
         {
+
+            string logfile = "test_log.csv";
+
+            SaveFileDialog openFileDialog1 = new SaveFileDialog();
+
+            openFileDialog1.InitialDirectory = "c:\\";
+            openFileDialog1.Filter = "Comma-separated values file (*.csv)|*.csv|Log files (*.log)|*.log|All files (*.*)|*.*";
+            openFileDialog1.FilterIndex = 1;
+            openFileDialog1.RestoreDirectory = true;
+
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                logfile = openFileDialog1.FileName;
+            }
+
             // clear the IR display
             g1.Clear(Color.White);
+
+            g2.Clear(Color.White);
 
             //if (!_tformloaded)
             //{
@@ -352,12 +373,167 @@ namespace TestWiimote3DTracking
 
             //_dotracking = false;
 
-            wiitrack.StartLogging(500.0, wm1, wm2, true, "test_log.txt");
+            //_displayirpoints = false;
+
+            wiitrack.StartLogging(500.0, wm1, wm2, this.Log3DCheckBox.Checked, this.LogRawCheckBox.Checked, this.LogUDCheckBox.Checked, logfile);
         }
 
         private void StopLoggingButton_Click(object sender, EventArgs e)
         {
             wiitrack.StopLogging();
+
+            _displayirpoints = true;
+        }
+
+
+        private void ReviewButton_Click(object sender, EventArgs e)
+        {
+            if (wiitrack.StereoCalibrateImageCount > 0)
+            {
+                // stop updating the real-time display of the ir points
+                _displayirpoints = false;
+
+                // reset the calration image count to zero
+                calibimageviewidx = 0;
+
+                // get the first calibration image set 
+                System.Drawing.PointF[][] wmcalibpoints = wiitrack.GetStereoCalibImage(calibimageviewidx);
+
+                // draw the two calibration images
+                DisplayCalibPoints(g1, wmcalibpoints[0]);
+
+                wm1IRPictureBox.Image = b1;
+
+                DisplayCalibPoints(g2, wmcalibpoints[1]);
+
+                wm2IRPictureBox.Image = b2;
+
+                CalibReviewLabel.Text = "Image: " + (calibimageviewidx + 1).ToString();
+
+                this.DeleteImageButton.Enabled = true;
+
+            }
+            else
+            {
+                MessageBox.Show("No calibration images to display");
+            }
+
+        }
+
+        private void StopReviewButton_Click(object sender, EventArgs e)
+        {
+            _displayirpoints = true;
+
+            this.DeleteImageButton.Enabled = false;
+        }
+
+        private void NextCalImageButton_Click(object sender, EventArgs e)
+        {
+            if (calibimageviewidx == wiitrack.StereoCalibrateImageCount - 1)
+            {
+                calibimageviewidx = 0;
+            }
+            else
+            {
+                calibimageviewidx = calibimageviewidx + 1;
+            }
+
+            // get the first calibration image set 
+            System.Drawing.PointF[][] wm1calibpoints = wiitrack.GetStereoCalibImage(calibimageviewidx);
+
+            // draw the two calibration images
+            DisplayCalibPoints(g1, wm1calibpoints[0]);
+            wm1IRPictureBox.Image = b1;
+
+            DisplayCalibPoints(g2, wm1calibpoints[1]);
+            wm2IRPictureBox.Image = b2;
+
+            CalibReviewLabel.Text = "Image: " + (calibimageviewidx + 1).ToString();
+        }
+
+        private void PrevCalImageButton_Click(object sender, EventArgs e)
+        {
+            if (calibimageviewidx == 0)
+            {
+                calibimageviewidx = wiitrack.StereoCalibrateImageCount - 1;
+            }
+            else
+            {
+                calibimageviewidx = calibimageviewidx - 1;
+            }
+
+            // get the first calibration image set 
+            System.Drawing.PointF[][] wmcalibpoints = wiitrack.GetStereoCalibImage(calibimageviewidx);
+
+            // draw the two calibration images
+            DisplayCalibPoints(g1, wmcalibpoints[0]);
+            wm1IRPictureBox.Image = b1;
+
+            DisplayCalibPoints(g2, wmcalibpoints[1]);
+            wm2IRPictureBox.Image = b2;
+
+            CalibReviewLabel.Text = "Image: " + (calibimageviewidx + 1).ToString();
+        }
+
+
+        private void DisplayCalibPoints(Graphics g, System.Drawing.PointF[] calibpoints)
+        {
+
+            g.Clear(Color.White);
+
+            float penwidth = 2.0F;
+
+            DrawCross(g, calibpoints[0], penwidth, Color.Red);
+
+            DrawCross(g, calibpoints[1], penwidth, Color.Blue);
+
+            DrawCross(g, calibpoints[2], penwidth, Color.Black);
+
+            DrawCross(g, calibpoints[3], penwidth, Color.Purple);
+
+        }
+
+        private void DrawCross(Graphics g, System.Drawing.PointF position, float penwidth, Color pencolour)
+        {
+            System.Drawing.PointF[] linepoints = new System.Drawing.PointF[4];
+
+            linepoints[0].X = (float)((position.X ) * drawscale) - (float)(b1.Height) * 0.05f;
+            linepoints[0].Y = (float)(position.Y * drawscale);
+
+            linepoints[1].X = (float)((position.X ) * drawscale) + (float)(b1.Height) * 0.05f;
+            linepoints[1].Y = (float)(position.Y * drawscale);
+
+            linepoints[2].X = (float)(position.X * drawscale);
+            linepoints[2].Y = (float)(position.Y * drawscale) - (float)(b1.Height) * 0.05f;
+
+            linepoints[3].X = (float)(position.X * drawscale);
+            linepoints[3].Y = (float)(position.Y * drawscale) + (float)(b1.Height) * 0.05f;
+
+            g.DrawLine(new Pen(pencolour, penwidth), linepoints[0], linepoints[1]);
+
+            g.DrawLine(new Pen(pencolour, penwidth), linepoints[2], linepoints[3]);
+
+        }
+
+        private void DeleteImageButton_Click(object sender, EventArgs e)
+        {
+            wiitrack.RemoveStereoCalibImage(calibimageviewidx);
+
+            calibimageviewidx--;
+
+            // get the first calibration image set 
+            System.Drawing.PointF[][] wmcalibpoints = wiitrack.GetStereoCalibImage(calibimageviewidx);
+
+            // draw the two calibration images
+            DisplayCalibPoints(g1, wmcalibpoints[0]);
+            wm1IRPictureBox.Image = b1;
+
+            DisplayCalibPoints(g2, wmcalibpoints[1]);
+            wm2IRPictureBox.Image = b2;
+
+            CalibReviewLabel.Text = "Image: " + (calibimageviewidx + 1).ToString();
+
+            captureTwoCountabel.Text = "Captured " + wiitrack.StereoCalibrateImageCount.ToString() + " Image Pairs";
         }
 
         #endregion
@@ -368,11 +544,11 @@ namespace TestWiimote3DTracking
         private delegate void UpdateExtensionChangedDelegate(WiimoteExtensionChangedEventArgs args);
 
         private void wm_WiimoteChanged(object sender, WiimoteChangedEventArgs args)
-		{
-			UpdateState(args);
-		}
+        {
+            UpdateState(args);
+        }
 
-		private void wm_WiimoteExtensionChanged(object sender, WiimoteExtensionChangedEventArgs args)
+        private void wm_WiimoteExtensionChanged(object sender, WiimoteExtensionChangedEventArgs args)
 		{
 			UpdateExtension(args);
 
@@ -409,57 +585,61 @@ namespace TestWiimote3DTracking
             }
             else
             {
+
                 WiimoteState ws = args.WiimoteState;
 
-                if (ws.ID == _wm1ID)
+                if (_displayirpoints)
                 {
-                    if (ws.ConnectionState == WiimoteLib.ConnectionState.Connected)
+                    if (ws.ID == _wm1ID)
                     {
-                        // first draw the positions in the graphic
-                        g1.Clear(Color.White);
+                        if (ws.ConnectionState == WiimoteLib.ConnectionState.Connected)
+                        {
+                            // first draw the positions in the graphic
+                            g1.Clear(Color.White);
 
-                        float penwidth = 2.0F;
+                            float penwidth = 2.0F;
 
-                        wm1IRSourceslabel.Text = "IR Sources: " + ws.IRPoints().ToString();
+                            wm1IRSourceslabel.Text = "IR Sources: " + ws.IRPoints().ToString();
 
-                        UpdateIR(g1, ws.IRState.IRSensors[0], wm1IRLabel1, Color.Red, penwidth);
-                        UpdateIR(g1, ws.IRState.IRSensors[1], wm1IRLabel2, Color.Blue, penwidth);
-                        UpdateIR(g1, ws.IRState.IRSensors[2], wm1IRLabel3, Color.Black, penwidth);
-                        UpdateIR(g1, ws.IRState.IRSensors[3], wm1IRLabel4, Color.Purple, penwidth);
+                            UpdateIR(g1, ws.IRState.IRSensors[0], wm1IRLabel1, Color.Red, penwidth);
+                            UpdateIR(g1, ws.IRState.IRSensors[1], wm1IRLabel2, Color.Blue, penwidth);
+                            UpdateIR(g1, ws.IRState.IRSensors[2], wm1IRLabel3, Color.Black, penwidth);
+                            UpdateIR(g1, ws.IRState.IRSensors[3], wm1IRLabel4, Color.Purple, penwidth);
 
-                        //if (ws.IRState.IRSensors[0].Found && ws.IRState.IRSensors[1].Found)
-                        //    g1.DrawEllipse(new Pen(Color.Green, 1.0F), (int)(drawscale * ws.IRState.RawMidpoint.X), (int)(drawscale * ws.IRState.RawMidpoint.Y), (int)(2 / drawscale), (int)(2 / drawscale));
+                            //if (ws.IRState.IRSensors[0].Found && ws.IRState.IRSensors[1].Found)
+                            //    g1.DrawEllipse(new Pen(Color.Green, 1.0F), (int)(drawscale * ws.IRState.RawMidpoint.X), (int)(drawscale * ws.IRState.RawMidpoint.Y), (int)(2 / drawscale), (int)(2 / drawscale));
 
-                        wm1IRPictureBox.Image = b1;
+                            wm1IRPictureBox.Image = b1;
+                        }
+                        else
+                        {
+                            wm1IRPictureBox.Image = null;
+                        }
                     }
-                    else
+                    else if (ws.ID == _wm2ID)
                     {
-                        wm1IRPictureBox.Image = null;
-                    }
-                }
-                else if (ws.ID == _wm2ID)
-                {
-                    if (ws.ConnectionState == WiimoteLib.ConnectionState.Connected)
-                    {
-                        g2.Clear(Color.White);
+                        if (ws.ConnectionState == WiimoteLib.ConnectionState.Connected)
+                        {
+                            g2.Clear(Color.White);
 
-                        float penwidth = 2.0F;
+                            float penwidth = 2.0F;
 
-                        wm2IRSourceslabel.Text = "IR Sources: " + ws.IRPoints().ToString();
+                            wm2IRSourceslabel.Text = "IR Sources: " + ws.IRPoints().ToString();
 
-                        UpdateIR(g2, ws.IRState.IRSensors[0], wm2IRLabel1, Color.Red, penwidth);
-                        UpdateIR(g2, ws.IRState.IRSensors[1], wm2IRLabel2, Color.Blue, penwidth);
-                        UpdateIR(g2, ws.IRState.IRSensors[2], wm2IRLabel3, Color.Black, penwidth);
-                        UpdateIR(g2, ws.IRState.IRSensors[3], wm2IRLabel4, Color.Purple, penwidth);
+                            UpdateIR(g2, ws.IRState.IRSensors[0], wm2IRLabel1, Color.Red, penwidth);
+                            UpdateIR(g2, ws.IRState.IRSensors[1], wm2IRLabel2, Color.Blue, penwidth);
+                            UpdateIR(g2, ws.IRState.IRSensors[2], wm2IRLabel3, Color.Black, penwidth);
+                            UpdateIR(g2, ws.IRState.IRSensors[3], wm2IRLabel4, Color.Purple, penwidth);
 
-                        //if (ws.IRState.IRSensors[0].Found && ws.IRState.IRSensors[1].Found)
-                        //    g2.DrawEllipse(new Pen(Color.Green, 1.0F), (int)(drawscale * ws.IRState.RawMidpoint.X), (int)(drawscale * (768 - ws.IRState.RawMidpoint.Y)), (int)(2 / drawscale), (int)(2 / drawscale));
+                            //if (ws.IRState.IRSensors[0].Found && ws.IRState.IRSensors[1].Found)
+                            //    g2.DrawEllipse(new Pen(Color.Green, 1.0F), (int)(drawscale * ws.IRState.RawMidpoint.X), (int)(drawscale * (768 - ws.IRState.RawMidpoint.Y)), (int)(2 / drawscale), (int)(2 / drawscale));
 
-                        wm2IRPictureBox.Image = b2;
-                    }
-                    else
-                    {
-                        wm2IRPictureBox.Image = null;
+                            wm2IRPictureBox.Image = b2;
+                        }
+                        else
+                        {
+                            wm2IRPictureBox.Image = null;
+                        }
                     }
                 }
 
@@ -907,7 +1087,6 @@ namespace TestWiimote3DTracking
             this.captureTwoCountabel.Text = "Captured " + wiitrack.CalibrateImageCount.ToString() + " Image Pairs";
 
         }
-
 
     }
 }

@@ -48,6 +48,7 @@
             this.wm2IRLabel2 = new System.Windows.Forms.Label();
             this.wm2IRLabel1 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.StopLoggingButton = new System.Windows.Forms.Button();
             this.StartLoggingButton = new System.Windows.Forms.Button();
             this.yCalibTextBox = new System.Windows.Forms.TextBox();
             this.xCalibTextBox = new System.Windows.Forms.TextBox();
@@ -64,7 +65,6 @@
             this.wm1IRSourceslabel = new System.Windows.Forms.Label();
             this.wm2IRSourceslabel = new System.Windows.Forms.Label();
             this.PrintPointsButton = new System.Windows.Forms.Button();
-            this.StopLoggingButton = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tabPage2 = new System.Windows.Forms.TabPage();
@@ -84,6 +84,11 @@
             this.StopReviewButton = new System.Windows.Forms.Button();
             this.PrevCalImageButton = new System.Windows.Forms.Button();
             this.NextCalImageButton = new System.Windows.Forms.Button();
+            this.DeleteImageButton = new System.Windows.Forms.Button();
+            this.CalibReviewLabel = new System.Windows.Forms.Label();
+            this.LogRawCheckBox = new System.Windows.Forms.CheckBox();
+            this.LogUDCheckBox = new System.Windows.Forms.CheckBox();
+            this.Log3DCheckBox = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.wm1IRPictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.wm2IRPictureBox)).BeginInit();
             this.groupBox1.SuspendLayout();
@@ -273,6 +278,9 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.Log3DCheckBox);
+            this.groupBox1.Controls.Add(this.LogUDCheckBox);
+            this.groupBox1.Controls.Add(this.LogRawCheckBox);
             this.groupBox1.Controls.Add(this.StopLoggingButton);
             this.groupBox1.Controls.Add(this.StartLoggingButton);
             this.groupBox1.Controls.Add(this.yCalibTextBox);
@@ -289,14 +297,24 @@
             this.groupBox1.Controls.Add(this.StereoConnectButton);
             this.groupBox1.Location = new System.Drawing.Point(6, 220);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(246, 348);
+            this.groupBox1.Size = new System.Drawing.Size(246, 372);
             this.groupBox1.TabIndex = 19;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Dual Wiimote Controls";
             // 
+            // StopLoggingButton
+            // 
+            this.StopLoggingButton.Location = new System.Drawing.Point(7, 343);
+            this.StopLoggingButton.Name = "StopLoggingButton";
+            this.StopLoggingButton.Size = new System.Drawing.Size(172, 23);
+            this.StopLoggingButton.TabIndex = 26;
+            this.StopLoggingButton.Text = "Stop Logging";
+            this.StopLoggingButton.UseVisualStyleBackColor = true;
+            this.StopLoggingButton.Click += new System.EventHandler(this.StopLoggingButton_Click);
+            // 
             // StartLoggingButton
             // 
-            this.StartLoggingButton.Location = new System.Drawing.Point(7, 291);
+            this.StartLoggingButton.Location = new System.Drawing.Point(8, 314);
             this.StartLoggingButton.Name = "StartLoggingButton";
             this.StartLoggingButton.Size = new System.Drawing.Size(172, 23);
             this.StartLoggingButton.TabIndex = 25;
@@ -306,14 +324,14 @@
             // 
             // yCalibTextBox
             // 
-            this.yCalibTextBox.Location = new System.Drawing.Point(186, 104);
+            this.yCalibTextBox.Location = new System.Drawing.Point(182, 106);
             this.yCalibTextBox.Name = "yCalibTextBox";
             this.yCalibTextBox.Size = new System.Drawing.Size(52, 20);
             this.yCalibTextBox.TabIndex = 24;
             // 
             // xCalibTextBox
             // 
-            this.xCalibTextBox.Location = new System.Drawing.Point(128, 104);
+            this.xCalibTextBox.Location = new System.Drawing.Point(124, 106);
             this.xCalibTextBox.Name = "xCalibTextBox";
             this.xCalibTextBox.Size = new System.Drawing.Size(52, 20);
             this.xCalibTextBox.TabIndex = 23;
@@ -330,7 +348,7 @@
             // 
             // showTrackingFormButton
             // 
-            this.showTrackingFormButton.Location = new System.Drawing.Point(6, 257);
+            this.showTrackingFormButton.Location = new System.Drawing.Point(73, 249);
             this.showTrackingFormButton.Name = "showTrackingFormButton";
             this.showTrackingFormButton.Size = new System.Drawing.Size(174, 23);
             this.showTrackingFormButton.TabIndex = 21;
@@ -340,7 +358,7 @@
             // 
             // StopTrackingButton
             // 
-            this.StopTrackingButton.Location = new System.Drawing.Point(7, 228);
+            this.StopTrackingButton.Location = new System.Drawing.Point(72, 220);
             this.StopTrackingButton.Name = "StopTrackingButton";
             this.StopTrackingButton.Size = new System.Drawing.Size(174, 23);
             this.StopTrackingButton.TabIndex = 20;
@@ -350,7 +368,7 @@
             // 
             // StartTrackingButton
             // 
-            this.StartTrackingButton.Location = new System.Drawing.Point(6, 199);
+            this.StartTrackingButton.Location = new System.Drawing.Point(73, 191);
             this.StartTrackingButton.Name = "StartTrackingButton";
             this.StartTrackingButton.Size = new System.Drawing.Size(173, 23);
             this.StartTrackingButton.TabIndex = 19;
@@ -360,7 +378,7 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(6, 170);
+            this.button2.Location = new System.Drawing.Point(73, 162);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(173, 23);
             this.button2.TabIndex = 18;
@@ -451,16 +469,6 @@
             this.PrintPointsButton.UseVisualStyleBackColor = true;
             this.PrintPointsButton.Click += new System.EventHandler(this.PrintPointsButton_Click);
             // 
-            // StopLoggingButton
-            // 
-            this.StopLoggingButton.Location = new System.Drawing.Point(7, 321);
-            this.StopLoggingButton.Name = "StopLoggingButton";
-            this.StopLoggingButton.Size = new System.Drawing.Size(172, 23);
-            this.StopLoggingButton.TabIndex = 26;
-            this.StopLoggingButton.Text = "Stop Logging";
-            this.StopLoggingButton.UseVisualStyleBackColor = true;
-            this.StopLoggingButton.Click += new System.EventHandler(this.StopLoggingButton_Click);
-            // 
             // tabControl1
             // 
             this.tabControl1.Controls.Add(this.tabPage1);
@@ -482,7 +490,7 @@
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage1.Size = new System.Drawing.Size(273, 598);
             this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "tabPage1";
+            this.tabPage1.Text = "Setup";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
             // tabPage2
@@ -504,7 +512,7 @@
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage2.Size = new System.Drawing.Size(273, 598);
             this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "tabPage2";
+            this.tabPage2.Text = "Tracking";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
             // XposLabel1
@@ -635,6 +643,7 @@
             this.ReviewButton.TabIndex = 0;
             this.ReviewButton.Text = "Review Cal";
             this.ReviewButton.UseVisualStyleBackColor = true;
+            this.ReviewButton.Click += new System.EventHandler(this.ReviewButton_Click);
             // 
             // StopReviewButton
             // 
@@ -644,6 +653,7 @@
             this.StopReviewButton.TabIndex = 24;
             this.StopReviewButton.Text = "Stop Rev";
             this.StopReviewButton.UseVisualStyleBackColor = true;
+            this.StopReviewButton.Click += new System.EventHandler(this.StopReviewButton_Click);
             // 
             // PrevCalImageButton
             // 
@@ -653,6 +663,7 @@
             this.PrevCalImageButton.TabIndex = 25;
             this.PrevCalImageButton.Text = "<-";
             this.PrevCalImageButton.UseVisualStyleBackColor = true;
+            this.PrevCalImageButton.Click += new System.EventHandler(this.PrevCalImageButton_Click);
             // 
             // NextCalImageButton
             // 
@@ -662,6 +673,57 @@
             this.NextCalImageButton.TabIndex = 26;
             this.NextCalImageButton.Text = "->";
             this.NextCalImageButton.UseVisualStyleBackColor = true;
+            this.NextCalImageButton.Click += new System.EventHandler(this.NextCalImageButton_Click);
+            // 
+            // DeleteImageButton
+            // 
+            this.DeleteImageButton.Enabled = false;
+            this.DeleteImageButton.Location = new System.Drawing.Point(293, 452);
+            this.DeleteImageButton.Name = "DeleteImageButton";
+            this.DeleteImageButton.Size = new System.Drawing.Size(75, 23);
+            this.DeleteImageButton.TabIndex = 27;
+            this.DeleteImageButton.Text = "Delete Im";
+            this.DeleteImageButton.UseVisualStyleBackColor = true;
+            this.DeleteImageButton.Click += new System.EventHandler(this.DeleteImageButton_Click);
+            // 
+            // CalibReviewLabel
+            // 
+            this.CalibReviewLabel.AutoSize = true;
+            this.CalibReviewLabel.Location = new System.Drawing.Point(293, 482);
+            this.CalibReviewLabel.Name = "CalibReviewLabel";
+            this.CalibReviewLabel.Size = new System.Drawing.Size(39, 13);
+            this.CalibReviewLabel.TabIndex = 28;
+            this.CalibReviewLabel.Text = "Image:";
+            // 
+            // LogRawCheckBox
+            // 
+            this.LogRawCheckBox.AutoSize = true;
+            this.LogRawCheckBox.Location = new System.Drawing.Point(8, 291);
+            this.LogRawCheckBox.Name = "LogRawCheckBox";
+            this.LogRawCheckBox.Size = new System.Drawing.Size(69, 17);
+            this.LogRawCheckBox.TabIndex = 27;
+            this.LogRawCheckBox.Text = "Log Raw";
+            this.LogRawCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // LogUDCheckBox
+            // 
+            this.LogUDCheckBox.AutoSize = true;
+            this.LogUDCheckBox.Location = new System.Drawing.Point(84, 291);
+            this.LogUDCheckBox.Name = "LogUDCheckBox";
+            this.LogUDCheckBox.Size = new System.Drawing.Size(63, 17);
+            this.LogUDCheckBox.TabIndex = 28;
+            this.LogUDCheckBox.Text = "Log UD";
+            this.LogUDCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // Log3DCheckBox
+            // 
+            this.Log3DCheckBox.AutoSize = true;
+            this.Log3DCheckBox.Location = new System.Drawing.Point(154, 291);
+            this.Log3DCheckBox.Name = "Log3DCheckBox";
+            this.Log3DCheckBox.Size = new System.Drawing.Size(61, 17);
+            this.Log3DCheckBox.TabIndex = 29;
+            this.Log3DCheckBox.Text = "Log 3D";
+            this.Log3DCheckBox.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
@@ -669,6 +731,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(850, 633);
+            this.Controls.Add(this.CalibReviewLabel);
+            this.Controls.Add(this.DeleteImageButton);
             this.Controls.Add(this.NextCalImageButton);
             this.Controls.Add(this.PrevCalImageButton);
             this.Controls.Add(this.StopReviewButton);
@@ -761,6 +825,11 @@
         private System.Windows.Forms.Button StopReviewButton;
         private System.Windows.Forms.Button PrevCalImageButton;
         private System.Windows.Forms.Button NextCalImageButton;
+        private System.Windows.Forms.Button DeleteImageButton;
+        private System.Windows.Forms.Label CalibReviewLabel;
+        private System.Windows.Forms.CheckBox Log3DCheckBox;
+        private System.Windows.Forms.CheckBox LogUDCheckBox;
+        private System.Windows.Forms.CheckBox LogRawCheckBox;
     }
 }
 

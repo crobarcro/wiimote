@@ -47,6 +47,12 @@ namespace Wiimote3DTrackingLib
         // and not performing a triangulation
         private bool DOUNDISTORTPOINTS = false;
 
+        private bool DOLOG3D = false;
+
+        private bool DOLOGRAW = false;
+
+        private bool DOLOGUNDISTORTED = false;
+
         // wiimote objects for use when logging data
         WiimoteLib.Wiimote loggingwm1, loggingwm2;
 
@@ -241,7 +247,7 @@ namespace Wiimote3DTrackingLib
         /// Returns the number of single camera calibration images that 
         /// have been captured.
         /// </summary>
-        public float CalibrateImageCount
+        public int CalibrateImageCount
         {
             get { return capCount; }
         }
@@ -250,9 +256,28 @@ namespace Wiimote3DTrackingLib
         /// Returns the number of stereo camera calibration image pairs 
         /// that have been captured.
         /// </summary>
-        public float StereoCalibrateImageCount
+        public int StereoCalibrateImageCount
         {
             get { return stereoCapCount; }
+        }
+
+        public int RemoveStereoCalibImage(int imgidx)
+        {
+            if (imgidx < stereoCapCount - 1)
+            {
+
+                Array.Copy(wm1capturedImages, imgidx + 1, wm1capturedImages, imgidx, wm1capturedImages.Length - imgidx - 1);
+
+                Array.Copy(wm2capturedImages, imgidx + 1, wm2capturedImages, imgidx, wm2capturedImages.Length - imgidx - 1);
+
+                stereoCapCount--;
+
+                return 0;
+            }
+            else
+            {
+                return -1;
+            }
         }
 
         /// <summary>
@@ -1345,6 +1370,17 @@ namespace Wiimote3DTrackingLib
             return 0;
         }
 
+        /// <summary>
+        /// Captures and stores images from two wiimotes for the purposes of stereo
+        /// calibration.
+        /// </summary>
+        /// <param name="wm1">Wiimote 1, the left camera</param>
+        /// <param name="wm2">Wiimote 2, the right camera</param>
+        /// <returns>integer, -1 if the smae number of points cannot be seen in both wiimotes,
+        /// -2 if image capture from Wiimote 1 was unsuccessful, -3 if image capture from
+        /// Wiimote 2 was unsuccessful, -4 if the maximum allowed number of calibration
+        /// images has been exceeded, or 0 if an image was successfully captured from
+        /// both Wiimotes.</returns>
         public int StereoCalibCapture(WiimoteLib.Wiimote wm1, WiimoteLib.Wiimote wm2)
         {
             int i = 0;
@@ -1595,6 +1631,7 @@ namespace Wiimote3DTrackingLib
 
         }
 
+
         int GetCoords(WiimoteLib.Wiimote wm, coord[] coords)
         {
 
@@ -1650,7 +1687,35 @@ namespace Wiimote3DTrackingLib
         }
 
 
-        public void StartLogging(double interval, WiimoteLib.Wiimote wm1, WiimoteLib.Wiimote wm2)
+        public System.Drawing.PointF[][] GetStereoCalibImage(int imageidx)
+        {
+
+            System.Drawing.PointF[][] imagepair = new System.Drawing.PointF[2][];
+
+            if (imageidx < 0 | imageidx > stereoCapCount)
+            {
+                return imagepair;
+            }
+            else
+            {
+
+                imagepair[0] = wm1capturedImages[imageidx];
+
+                imagepair[1] = wm2capturedImages[imageidx];
+
+                return imagepair;
+
+            }
+
+        }
+
+        /// <summary>
+        /// Begins logging data from a pair of Wiimotes.
+        /// </summary>
+        /// <param name="interval">Interval in milliseconds between logging events.</param>
+        /// <param name="wm1">Wimmote 1</param>
+        /// <param name="wm2">Wiimote 2</param>
+        private void StartLogging(double interval, WiimoteLib.Wiimote wm1, WiimoteLib.Wiimote wm2)
         {
             // get the wiimotes we're using for logging
             loggingwm1 = wm1;
@@ -1672,32 +1737,50 @@ namespace Wiimote3DTrackingLib
             datalogtimer.Enabled = true;
         }
 
-        public void StartLogging(double interval, WiimoteLib.Wiimote wm1, WiimoteLib.Wiimote wm2, bool dotriangulation)
+        public void StartLogging(double interval, WiimoteLib.Wiimote wm1, WiimoteLib.Wiimote wm2, bool dolog3D, bool dolograwdata, bool dologundistorted)
         {
 
-            DOTRIANGULATION = dotriangulation;
+            if (dolog3D)
+            {
+                DOTRIANGULATION = true;
+            }
+            else
+            {
+                DOTRIANGULATION = false;
+            }
+
+            DOLOG3D = dolog3D;
+
+            DOLOGRAW = dolograwdata;
+
+            DOLOGUNDISTORTED = dologundistorted;
+
+            if (DOLOGUNDISTORTED)
+            {
+                DOUNDISTORTPOINTS = true;
+            }
 
             StartLogging(interval, wm1, wm2);
 
         }
 
-        public void StartLogging(double interval, WiimoteLib.Wiimote wm1, WiimoteLib.Wiimote wm2, bool dotriangulation, string filename)
+        public void StartLogging(double interval, WiimoteLib.Wiimote wm1, WiimoteLib.Wiimote wm2, bool dolog3D, bool dolograwdata, bool dologundistorted, string filename)
         {
 
             _logfilename = filename;
 
-            StartLogging(interval, wm1, wm2, dotriangulation);
+            StartLogging(interval, wm1, wm2, dolog3D, dolograwdata, dologundistorted);
 
         }
 
-        public void StartLogging(double interval, WiimoteLib.Wiimote wm1, WiimoteLib.Wiimote wm2, string filename)
-        {
+        //public void StartLogging(double interval, WiimoteLib.Wiimote wm1, WiimoteLib.Wiimote wm2, string filename)
+        //{
 
-            _logfilename = filename;
+        //    _logfilename = filename;
 
-            StartLogging(interval, wm1, wm2);
+        //    StartLogging(interval, wm1, wm2);
 
-        }
+        //}
 
         public void StopLogging()
         {
@@ -1724,6 +1807,19 @@ namespace Wiimote3DTrackingLib
         {
             //Console.WriteLine("The Elapsed event was raised at {0}", e.SignalTime);
 
+            if (!(DOLOGRAW || DOLOGUNDISTORTED || DOLOG3D))
+            {
+                StopLogging();
+
+                return;
+            }
+
+            long datetime = DateTime.Now.ToFileTime();
+
+            // write the time in a suitible format
+            //logStreamWriter.Write(DateTime.Now.ToString("o"));
+            logStreamWriter.Write(datetime.ToString());
+
             if (DOTRIANGULATION)
             {
                 if (this.IsStereoCalibrated)
@@ -1731,17 +1827,42 @@ namespace Wiimote3DTrackingLib
 
                     lock (_result3DLocker)
                     {
+
+                        // Get the 3D location, this also puts the coordinates in leftimagepoints
+                        // and rightimagepoints and UDleftimagepoints and UDrightimagepoints
                         Location3D_2(logging3DPoints, loggingwm1, loggingwm2);
 
                         logStreamWriter.Write(DateTime.Now.ToString("o"));
 
-                        for (int i = 0; i < MAX_NUM_IR_SRCS; i++)
+                        if (DOLOGRAW)
                         {
-                            // logStreamWriter.Write(",");
+                            for (int i = 0; i < MAX_NUM_IR_SRCS; i++)
+                            {
+                                // logStreamWriter.Write(",");
 
-                            logStreamWriter.Write(",{0},{1},{2},{3}", leftimagepoints[i].X, leftimagepoints[i].Y, rightimagepoints[i].X, rightimagepoints[i].Y);
 
-                            logStreamWriter.Write(",{0},{1},{2},{3}", logging3DPoints[i].Data[0, 0], logging3DPoints[i].Data[1, 0], logging3DPoints[i].Data[2, 0], logging3DPoints[i].Data[3, 0]);
+                                logStreamWriter.Write(",{0},{1},{2},{3}", leftimagepoints[i].X, leftimagepoints[i].Y, rightimagepoints[i].X, rightimagepoints[i].Y);
+
+
+                            }
+                        }
+
+                        if (DOLOGUNDISTORTED)
+                        {
+                            for (int i = 0; i < MAX_NUM_IR_SRCS; i++)
+                            {
+                                // logStreamWriter.Write(",");
+
+                                logStreamWriter.Write(",{0},{1},{2},{3}", UDleftimagepoints[i].X, UDleftimagepoints[i].Y, rightimagepoints[i].X, rightimagepoints[i].Y);
+                            }
+                        }
+
+                        if (DOLOG3D)
+                        {
+                            for (int i = 0; i < MAX_NUM_IR_SRCS; i++)
+                            {
+                                logStreamWriter.Write(",{0},{1},{2},{3}", logging3DPoints[i].Data[0, 0], logging3DPoints[i].Data[1, 0], logging3DPoints[i].Data[2, 0], logging3DPoints[i].Data[3, 0]);
+                            }
                         }
 
                         logStreamWriter.Write("\n");
@@ -1754,24 +1875,12 @@ namespace Wiimote3DTrackingLib
                 else
                 {
                     StopLogging();
+
+                    return;
                 }
             }
             else
             {
-
-                long datetime = DateTime.Now.ToFileTime();
-
-                // write the time in a suitible format
-                //logStreamWriter.Write(DateTime.Now.ToString("o"));
-
-                //logStreamWriter.Write(datetime.ToString());
-
-                //logStreamWriter.Write("\n");
-
-                //Console.WriteLine(DateTime.Now.ToString("o"));
-
-                //Console.WriteLine(datetime.ToString());
-
 
                 // capture an image of the IR points from both wiimote cameras
                 StereoCapture(loggingwm1, loggingwm2, leftimagepoints, rightimagepoints);
@@ -1787,10 +1896,6 @@ namespace Wiimote3DTrackingLib
                         // undistort the points in the right hand camera
                         UDrightimagepoints = loggingwm2.WiimoteState.CameraCalibInfo.CamIntrinsic.Undistort(rightimagepoints, R2, P2);
 
-                        // write the time in a suitible format
-                        //logStreamWriter.Write(DateTime.Now.ToString("o"));
-                        logStreamWriter.Write(datetime.ToString());
-
                         for (int i = 0; i < MAX_NUM_IR_SRCS; i++)
                         {
                             // logStreamWriter.Write(",");
@@ -1803,23 +1908,29 @@ namespace Wiimote3DTrackingLib
                     else
                     {
                         StopLogging();
+
+                        return;
                     }
                 }
                 else
                 {
                     // log the raw data from the wiimotes
-
-                    //logStreamWriter.Write(DateTime.Now.ToString("o"));
-                    logStreamWriter.Write(datetime.ToString());
-
-                    for (int i = 0; i < MAX_NUM_IR_SRCS; i++)
+                    if (DOLOGRAW)
                     {
-                        // logStreamWriter.Write(",");
 
-                        logStreamWriter.Write(",{0},{1},{2},{3}", leftimagepoints[i].X, leftimagepoints[i].Y, rightimagepoints[i].X, rightimagepoints[i].Y);
+                        for (int i = 0; i < MAX_NUM_IR_SRCS; i++)
+                        {
+                            logStreamWriter.Write(",{0},{1},{2},{3}", leftimagepoints[i].X, leftimagepoints[i].Y, rightimagepoints[i].X, rightimagepoints[i].Y);
+                        }
+
+                        logStreamWriter.Write("\n");
                     }
+                    else
+                    {
+                        StopLogging();
 
-                    logStreamWriter.Write("\n");
+                        return;
+                    }
 
                 }
             }
