@@ -721,6 +721,11 @@ namespace WiimoteLib
 		/// </summary>
 		[DataMember]
 		public IRMode Mode;
+        /// <summary>
+        /// Current IR camera sensitivity setting
+        /// </summary>
+        [DataMember]
+        public IRSensitivity Sensitivity;
 		/// <summary>
 		/// Current state of IR sensors
 		/// </summary>

@@ -661,6 +661,11 @@ namespace WiimoteLib
 			mWiimoteState.IRState.IRSensors[0].RawPosition.X = buff[6] | ((buff[8] >> 4) & 0x03) << 8;
 			mWiimoteState.IRState.IRSensors[0].RawPosition.Y = buff[7] | ((buff[8] >> 6) & 0x03) << 8;
 
+            if (mWiimoteState.IRState.IRSensors[0].RawPosition.Y < 1)
+            {
+                float temp = mWiimoteState.IRState.IRSensors[0].RawPosition.Y;
+            }
+
 			switch(mWiimoteState.IRState.Mode)
 			{
 				case IRMode.Basic:
@@ -1100,6 +1105,15 @@ namespace WiimoteLib
 			WriteReport(Buff);
 		}
 
+        /// <summary>
+        /// Set the IR camera sensitivity
+        /// </summary>
+        /// <param name="irSensitivity">IR sensitivity</param>
+        public void SetIRSensitivity(IRSensitivity irSensitivity)
+        {
+            SetReportType(InputReport.IRAccel, irSensitivity, true);
+        }
+
 		/// <summary>
 		/// Set the LEDs on the Wiimote
 		/// </summary>
@@ -1238,26 +1252,32 @@ namespace WiimoteLib
 				case IRSensitivity.WiiLevel1:
 					WriteData(REGISTER_IR_SENSITIVITY_1, 9, new byte[] {0x02, 0x00, 0x00, 0x71, 0x01, 0x00, 0x64, 0x00, 0xfe});
 					WriteData(REGISTER_IR_SENSITIVITY_2, 2, new byte[] {0xfd, 0x05});
+                    this.WiimoteState.IRState.Sensitivity = irSensitivity;
 					break;
 				case IRSensitivity.WiiLevel2:
 					WriteData(REGISTER_IR_SENSITIVITY_1, 9, new byte[] {0x02, 0x00, 0x00, 0x71, 0x01, 0x00, 0x96, 0x00, 0xb4});
 					WriteData(REGISTER_IR_SENSITIVITY_2, 2, new byte[] {0xb3, 0x04});
+                    this.WiimoteState.IRState.Sensitivity = irSensitivity;
 					break;
 				case IRSensitivity.WiiLevel3:
 					WriteData(REGISTER_IR_SENSITIVITY_1, 9, new byte[] {0x02, 0x00, 0x00, 0x71, 0x01, 0x00, 0xaa, 0x00, 0x64});
 					WriteData(REGISTER_IR_SENSITIVITY_2, 2, new byte[] {0x63, 0x03});
+                    this.WiimoteState.IRState.Sensitivity = irSensitivity;
 					break;
 				case IRSensitivity.WiiLevel4:
 					WriteData(REGISTER_IR_SENSITIVITY_1, 9, new byte[] {0x02, 0x00, 0x00, 0x71, 0x01, 0x00, 0xc8, 0x00, 0x36});
 					WriteData(REGISTER_IR_SENSITIVITY_2, 2, new byte[] {0x35, 0x03});
+                    this.WiimoteState.IRState.Sensitivity = irSensitivity;
 					break;
 				case IRSensitivity.WiiLevel5:
 					WriteData(REGISTER_IR_SENSITIVITY_1, 9, new byte[] {0x07, 0x00, 0x00, 0x71, 0x01, 0x00, 0x72, 0x00, 0x20});
 					WriteData(REGISTER_IR_SENSITIVITY_2, 2, new byte[] {0x1, 0x03});
+                    this.WiimoteState.IRState.Sensitivity = irSensitivity;
 					break;
 				case IRSensitivity.Maximum:
 					WriteData(REGISTER_IR_SENSITIVITY_1, 9, new byte[] {0x02, 0x00, 0x00, 0x71, 0x01, 0x00, 0x90, 0x00, 0x41});
 					WriteData(REGISTER_IR_SENSITIVITY_2, 2, new byte[] {0x40, 0x00});
+                    this.WiimoteState.IRState.Sensitivity = irSensitivity;
 					break;
 				default:
 					throw new ArgumentOutOfRangeException("irSensitivity");
