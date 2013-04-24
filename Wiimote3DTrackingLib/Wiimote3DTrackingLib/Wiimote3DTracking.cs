@@ -11,6 +11,7 @@ using System.Diagnostics;
 namespace Wiimote3DTrackingLib
 {
     using cv = Emgu.CV.CvInvoke;
+    using System.Threading;
 
     public class StereoTracking
     {
@@ -31,8 +32,8 @@ namespace Wiimote3DTrackingLib
         /// </summary>
         private static readonly int MAX_NUM_OF_CAL_IMAGES = 100;
 
-        // The length of a side of the calibration square
-        private float sqSideLength;
+        // The size of the calibration rectangle
+        private SizeF calibRectSize = new SizeF(1, 1);
 
         // A (MAX_NUM_OF_CAL_IMAGES x 4) array of MCvPoint3D32f objects to hold the 
         // calibration image coordinates, there will be MAX_NUM_OF_CAL_IMAGES sets
@@ -117,7 +118,8 @@ namespace Wiimote3DTrackingLib
 
         public StereoTracking()
         {
-            sqSideLength = (float)(142.0 / 1000.0);
+            calibRectSize.Width = (float)(142.0 / 1000.0);
+            calibRectSize.Height = calibRectSize.Width;
 
             InitializeStereoTrackingImages();
 
@@ -129,10 +131,12 @@ namespace Wiimote3DTrackingLib
         /// Constructor which takes the width of the side of the calibration 
         /// square as input. Length is in meters, if a real lengthis to be used.
         /// </summary>
-        /// <param name="sWidth">The width of the calibration square sides.</param>
-        public StereoTracking(float sWidth)
+        /// <param name="sideLen">The width of the calibration square sides.</param>
+        public StereoTracking(float sideLen)
         {
-            sqSideLength = sWidth;
+            //sqSideLength = sWidth;
+            calibRectSize.Width = sideLen;
+            calibRectSize.Height = sideLen;
 
             InitializeStereoTrackingImages();
 
@@ -141,14 +145,38 @@ namespace Wiimote3DTrackingLib
         }
 
         /// <summary>
-        /// Gets or sets the size of the sides of the calibration square 
-        /// in metres.
+        /// Constructor which takes the length of the side of a calibration 
+        /// square as input. Length is in meters, if a real length is to be used.
         /// </summary>
-        public float SquareSideLength
+        /// <param name="sideLen">The width of the calibration square sides.</param>
+        public StereoTracking(float Width, float Height)
         {
-            get { return sqSideLength; }
+            //sqSideLength = sWidth;
+            calibRectSize.Width = Width;
+            calibRectSize.Height = Height;
 
-            set { sqSideLength = SquareSideLength; }
+            InitializeStereoTrackingImages();
+
+            leftimagepoints.Initialize();
+            rightimagepoints.Initialize();
+        }
+
+        /// <summary>
+        /// Sets the height and width of a rectangular calibration object
+        /// </summary>
+        /// <param name="Width">Width of the object in m</param>
+        /// <param name="Height">Height of the object in m</param>
+        public void setCalibObjSize(float Width, float Height)
+        {
+            if (Width > 0 & Height > 0)
+            {
+                calibRectSize.Width = Width;
+                calibRectSize.Height = Height;
+
+                // Reinitialize the Image capture as the calibration 
+                // object has changed
+                InitializeStereoTrackingImages();
+            }
         }
 
         /// <summary>
@@ -196,6 +224,10 @@ namespace Wiimote3DTrackingLib
             stereoCapCount = 0;
         }
 
+        /// <summary>
+        /// Get a boolean informing whether a stereo calibration has 
+        /// been performed.
+        /// </summary>
         public bool IsStereoCalibrated
         {
             get { return _isStereoCalib; }
@@ -275,10 +307,10 @@ namespace Wiimote3DTrackingLib
         private void InitializeStereoTrackingImages()
         {
             // Initialize the array of calibration points (the location 
-            // of the corners of the calibration square in its coordinate 
+            // of the corners of the calibration rectangle in its coordinate 
             // reference frame). These points are all identical as the shape
             // of the square does not change and they are in the coordinate
-            // frame of the square
+            // frame of the rectangle
             CalibObjectPoints.Initialize();
 
             for (int i = 0; i<CalibObjectPoints.Length; i++)
@@ -299,14 +331,14 @@ namespace Wiimote3DTrackingLib
                 CalibObjectPoints[i][0].z = 0;
 
                 CalibObjectPoints[i][1].x = 0;
-                CalibObjectPoints[i][1].y = sqSideLength;
+                CalibObjectPoints[i][1].y = calibRectSize.Height;
                 CalibObjectPoints[i][1].z = 0;
 
-                CalibObjectPoints[i][2].x = sqSideLength;
-                CalibObjectPoints[i][2].y = sqSideLength;
+                CalibObjectPoints[i][2].x = calibRectSize.Width;
+                CalibObjectPoints[i][2].y = calibRectSize.Height;
                 CalibObjectPoints[i][2].z = 0;
 
-                CalibObjectPoints[i][3].x = sqSideLength;
+                CalibObjectPoints[i][3].x = calibRectSize.Width;
                 CalibObjectPoints[i][3].y = 0;
                 CalibObjectPoints[i][3].z = 0;
             }
@@ -316,6 +348,8 @@ namespace Wiimote3DTrackingLib
             singlewmCapturedImages.Initialize();
             wm1capturedImages.Initialize();
             wm2capturedImages.Initialize();
+
+            ResetStereoCamCalibrateCapture();
 
             // Now initialize each of the sub arrays for holding the sets of 4 points
             for (int i = 0; i < wm1capturedImages.Length; i++)
@@ -768,13 +802,14 @@ namespace Wiimote3DTrackingLib
                     rightimagepoints[i].X <= wiimoteCamSize.Width &&
                     rightimagepoints[i].Y <= wiimoteCamSize.Height)
                 {
+                    tmpLeftPnt[0] = UDleftimagepoints[i];
+                    tmpRightPnt[0] = UDrightimagepoints[i];
 
-                    cvCorrectMatches(tmpLeftPnt, tmpRightPnt);
+                    //cvCorrectMatches(tmpLeftPnt, tmpRightPnt);
 
                     triangulate(P1, P2, tmpLeftPnt, tmpRightPnt, XYDpoint);
 
-                    result3DPoints[i] = XYDpoint[0];
-
+                    XYDpoint[0].CopyTo(result3DPoints[i]);
                 }
                 else
                 {
@@ -1139,8 +1174,8 @@ namespace Wiimote3DTrackingLib
 
                     float x, y;
                     float xr, yr, wr;
-                    x = projPoints[i][currCamera].X;
-                    y = projPoints[i][currCamera].Y;
+                    x = projPoints[currCamera][i].X;
+                    y = projPoints[currCamera][i].Y;
 
                     wr = (float)point2D.Data[2, 0];
                     xr = (float)(point2D.Data[0, 0] / wr);
@@ -1381,6 +1416,16 @@ namespace Wiimote3DTrackingLib
 
         }
 
+        /// <summary>
+        /// Captures the images from both wiimotes
+        /// </summary>
+        /// <param name="wm1">Wiimote object corresponding to left hand wiimote</param>
+        /// <param name="wm2">Wiimote object corresponding to right hand wiimote</param>
+        /// <param name="points1">Array of PointF objects to hold the image points from
+        /// Wiimote 1.</param>
+        /// <param name="points2">Array of PointF objects to hold the image points from
+        /// Wiimote 2.</param>
+        /// <returns>0 on success, or -1 otherwise</returns>
         public int StereoCapture(WiimoteLib.Wiimote wm1, WiimoteLib.Wiimote wm2, PointF[] points1, PointF[] points2)
         {
 

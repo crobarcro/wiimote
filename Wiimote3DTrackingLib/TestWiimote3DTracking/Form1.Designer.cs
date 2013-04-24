@@ -48,6 +48,7 @@
             this.wm2IRLabel2 = new System.Windows.Forms.Label();
             this.wm2IRLabel1 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.showTrackingFormButton = new System.Windows.Forms.Button();
             this.StopTrackingButton = new System.Windows.Forms.Button();
             this.StartTrackingButton = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
@@ -59,7 +60,9 @@
             this.wm1IRSourceslabel = new System.Windows.Forms.Label();
             this.wm2IRSourceslabel = new System.Windows.Forms.Label();
             this.PrintPointsButton = new System.Windows.Forms.Button();
-            this.showTrackingFormButton = new System.Windows.Forms.Button();
+            this.calibObjSizeButton = new System.Windows.Forms.Button();
+            this.xCalibTextBox = new System.Windows.Forms.TextBox();
+            this.yCalibTextBox = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.wm1IRPictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.wm2IRPictureBox)).BeginInit();
             this.groupBox1.SuspendLayout();
@@ -110,7 +113,7 @@
             this.wm1IRPictureBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.wm1IRPictureBox.Location = new System.Drawing.Point(352, 12);
             this.wm1IRPictureBox.Name = "wm1IRPictureBox";
-            this.wm1IRPictureBox.Size = new System.Drawing.Size(512, 384);
+            this.wm1IRPictureBox.Size = new System.Drawing.Size(385, 237);
             this.wm1IRPictureBox.TabIndex = 4;
             this.wm1IRPictureBox.TabStop = false;
             // 
@@ -182,9 +185,9 @@
             // wm2IRPictureBox
             // 
             this.wm2IRPictureBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.wm2IRPictureBox.Location = new System.Drawing.Point(352, 402);
+            this.wm2IRPictureBox.Location = new System.Drawing.Point(352, 272);
             this.wm2IRPictureBox.Name = "wm2IRPictureBox";
-            this.wm2IRPictureBox.Size = new System.Drawing.Size(512, 384);
+            this.wm2IRPictureBox.Size = new System.Drawing.Size(385, 262);
             this.wm2IRPictureBox.TabIndex = 12;
             this.wm2IRPictureBox.TabStop = false;
             // 
@@ -200,7 +203,7 @@
             // 
             // DisconnectAllButton
             // 
-            this.DisconnectAllButton.Location = new System.Drawing.Point(13, 373);
+            this.DisconnectAllButton.Location = new System.Drawing.Point(13, 198);
             this.DisconnectAllButton.Name = "DisconnectAllButton";
             this.DisconnectAllButton.Size = new System.Drawing.Size(102, 23);
             this.DisconnectAllButton.TabIndex = 14;
@@ -211,7 +214,7 @@
             // wm2IRLabel4
             // 
             this.wm2IRLabel4.AutoSize = true;
-            this.wm2IRLabel4.Location = new System.Drawing.Point(265, 489);
+            this.wm2IRLabel4.Location = new System.Drawing.Point(265, 380);
             this.wm2IRLabel4.Name = "wm2IRLabel4";
             this.wm2IRLabel4.Size = new System.Drawing.Size(35, 13);
             this.wm2IRLabel4.TabIndex = 18;
@@ -220,7 +223,7 @@
             // wm2IRLabel3
             // 
             this.wm2IRLabel3.AutoSize = true;
-            this.wm2IRLabel3.Location = new System.Drawing.Point(265, 460);
+            this.wm2IRLabel3.Location = new System.Drawing.Point(266, 341);
             this.wm2IRLabel3.Name = "wm2IRLabel3";
             this.wm2IRLabel3.Size = new System.Drawing.Size(35, 13);
             this.wm2IRLabel3.TabIndex = 17;
@@ -229,7 +232,7 @@
             // wm2IRLabel2
             // 
             this.wm2IRLabel2.AutoSize = true;
-            this.wm2IRLabel2.Location = new System.Drawing.Point(265, 431);
+            this.wm2IRLabel2.Location = new System.Drawing.Point(266, 306);
             this.wm2IRLabel2.Name = "wm2IRLabel2";
             this.wm2IRLabel2.Size = new System.Drawing.Size(35, 13);
             this.wm2IRLabel2.TabIndex = 16;
@@ -238,7 +241,7 @@
             // wm2IRLabel1
             // 
             this.wm2IRLabel1.AutoSize = true;
-            this.wm2IRLabel1.Location = new System.Drawing.Point(265, 402);
+            this.wm2IRLabel1.Location = new System.Drawing.Point(265, 272);
             this.wm2IRLabel1.Name = "wm2IRLabel1";
             this.wm2IRLabel1.Size = new System.Drawing.Size(65, 13);
             this.wm2IRLabel1.TabIndex = 15;
@@ -246,6 +249,9 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.yCalibTextBox);
+            this.groupBox1.Controls.Add(this.xCalibTextBox);
+            this.groupBox1.Controls.Add(this.calibObjSizeButton);
             this.groupBox1.Controls.Add(this.showTrackingFormButton);
             this.groupBox1.Controls.Add(this.StopTrackingButton);
             this.groupBox1.Controls.Add(this.StartTrackingButton);
@@ -255,16 +261,26 @@
             this.groupBox1.Controls.Add(this.ResetDualCalibButton);
             this.groupBox1.Controls.Add(this.dualcapturebutton);
             this.groupBox1.Controls.Add(this.StereoConnectButton);
-            this.groupBox1.Location = new System.Drawing.Point(13, 402);
+            this.groupBox1.Location = new System.Drawing.Point(13, 227);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(246, 364);
+            this.groupBox1.Size = new System.Drawing.Size(246, 307);
             this.groupBox1.TabIndex = 19;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Dual Wiimote Controls";
             // 
+            // showTrackingFormButton
+            // 
+            this.showTrackingFormButton.Location = new System.Drawing.Point(6, 262);
+            this.showTrackingFormButton.Name = "showTrackingFormButton";
+            this.showTrackingFormButton.Size = new System.Drawing.Size(174, 23);
+            this.showTrackingFormButton.TabIndex = 21;
+            this.showTrackingFormButton.Text = "Show Tracking Form";
+            this.showTrackingFormButton.UseVisualStyleBackColor = true;
+            this.showTrackingFormButton.Click += new System.EventHandler(this.showTrackingFormButton_Click);
+            // 
             // StopTrackingButton
             // 
-            this.StopTrackingButton.Location = new System.Drawing.Point(7, 271);
+            this.StopTrackingButton.Location = new System.Drawing.Point(7, 228);
             this.StopTrackingButton.Name = "StopTrackingButton";
             this.StopTrackingButton.Size = new System.Drawing.Size(174, 23);
             this.StopTrackingButton.TabIndex = 20;
@@ -274,7 +290,7 @@
             // 
             // StartTrackingButton
             // 
-            this.StartTrackingButton.Location = new System.Drawing.Point(7, 242);
+            this.StartTrackingButton.Location = new System.Drawing.Point(6, 199);
             this.StartTrackingButton.Name = "StartTrackingButton";
             this.StartTrackingButton.Size = new System.Drawing.Size(173, 23);
             this.StartTrackingButton.TabIndex = 19;
@@ -284,7 +300,7 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(7, 180);
+            this.button2.Location = new System.Drawing.Point(6, 170);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(173, 23);
             this.button2.TabIndex = 18;
@@ -294,7 +310,7 @@
             // 
             // CalibrateStereoButton
             // 
-            this.CalibrateStereoButton.Location = new System.Drawing.Point(7, 109);
+            this.CalibrateStereoButton.Location = new System.Drawing.Point(7, 133);
             this.CalibrateStereoButton.Name = "CalibrateStereoButton";
             this.CalibrateStereoButton.Size = new System.Drawing.Size(173, 23);
             this.CalibrateStereoButton.TabIndex = 17;
@@ -342,7 +358,7 @@
             this.groupBox2.Controls.Add(this.IRpointslabel);
             this.groupBox2.Location = new System.Drawing.Point(13, 12);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(241, 355);
+            this.groupBox2.Size = new System.Drawing.Size(241, 180);
             this.groupBox2.TabIndex = 20;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Single Wiimote Controls";
@@ -350,7 +366,7 @@
             // wm1IRSourceslabel
             // 
             this.wm1IRSourceslabel.AutoSize = true;
-            this.wm1IRSourceslabel.Location = new System.Drawing.Point(268, 122);
+            this.wm1IRSourceslabel.Location = new System.Drawing.Point(266, 132);
             this.wm1IRSourceslabel.Name = "wm1IRSourceslabel";
             this.wm1IRSourceslabel.Size = new System.Drawing.Size(35, 13);
             this.wm1IRSourceslabel.TabIndex = 21;
@@ -359,7 +375,7 @@
             // wm2IRSourceslabel
             // 
             this.wm2IRSourceslabel.AutoSize = true;
-            this.wm2IRSourceslabel.Location = new System.Drawing.Point(266, 511);
+            this.wm2IRSourceslabel.Location = new System.Drawing.Point(266, 416);
             this.wm2IRSourceslabel.Name = "wm2IRSourceslabel";
             this.wm2IRSourceslabel.Size = new System.Drawing.Size(35, 13);
             this.wm2IRSourceslabel.TabIndex = 22;
@@ -367,7 +383,7 @@
             // 
             // PrintPointsButton
             // 
-            this.PrintPointsButton.Location = new System.Drawing.Point(179, 373);
+            this.PrintPointsButton.Location = new System.Drawing.Point(179, 198);
             this.PrintPointsButton.Name = "PrintPointsButton";
             this.PrintPointsButton.Size = new System.Drawing.Size(75, 23);
             this.PrintPointsButton.TabIndex = 18;
@@ -375,21 +391,36 @@
             this.PrintPointsButton.UseVisualStyleBackColor = true;
             this.PrintPointsButton.Click += new System.EventHandler(this.PrintPointsButton_Click);
             // 
-            // showTrackingFormButton
+            // calibObjSizeButton
             // 
-            this.showTrackingFormButton.Location = new System.Drawing.Point(6, 320);
-            this.showTrackingFormButton.Name = "showTrackingFormButton";
-            this.showTrackingFormButton.Size = new System.Drawing.Size(174, 23);
-            this.showTrackingFormButton.TabIndex = 21;
-            this.showTrackingFormButton.Text = "Show Tracking Form";
-            this.showTrackingFormButton.UseVisualStyleBackColor = true;
-            this.showTrackingFormButton.Click += new System.EventHandler(this.showTrackingFormButton_Click);
+            this.calibObjSizeButton.Location = new System.Drawing.Point(7, 104);
+            this.calibObjSizeButton.Name = "calibObjSizeButton";
+            this.calibObjSizeButton.Size = new System.Drawing.Size(111, 23);
+            this.calibObjSizeButton.TabIndex = 22;
+            this.calibObjSizeButton.Text = "Set Object Size";
+            this.calibObjSizeButton.UseVisualStyleBackColor = true;
+            this.calibObjSizeButton.Click += new System.EventHandler(this.calibObjSizeButton_Click);
+            // 
+            // xCalibTextBox
+            // 
+            this.xCalibTextBox.Location = new System.Drawing.Point(128, 104);
+            this.xCalibTextBox.Name = "xCalibTextBox";
+            this.xCalibTextBox.Size = new System.Drawing.Size(52, 20);
+            this.xCalibTextBox.TabIndex = 23;
+            // 
+            // yCalibTextBox
+            // 
+            this.yCalibTextBox.Location = new System.Drawing.Point(186, 104);
+            this.yCalibTextBox.Name = "yCalibTextBox";
+            this.yCalibTextBox.Size = new System.Drawing.Size(52, 20);
+            this.yCalibTextBox.TabIndex = 24;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(876, 778);
+            this.AutoSize = true;
+            this.ClientSize = new System.Drawing.Size(704, 587);
             this.Controls.Add(this.PrintPointsButton);
             this.Controls.Add(this.wm2IRSourceslabel);
             this.Controls.Add(this.wm1IRSourceslabel);
@@ -453,6 +484,9 @@
         private System.Windows.Forms.Button StartTrackingButton;
         private System.Windows.Forms.Button StopTrackingButton;
         private System.Windows.Forms.Button showTrackingFormButton;
+        private System.Windows.Forms.TextBox yCalibTextBox;
+        private System.Windows.Forms.TextBox xCalibTextBox;
+        private System.Windows.Forms.Button calibObjSizeButton;
     }
 }
 

@@ -36,6 +36,23 @@ namespace TestWiimote3DTracking
 
         private bool do3Dplot = false;
 
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            base.OnFormClosing(e);
+
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                e.Cancel = true;
+
+                this.Hide();
+            }
+            else
+            {
+                return;
+            }
+
+        }
+
         private void TrackingForm_Load(object sender, EventArgs e)
         {
 

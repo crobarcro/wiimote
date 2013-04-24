@@ -24,7 +24,7 @@ namespace TestWiimote3DTracking
 
         Wiimote3DTrackingLib.StereoTracking wiitrack;
 
-        private Double drawscale = 0.5;
+        private Double drawscale = 0.4;
         private Double drawx = new Double();
         private  Double drawy = new Double();
         private Bitmap b1;
@@ -37,6 +37,10 @@ namespace TestWiimote3DTracking
 
         private bool _dotracking = false;
         private Matrix<double>[] result3DPoints = new Matrix<double>[4];
+
+        // declare an object to protect the Location array while we access 
+        // it using the lock statement
+        static readonly object _result3DLocker = new object();
 
 
         TrackingForm TForm = new TrackingForm();
@@ -68,6 +72,8 @@ namespace TestWiimote3DTracking
 
             this.wm1IRPictureBox.Size = tempsize;
             this.wm2IRPictureBox.Size = tempsize;
+
+            this.wm2IRPictureBox.Location = new System.Drawing.Point(this.wm1IRPictureBox.Location.X, this.wm1IRPictureBox.Location.Y + (int)(21 * this.wm1IRPictureBox.Size.Height / 20));
 
             wm1IRLabel1.Text = "No IR";
             wm1IRLabel2.Text = "No IR";
@@ -426,66 +432,71 @@ namespace TestWiimote3DTracking
             if (_dotracking)
             {
                 // get the 3D location of points in view of the cameras (if any)
-                // stroing them in the result3DPoints array. Where points are not
+                // storing them in the result3DPoints array. Where points are not
                 // present the X, Y and Z values will all have values -9999
-                wiitrack.Location3D(result3DPoints, wm1, wm2);
+                //wiitrack.Location3D(result3DPoints, wm1, wm2);
 
-                if (!(result3DPoints[0].Data[0, 0] == -9999 && result3DPoints[0].Data[1, 0] == -9999 && result3DPoints[0].Data[2, 0] == -9999))
+                lock (_result3DLocker)
                 {
-                    TForm.XposLabel1.Text = "X: " + result3DPoints[0].Data[0, 0].ToString("f4");
-                    TForm.YposLabel1.Text = "Y: " + result3DPoints[0].Data[1, 0].ToString("f4");
-                    TForm.ZposLabel1.Text = "Z: " + result3DPoints[0].Data[2, 0].ToString("f4");
-                }
-                else
-                {
-                    TForm.XposLabel1.Text = "X: No IR";
-                    TForm.YposLabel1.Text = "Y: No IR";
-                    TForm.ZposLabel1.Text = "Z: No IR";
-                }
+                    wiitrack.Location3D_2(result3DPoints, wm1, wm2);
 
-                if (!(result3DPoints[1].Data[0, 0] == -9999 && result3DPoints[1].Data[1, 0] == -9999 && result3DPoints[1].Data[2, 0] == -9999))
-                {
-                    TForm.XposLabel2.Text = "X: " + result3DPoints[1].Data[0, 0].ToString("f4");
-                    TForm.YposLabel2.Text = "Y: " + result3DPoints[1].Data[1, 0].ToString("f4");
-                    TForm.ZposLabel2.Text = "Z: " + result3DPoints[1].Data[2, 0].ToString("f4");
-                }
-                else
-                {
-                    TForm.XposLabel2.Text = "X: No IR";
-                    TForm.YposLabel2.Text = "Y: No IR";
-                    TForm.ZposLabel2.Text = "Z: No IR";
-                }
+                    if (!(result3DPoints[0].Data[0, 0] == -9999 && result3DPoints[0].Data[1, 0] == -9999 && result3DPoints[0].Data[2, 0] == -9999))
+                    {
+                        TForm.XposLabel1.Text = "X: " + result3DPoints[0].Data[0, 0].ToString("f4");
+                        TForm.YposLabel1.Text = "Y: " + result3DPoints[0].Data[1, 0].ToString("f4");
+                        TForm.ZposLabel1.Text = "Z: " + result3DPoints[0].Data[2, 0].ToString("f4");
+                    }
+                    else
+                    {
+                        TForm.XposLabel1.Text = "X: No IR";
+                        TForm.YposLabel1.Text = "Y: No IR";
+                        TForm.ZposLabel1.Text = "Z: No IR";
+                    }
 
-                if (!(result3DPoints[2].Data[0, 0] == -9999 && result3DPoints[2].Data[1, 0] == -9999 && result3DPoints[2].Data[2, 0] == -9999))
-                {
-                    TForm.XposLabel3.Text = "X: " + result3DPoints[2].Data[0, 0].ToString("f4");
-                    TForm.YposLabel3.Text = "Y: " + result3DPoints[2].Data[1, 0].ToString("f4");
-                    TForm.ZposLabel3.Text = "Z: " + result3DPoints[2].Data[2, 0].ToString("f4");
-                }
-                else
-                {
-                    TForm.XposLabel3.Text = "X: No IR";
-                    TForm.YposLabel3.Text = "Y: No IR";
-                    TForm.ZposLabel3.Text = "Z: No IR";
-                }
+                    if (!(result3DPoints[1].Data[0, 0] == -9999 && result3DPoints[1].Data[1, 0] == -9999 && result3DPoints[1].Data[2, 0] == -9999))
+                    {
+                        TForm.XposLabel2.Text = "X: " + result3DPoints[1].Data[0, 0].ToString("f4");
+                        TForm.YposLabel2.Text = "Y: " + result3DPoints[1].Data[1, 0].ToString("f4");
+                        TForm.ZposLabel2.Text = "Z: " + result3DPoints[1].Data[2, 0].ToString("f4");
+                    }
+                    else
+                    {
+                        TForm.XposLabel2.Text = "X: No IR";
+                        TForm.YposLabel2.Text = "Y: No IR";
+                        TForm.ZposLabel2.Text = "Z: No IR";
+                    }
 
-                if (!(result3DPoints[3].Data[0, 0] == -9999 && result3DPoints[3].Data[1, 0] == -9999 && result3DPoints[3].Data[2, 0] == -9999))
-                {
-                    TForm.XposLabel4.Text = "X: " + result3DPoints[3].Data[0, 0].ToString("f4");
-                    TForm.YposLabel4.Text = "Y: " + result3DPoints[3].Data[1, 0].ToString("f4");
-                    TForm.ZposLabel4.Text = "Z: " + result3DPoints[3].Data[2, 0].ToString("f4");
-                }
-                else
-                {
-                    TForm.XposLabel4.Text = "X: No IR";
-                    TForm.YposLabel4.Text = "Y: No IR";
-                    TForm.ZposLabel4.Text = "Z: No IR";
-                }
+                    if (!(result3DPoints[2].Data[0, 0] == -9999 && result3DPoints[2].Data[1, 0] == -9999 && result3DPoints[2].Data[2, 0] == -9999))
+                    {
+                        TForm.XposLabel3.Text = "X: " + result3DPoints[2].Data[0, 0].ToString("f4");
+                        TForm.YposLabel3.Text = "Y: " + result3DPoints[2].Data[1, 0].ToString("f4");
+                        TForm.ZposLabel3.Text = "Z: " + result3DPoints[2].Data[2, 0].ToString("f4");
+                    }
+                    else
+                    {
+                        TForm.XposLabel3.Text = "X: No IR";
+                        TForm.YposLabel3.Text = "Y: No IR";
+                        TForm.ZposLabel3.Text = "Z: No IR";
+                    }
 
-                for (int j = 0; j < result3DPoints.Length; j++)
-                {
-                    TForm.SetTrackingPointPos(result3DPoints[j].Data[0, 0], 
-                        result3DPoints[j].Data[1, 0], -result3DPoints[j].Data[2, 0], j);
+                    if (!(result3DPoints[3].Data[0, 0] == -9999 && result3DPoints[3].Data[1, 0] == -9999 && result3DPoints[3].Data[2, 0] == -9999))
+                    {
+                        TForm.XposLabel4.Text = "X: " + result3DPoints[3].Data[0, 0].ToString("f4");
+                        TForm.YposLabel4.Text = "Y: " + result3DPoints[3].Data[1, 0].ToString("f4");
+                        TForm.ZposLabel4.Text = "Z: " + result3DPoints[3].Data[2, 0].ToString("f4");
+                    }
+                    else
+                    {
+                        TForm.XposLabel4.Text = "X: No IR";
+                        TForm.YposLabel4.Text = "Y: No IR";
+                        TForm.ZposLabel4.Text = "Z: No IR";
+                    }
+
+                    for (int j = 0; j < result3DPoints.Length; j++)
+                    {
+                        TForm.SetTrackingPointPos(result3DPoints[j].Data[0, 0],
+                            result3DPoints[j].Data[1, 0], -result3DPoints[j].Data[2, 0], j);
+                    }
                 }
 
             }
@@ -532,6 +543,36 @@ namespace TestWiimote3DTracking
         private void showTrackingFormButton_Click(object sender, EventArgs e)
         {
             TForm.Show();
+        }
+
+
+        private void calibObjSizeButton_Click(object sender, EventArgs e)
+        {
+            float Width;
+            float Height;
+
+            try
+            {
+                Width = float.Parse(xCalibTextBox.Text);
+            }
+            catch
+            {
+                MessageBox.Show("Invalid Width");
+                return;
+            }
+
+            try
+            {
+                Height = float.Parse(yCalibTextBox.Text);
+            }
+            catch
+            {
+                MessageBox.Show("Invalid Height");
+                return;
+            }
+
+            wiitrack.setCalibObjSize(Width, Height);
+
         }
 
 
