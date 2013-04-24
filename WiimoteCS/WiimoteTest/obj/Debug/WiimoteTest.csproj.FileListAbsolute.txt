@@ -1,0 +1,28 @@
+C:\Documents and Settings\Richard\My Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteTest\bin\Debug\WiimoteTest.exe
+C:\Documents and Settings\Richard\My Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteTest\bin\Debug\WiimoteTest.pdb
+C:\Documents and Settings\Richard\My Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteTest\bin\Debug\WiimoteLib.dll
+C:\Documents and Settings\Richard\My Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteTest\bin\Debug\WiimoteLib.pdb
+C:\Documents and Settings\Richard\My Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteTest\bin\Debug\WiimoteLib.xml
+C:\Documents and Settings\Richard\My Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteTest\obj\Debug\ResolveAssemblyReference.cache
+C:\Documents and Settings\Richard\My Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteTest\obj\Debug\WiimoteTest.SingleWiimoteForm.resources
+C:\Documents and Settings\Richard\My Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteTest\obj\Debug\WiimoteTest.MultipleWiimoteForm.resources
+C:\Documents and Settings\Richard\My Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteTest\obj\Debug\WiimoteTest.Properties.Resources.resources
+C:\Documents and Settings\Richard\My Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteTest\obj\Debug\WiimoteTest.WiimoteInfo.resources
+C:\Documents and Settings\Richard\My Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteTest\obj\Debug\GenerateResource.read.1.tlog
+C:\Documents and Settings\Richard\My Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteTest\obj\Debug\GenerateResource.write.1.tlog
+C:\Documents and Settings\Richard\My Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteTest\obj\Debug\WiimoteTest.exe
+C:\Documents and Settings\Richard\My Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteTest\obj\Debug\WiimoteTest.pdb
+C:\Users\Richard\Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteTest\obj\Debug\WiimoteTest.exe
+C:\Users\Richard\Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteTest\obj\Debug\WiimoteTest.pdb
+C:\Users\Richard\Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteTest\bin\Debug\WiimoteTest.exe
+C:\Users\Richard\Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteTest\bin\Debug\WiimoteTest.pdb
+C:\Users\Richard\Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteTest\bin\Debug\WiimoteLib.dll
+C:\Users\Richard\Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteTest\bin\Debug\WiimoteLib.pdb
+C:\Users\Richard\Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteTest\bin\Debug\WiimoteLib.xml
+C:\Users\Richard\Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteTest\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\Richard\Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteTest\obj\Debug\WiimoteTest.MultipleWiimoteForm.resources
+C:\Users\Richard\Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteTest\obj\Debug\WiimoteTest.SingleWiimoteForm.resources
+C:\Users\Richard\Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteTest\obj\Debug\WiimoteTest.Properties.Resources.resources
+C:\Users\Richard\Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteTest\obj\Debug\WiimoteTest.WiimoteInfo.resources
+C:\Users\Richard\Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteTest\obj\Debug\GenerateResource.read.1.tlog
+C:\Users\Richard\Documents\Visual Studio 2010\Projects\WiimoteLib_1.7_src\WiimoteCS\WiimoteTest\obj\Debug\GenerateResource.write.1.tlog
