@@ -48,6 +48,9 @@
             this.wm2IRLabel2 = new System.Windows.Forms.Label();
             this.wm2IRLabel1 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.yCalibTextBox = new System.Windows.Forms.TextBox();
+            this.xCalibTextBox = new System.Windows.Forms.TextBox();
+            this.calibObjSizeButton = new System.Windows.Forms.Button();
             this.showTrackingFormButton = new System.Windows.Forms.Button();
             this.StopTrackingButton = new System.Windows.Forms.Button();
             this.StartTrackingButton = new System.Windows.Forms.Button();
@@ -60,9 +63,7 @@
             this.wm1IRSourceslabel = new System.Windows.Forms.Label();
             this.wm2IRSourceslabel = new System.Windows.Forms.Label();
             this.PrintPointsButton = new System.Windows.Forms.Button();
-            this.calibObjSizeButton = new System.Windows.Forms.Button();
-            this.xCalibTextBox = new System.Windows.Forms.TextBox();
-            this.yCalibTextBox = new System.Windows.Forms.TextBox();
+            this.StartLoggingButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.wm1IRPictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.wm2IRPictureBox)).BeginInit();
             this.groupBox1.SuspendLayout();
@@ -249,6 +250,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.StartLoggingButton);
             this.groupBox1.Controls.Add(this.yCalibTextBox);
             this.groupBox1.Controls.Add(this.xCalibTextBox);
             this.groupBox1.Controls.Add(this.calibObjSizeButton);
@@ -263,10 +265,34 @@
             this.groupBox1.Controls.Add(this.StereoConnectButton);
             this.groupBox1.Location = new System.Drawing.Point(13, 227);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(246, 307);
+            this.groupBox1.Size = new System.Drawing.Size(246, 348);
             this.groupBox1.TabIndex = 19;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Dual Wiimote Controls";
+            // 
+            // yCalibTextBox
+            // 
+            this.yCalibTextBox.Location = new System.Drawing.Point(186, 104);
+            this.yCalibTextBox.Name = "yCalibTextBox";
+            this.yCalibTextBox.Size = new System.Drawing.Size(52, 20);
+            this.yCalibTextBox.TabIndex = 24;
+            // 
+            // xCalibTextBox
+            // 
+            this.xCalibTextBox.Location = new System.Drawing.Point(128, 104);
+            this.xCalibTextBox.Name = "xCalibTextBox";
+            this.xCalibTextBox.Size = new System.Drawing.Size(52, 20);
+            this.xCalibTextBox.TabIndex = 23;
+            // 
+            // calibObjSizeButton
+            // 
+            this.calibObjSizeButton.Location = new System.Drawing.Point(7, 104);
+            this.calibObjSizeButton.Name = "calibObjSizeButton";
+            this.calibObjSizeButton.Size = new System.Drawing.Size(111, 23);
+            this.calibObjSizeButton.TabIndex = 22;
+            this.calibObjSizeButton.Text = "Set Object Size";
+            this.calibObjSizeButton.UseVisualStyleBackColor = true;
+            this.calibObjSizeButton.Click += new System.EventHandler(this.calibObjSizeButton_Click);
             // 
             // showTrackingFormButton
             // 
@@ -391,29 +417,14 @@
             this.PrintPointsButton.UseVisualStyleBackColor = true;
             this.PrintPointsButton.Click += new System.EventHandler(this.PrintPointsButton_Click);
             // 
-            // calibObjSizeButton
+            // StartLoggingButton
             // 
-            this.calibObjSizeButton.Location = new System.Drawing.Point(7, 104);
-            this.calibObjSizeButton.Name = "calibObjSizeButton";
-            this.calibObjSizeButton.Size = new System.Drawing.Size(111, 23);
-            this.calibObjSizeButton.TabIndex = 22;
-            this.calibObjSizeButton.Text = "Set Object Size";
-            this.calibObjSizeButton.UseVisualStyleBackColor = true;
-            this.calibObjSizeButton.Click += new System.EventHandler(this.calibObjSizeButton_Click);
-            // 
-            // xCalibTextBox
-            // 
-            this.xCalibTextBox.Location = new System.Drawing.Point(128, 104);
-            this.xCalibTextBox.Name = "xCalibTextBox";
-            this.xCalibTextBox.Size = new System.Drawing.Size(52, 20);
-            this.xCalibTextBox.TabIndex = 23;
-            // 
-            // yCalibTextBox
-            // 
-            this.yCalibTextBox.Location = new System.Drawing.Point(186, 104);
-            this.yCalibTextBox.Name = "yCalibTextBox";
-            this.yCalibTextBox.Size = new System.Drawing.Size(52, 20);
-            this.yCalibTextBox.TabIndex = 24;
+            this.StartLoggingButton.Location = new System.Drawing.Point(7, 319);
+            this.StartLoggingButton.Name = "StartLoggingButton";
+            this.StartLoggingButton.Size = new System.Drawing.Size(172, 23);
+            this.StartLoggingButton.TabIndex = 25;
+            this.StartLoggingButton.Text = "Start Logging";
+            this.StartLoggingButton.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
@@ -487,6 +498,7 @@
         private System.Windows.Forms.TextBox yCalibTextBox;
         private System.Windows.Forms.TextBox xCalibTextBox;
         private System.Windows.Forms.Button calibObjSizeButton;
+        private System.Windows.Forms.Button StartLoggingButton;
     }
 }
 

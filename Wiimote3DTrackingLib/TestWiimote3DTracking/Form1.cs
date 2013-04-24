@@ -36,6 +36,7 @@ namespace TestWiimote3DTracking
         private Guid _wm2ID;
 
         private bool _dotracking = false;
+        private bool _dologging = false;
         private Matrix<double>[] result3DPoints = new Matrix<double>[4];
 
         // declare an object to protect the Location array while we access 
@@ -374,135 +375,141 @@ namespace TestWiimote3DTracking
 
         private void UpdateWiimoteChanged(WiimoteChangedEventArgs args)
         {
-            WiimoteState ws = args.WiimoteState;
-
-            if (ws.ID == _wm1ID)
+            if (!_dologging)
             {
-                if (ws.ConnectionState == WiimoteLib.ConnectionState.Connected)
+
+                // if we're not using the Wiimote3DTracking objects logging code
+
+                WiimoteState ws = args.WiimoteState;
+
+                if (ws.ID == _wm1ID)
                 {
-                    // first draw the positions in the graphic
-                    g1.Clear(Color.White);
+                    if (ws.ConnectionState == WiimoteLib.ConnectionState.Connected)
+                    {
+                        // first draw the positions in the graphic
+                        g1.Clear(Color.White);
 
-                    float penwidth = 2.0F;
+                        float penwidth = 2.0F;
 
-                    wm1IRSourceslabel.Text = "IR Sources: " + ws.IRPoints().ToString();
+                        wm1IRSourceslabel.Text = "IR Sources: " + ws.IRPoints().ToString();
 
-                    UpdateIR(g1, ws.IRState.IRSensors[0], wm1IRLabel1, Color.Red, penwidth);
-                    UpdateIR(g1, ws.IRState.IRSensors[1], wm1IRLabel2, Color.Blue, penwidth);
-                    UpdateIR(g1, ws.IRState.IRSensors[2], wm1IRLabel3, Color.Black, penwidth);
-                    UpdateIR(g1, ws.IRState.IRSensors[3], wm1IRLabel4, Color.Purple, penwidth);
+                        UpdateIR(g1, ws.IRState.IRSensors[0], wm1IRLabel1, Color.Red, penwidth);
+                        UpdateIR(g1, ws.IRState.IRSensors[1], wm1IRLabel2, Color.Blue, penwidth);
+                        UpdateIR(g1, ws.IRState.IRSensors[2], wm1IRLabel3, Color.Black, penwidth);
+                        UpdateIR(g1, ws.IRState.IRSensors[3], wm1IRLabel4, Color.Purple, penwidth);
 
-                    //if (ws.IRState.IRSensors[0].Found && ws.IRState.IRSensors[1].Found)
-                    //    g1.DrawEllipse(new Pen(Color.Green, 1.0F), (int)(drawscale * ws.IRState.RawMidpoint.X), (int)(drawscale * ws.IRState.RawMidpoint.Y), (int)(2 / drawscale), (int)(2 / drawscale));
+                        //if (ws.IRState.IRSensors[0].Found && ws.IRState.IRSensors[1].Found)
+                        //    g1.DrawEllipse(new Pen(Color.Green, 1.0F), (int)(drawscale * ws.IRState.RawMidpoint.X), (int)(drawscale * ws.IRState.RawMidpoint.Y), (int)(2 / drawscale), (int)(2 / drawscale));
 
-                    wm1IRPictureBox.Image = b1;
+                        wm1IRPictureBox.Image = b1;
+                    }
+                    else
+                    {
+                        wm1IRPictureBox.Image = null;
+                    }
                 }
-                else
+                else if (ws.ID == _wm2ID)
                 {
-                    wm1IRPictureBox.Image = null;
+                    if (ws.ConnectionState == WiimoteLib.ConnectionState.Connected)
+                    {
+                        g2.Clear(Color.White);
+
+                        float penwidth = 2.0F;
+
+                        wm2IRSourceslabel.Text = "IR Sources: " + ws.IRPoints().ToString();
+
+                        UpdateIR(g2, ws.IRState.IRSensors[0], wm2IRLabel1, Color.Red, penwidth);
+                        UpdateIR(g2, ws.IRState.IRSensors[1], wm2IRLabel2, Color.Blue, penwidth);
+                        UpdateIR(g2, ws.IRState.IRSensors[2], wm2IRLabel3, Color.Black, penwidth);
+                        UpdateIR(g2, ws.IRState.IRSensors[3], wm2IRLabel4, Color.Purple, penwidth);
+
+                        //if (ws.IRState.IRSensors[0].Found && ws.IRState.IRSensors[1].Found)
+                        //    g2.DrawEllipse(new Pen(Color.Green, 1.0F), (int)(drawscale * ws.IRState.RawMidpoint.X), (int)(drawscale * (768 - ws.IRState.RawMidpoint.Y)), (int)(2 / drawscale), (int)(2 / drawscale));
+
+                        wm2IRPictureBox.Image = b2;
+                    }
+                    else
+                    {
+                        wm2IRPictureBox.Image = null;
+                    }
                 }
+
+                // now get the info from wm1 that is required for 3D tracking
+                if (_dotracking)
+                {
+                    // get the 3D location of points in view of the cameras (if any)
+                    // storing them in the result3DPoints array. Where points are not
+                    // present the X, Y and Z values will all have values -9999
+                    //wiitrack.Location3D(result3DPoints, wm1, wm2);
+
+                    lock (_result3DLocker)
+                    {
+                        wiitrack.Location3D_2(result3DPoints, wm1, wm2);
+
+                        if (!(result3DPoints[0].Data[0, 0] == -9999 && result3DPoints[0].Data[1, 0] == -9999 && result3DPoints[0].Data[2, 0] == -9999))
+                        {
+                            TForm.XposLabel1.Text = "X: " + result3DPoints[0].Data[0, 0].ToString("f4");
+                            TForm.YposLabel1.Text = "Y: " + result3DPoints[0].Data[1, 0].ToString("f4");
+                            TForm.ZposLabel1.Text = "Z: " + result3DPoints[0].Data[2, 0].ToString("f4");
+                        }
+                        else
+                        {
+                            TForm.XposLabel1.Text = "X: No IR";
+                            TForm.YposLabel1.Text = "Y: No IR";
+                            TForm.ZposLabel1.Text = "Z: No IR";
+                        }
+
+                        if (!(result3DPoints[1].Data[0, 0] == -9999 && result3DPoints[1].Data[1, 0] == -9999 && result3DPoints[1].Data[2, 0] == -9999))
+                        {
+                            TForm.XposLabel2.Text = "X: " + result3DPoints[1].Data[0, 0].ToString("f4");
+                            TForm.YposLabel2.Text = "Y: " + result3DPoints[1].Data[1, 0].ToString("f4");
+                            TForm.ZposLabel2.Text = "Z: " + result3DPoints[1].Data[2, 0].ToString("f4");
+                        }
+                        else
+                        {
+                            TForm.XposLabel2.Text = "X: No IR";
+                            TForm.YposLabel2.Text = "Y: No IR";
+                            TForm.ZposLabel2.Text = "Z: No IR";
+                        }
+
+                        if (!(result3DPoints[2].Data[0, 0] == -9999 && result3DPoints[2].Data[1, 0] == -9999 && result3DPoints[2].Data[2, 0] == -9999))
+                        {
+                            TForm.XposLabel3.Text = "X: " + result3DPoints[2].Data[0, 0].ToString("f4");
+                            TForm.YposLabel3.Text = "Y: " + result3DPoints[2].Data[1, 0].ToString("f4");
+                            TForm.ZposLabel3.Text = "Z: " + result3DPoints[2].Data[2, 0].ToString("f4");
+                        }
+                        else
+                        {
+                            TForm.XposLabel3.Text = "X: No IR";
+                            TForm.YposLabel3.Text = "Y: No IR";
+                            TForm.ZposLabel3.Text = "Z: No IR";
+                        }
+
+                        if (!(result3DPoints[3].Data[0, 0] == -9999 && result3DPoints[3].Data[1, 0] == -9999 && result3DPoints[3].Data[2, 0] == -9999))
+                        {
+                            TForm.XposLabel4.Text = "X: " + result3DPoints[3].Data[0, 0].ToString("f4");
+                            TForm.YposLabel4.Text = "Y: " + result3DPoints[3].Data[1, 0].ToString("f4");
+                            TForm.ZposLabel4.Text = "Z: " + result3DPoints[3].Data[2, 0].ToString("f4");
+                        }
+                        else
+                        {
+                            TForm.XposLabel4.Text = "X: No IR";
+                            TForm.YposLabel4.Text = "Y: No IR";
+                            TForm.ZposLabel4.Text = "Z: No IR";
+                        }
+
+                        for (int j = 0; j < result3DPoints.Length; j++)
+                        {
+                            TForm.SetTrackingPointPos(result3DPoints[j].Data[0, 0],
+                                result3DPoints[j].Data[1, 0], -result3DPoints[j].Data[2, 0], j);
+                        }
+                    }
+
+                }
+                //pbBattery.Value = (ws.Battery > 0xc8 ? 0xc8 : (int)ws.Battery);
+                //lblBattery.Text = ws.Battery.ToString();
+                //lblDevicePath.Text = "Device Path: " + mWiimote.HIDDevicePath;
             }
-            else if (ws.ID == _wm2ID)
-            {
-                if (ws.ConnectionState == WiimoteLib.ConnectionState.Connected)
-                {
-                    g2.Clear(Color.White);
-
-                    float penwidth = 2.0F;
-
-                    wm2IRSourceslabel.Text = "IR Sources: " + ws.IRPoints().ToString();
-
-                    UpdateIR(g2, ws.IRState.IRSensors[0], wm2IRLabel1, Color.Red, penwidth);
-                    UpdateIR(g2, ws.IRState.IRSensors[1], wm2IRLabel2, Color.Blue, penwidth);
-                    UpdateIR(g2, ws.IRState.IRSensors[2], wm2IRLabel3, Color.Black, penwidth);
-                    UpdateIR(g2, ws.IRState.IRSensors[3], wm2IRLabel4, Color.Purple, penwidth);
-
-                    //if (ws.IRState.IRSensors[0].Found && ws.IRState.IRSensors[1].Found)
-                    //    g2.DrawEllipse(new Pen(Color.Green, 1.0F), (int)(drawscale * ws.IRState.RawMidpoint.X), (int)(drawscale * (768 - ws.IRState.RawMidpoint.Y)), (int)(2 / drawscale), (int)(2 / drawscale));
-
-                    wm2IRPictureBox.Image = b2;
-                }
-                else
-                {
-                    wm2IRPictureBox.Image = null;
-                }
-            }
-
-            // now get the info from wm1 that is required for 3D tracking
-            if (_dotracking)
-            {
-                // get the 3D location of points in view of the cameras (if any)
-                // storing them in the result3DPoints array. Where points are not
-                // present the X, Y and Z values will all have values -9999
-                //wiitrack.Location3D(result3DPoints, wm1, wm2);
-
-                lock (_result3DLocker)
-                {
-                    wiitrack.Location3D_2(result3DPoints, wm1, wm2);
-
-                    if (!(result3DPoints[0].Data[0, 0] == -9999 && result3DPoints[0].Data[1, 0] == -9999 && result3DPoints[0].Data[2, 0] == -9999))
-                    {
-                        TForm.XposLabel1.Text = "X: " + result3DPoints[0].Data[0, 0].ToString("f4");
-                        TForm.YposLabel1.Text = "Y: " + result3DPoints[0].Data[1, 0].ToString("f4");
-                        TForm.ZposLabel1.Text = "Z: " + result3DPoints[0].Data[2, 0].ToString("f4");
-                    }
-                    else
-                    {
-                        TForm.XposLabel1.Text = "X: No IR";
-                        TForm.YposLabel1.Text = "Y: No IR";
-                        TForm.ZposLabel1.Text = "Z: No IR";
-                    }
-
-                    if (!(result3DPoints[1].Data[0, 0] == -9999 && result3DPoints[1].Data[1, 0] == -9999 && result3DPoints[1].Data[2, 0] == -9999))
-                    {
-                        TForm.XposLabel2.Text = "X: " + result3DPoints[1].Data[0, 0].ToString("f4");
-                        TForm.YposLabel2.Text = "Y: " + result3DPoints[1].Data[1, 0].ToString("f4");
-                        TForm.ZposLabel2.Text = "Z: " + result3DPoints[1].Data[2, 0].ToString("f4");
-                    }
-                    else
-                    {
-                        TForm.XposLabel2.Text = "X: No IR";
-                        TForm.YposLabel2.Text = "Y: No IR";
-                        TForm.ZposLabel2.Text = "Z: No IR";
-                    }
-
-                    if (!(result3DPoints[2].Data[0, 0] == -9999 && result3DPoints[2].Data[1, 0] == -9999 && result3DPoints[2].Data[2, 0] == -9999))
-                    {
-                        TForm.XposLabel3.Text = "X: " + result3DPoints[2].Data[0, 0].ToString("f4");
-                        TForm.YposLabel3.Text = "Y: " + result3DPoints[2].Data[1, 0].ToString("f4");
-                        TForm.ZposLabel3.Text = "Z: " + result3DPoints[2].Data[2, 0].ToString("f4");
-                    }
-                    else
-                    {
-                        TForm.XposLabel3.Text = "X: No IR";
-                        TForm.YposLabel3.Text = "Y: No IR";
-                        TForm.ZposLabel3.Text = "Z: No IR";
-                    }
-
-                    if (!(result3DPoints[3].Data[0, 0] == -9999 && result3DPoints[3].Data[1, 0] == -9999 && result3DPoints[3].Data[2, 0] == -9999))
-                    {
-                        TForm.XposLabel4.Text = "X: " + result3DPoints[3].Data[0, 0].ToString("f4");
-                        TForm.YposLabel4.Text = "Y: " + result3DPoints[3].Data[1, 0].ToString("f4");
-                        TForm.ZposLabel4.Text = "Z: " + result3DPoints[3].Data[2, 0].ToString("f4");
-                    }
-                    else
-                    {
-                        TForm.XposLabel4.Text = "X: No IR";
-                        TForm.YposLabel4.Text = "Y: No IR";
-                        TForm.ZposLabel4.Text = "Z: No IR";
-                    }
-
-                    for (int j = 0; j < result3DPoints.Length; j++)
-                    {
-                        TForm.SetTrackingPointPos(result3DPoints[j].Data[0, 0],
-                            result3DPoints[j].Data[1, 0], -result3DPoints[j].Data[2, 0], j);
-                    }
-                }
-
-            }
-            //pbBattery.Value = (ws.Battery > 0xc8 ? 0xc8 : (int)ws.Battery);
-            //lblBattery.Text = ws.Battery.ToString();
-            //lblDevicePath.Text = "Device Path: " + mWiimote.HIDDevicePath;
         }
 
         private void UpdateIR(Graphics g, IRSensor irSensor, Label lblRaw, Color color, float penwidth)
