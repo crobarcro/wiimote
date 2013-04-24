@@ -522,6 +522,11 @@ namespace TestWiimote3DTracking
 
         #endregion
 
+        private void showTrackingFormButton_Click(object sender, EventArgs e)
+        {
+            TForm.Show();
+        }
+
 
 
 

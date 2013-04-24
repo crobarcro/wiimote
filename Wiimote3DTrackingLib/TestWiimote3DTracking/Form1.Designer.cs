@@ -48,6 +48,7 @@
             this.wm2IRLabel2 = new System.Windows.Forms.Label();
             this.wm2IRLabel1 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.StopTrackingButton = new System.Windows.Forms.Button();
             this.StartTrackingButton = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.CalibrateStereoButton = new System.Windows.Forms.Button();
@@ -58,7 +59,7 @@
             this.wm1IRSourceslabel = new System.Windows.Forms.Label();
             this.wm2IRSourceslabel = new System.Windows.Forms.Label();
             this.PrintPointsButton = new System.Windows.Forms.Button();
-            this.StopTrackingButton = new System.Windows.Forms.Button();
+            this.showTrackingFormButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.wm1IRPictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.wm2IRPictureBox)).BeginInit();
             this.groupBox1.SuspendLayout();
@@ -245,6 +246,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.showTrackingFormButton);
             this.groupBox1.Controls.Add(this.StopTrackingButton);
             this.groupBox1.Controls.Add(this.StartTrackingButton);
             this.groupBox1.Controls.Add(this.button2);
@@ -259,6 +261,16 @@
             this.groupBox1.TabIndex = 19;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Dual Wiimote Controls";
+            // 
+            // StopTrackingButton
+            // 
+            this.StopTrackingButton.Location = new System.Drawing.Point(7, 271);
+            this.StopTrackingButton.Name = "StopTrackingButton";
+            this.StopTrackingButton.Size = new System.Drawing.Size(174, 23);
+            this.StopTrackingButton.TabIndex = 20;
+            this.StopTrackingButton.Text = "Stop Tracking";
+            this.StopTrackingButton.UseVisualStyleBackColor = true;
+            this.StopTrackingButton.Click += new System.EventHandler(this.StopTrackingButton_Click);
             // 
             // StartTrackingButton
             // 
@@ -363,15 +375,15 @@
             this.PrintPointsButton.UseVisualStyleBackColor = true;
             this.PrintPointsButton.Click += new System.EventHandler(this.PrintPointsButton_Click);
             // 
-            // StopTrackingButton
+            // showTrackingFormButton
             // 
-            this.StopTrackingButton.Location = new System.Drawing.Point(7, 271);
-            this.StopTrackingButton.Name = "StopTrackingButton";
-            this.StopTrackingButton.Size = new System.Drawing.Size(174, 23);
-            this.StopTrackingButton.TabIndex = 20;
-            this.StopTrackingButton.Text = "Stop Tracking";
-            this.StopTrackingButton.UseVisualStyleBackColor = true;
-            this.StopTrackingButton.Click += new System.EventHandler(this.StopTrackingButton_Click);
+            this.showTrackingFormButton.Location = new System.Drawing.Point(6, 320);
+            this.showTrackingFormButton.Name = "showTrackingFormButton";
+            this.showTrackingFormButton.Size = new System.Drawing.Size(174, 23);
+            this.showTrackingFormButton.TabIndex = 21;
+            this.showTrackingFormButton.Text = "Show Tracking Form";
+            this.showTrackingFormButton.UseVisualStyleBackColor = true;
+            this.showTrackingFormButton.Click += new System.EventHandler(this.showTrackingFormButton_Click);
             // 
             // Form1
             // 
@@ -440,6 +452,7 @@
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button StartTrackingButton;
         private System.Windows.Forms.Button StopTrackingButton;
+        private System.Windows.Forms.Button showTrackingFormButton;
     }
 }
 

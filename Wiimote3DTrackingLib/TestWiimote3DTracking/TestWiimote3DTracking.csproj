@@ -42,6 +42,12 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\RCWiimoteLib\WiimoteCS\WiimoteLib\Emgu.Util.dll</HintPath>
     </Reference>
+    <Reference Include="ILNumerics.Drawing">
+      <HintPath>..\..\..\..\dll\ILNumerics.Drawing\ILNumerics.Drawing.dll</HintPath>
+    </Reference>
+    <Reference Include="ILNumerics.Net">
+      <HintPath>..\..\..\..\dll\ILNumerics.Core\ILNumerics.Net.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Windows.Forms.DataVisualization" />
@@ -61,6 +67,7 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Math3D.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TrackingForm.cs">
@@ -103,6 +110,17 @@
       <Project>{1AA09271-12C8-403E-917B-D1E0F776FACC}</Project>
       <Name>Wiimote3DTrackingLib</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="MLApp">
+      <Guid>{C36E46AB-6A81-457B-9F91-A7719A06287F}</Guid>
+      <VersionMajor>1</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
