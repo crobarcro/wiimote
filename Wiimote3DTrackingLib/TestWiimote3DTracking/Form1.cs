@@ -424,9 +424,12 @@ namespace TestWiimote3DTracking
             // now get the info from wm1 that is required for 3D tracking
             if (_dotracking)
             {
+                // get the 3D location of points in view of the cameras (if any)
+                // stroing them in the result3DPoints array. Where points are not
+                // present the X, Y and Z values will all have values -9999
                 wiitrack.Location3D(result3DPoints, wm1, wm2);
 
-                if (!(result3DPoints[0].Data[0, 0] == -1 && result3DPoints[0].Data[1, 0] == -1 && result3DPoints[0].Data[2, 0] == -1))
+                if (!(result3DPoints[0].Data[0, 0] == -9999 && result3DPoints[0].Data[1, 0] == -9999 && result3DPoints[0].Data[2, 0] == -9999))
                 {
                     TForm.XposLabel1.Text = "X: " + result3DPoints[0].Data[0, 0].ToString("f4");
                     TForm.YposLabel1.Text = "Y: " + result3DPoints[0].Data[1, 0].ToString("f4");
@@ -439,7 +442,7 @@ namespace TestWiimote3DTracking
                     TForm.ZposLabel1.Text = "Z: No IR";
                 }
 
-                if (!(result3DPoints[1].Data[0, 0] == -1 && result3DPoints[1].Data[1, 0] == -1 && result3DPoints[1].Data[2, 0] == -1))
+                if (!(result3DPoints[1].Data[0, 0] == -9999 && result3DPoints[1].Data[1, 0] == -9999 && result3DPoints[1].Data[2, 0] == -9999))
                 {
                     TForm.XposLabel2.Text = "X: " + result3DPoints[1].Data[0, 0].ToString("f4");
                     TForm.YposLabel2.Text = "Y: " + result3DPoints[1].Data[1, 0].ToString("f4");
@@ -452,7 +455,7 @@ namespace TestWiimote3DTracking
                     TForm.ZposLabel2.Text = "Z: No IR";
                 }
 
-                if (!(result3DPoints[2].Data[0, 0] == -1 && result3DPoints[2].Data[1, 0] == -1 && result3DPoints[2].Data[2, 0] == -1))
+                if (!(result3DPoints[2].Data[0, 0] == -9999 && result3DPoints[2].Data[1, 0] == -9999 && result3DPoints[2].Data[2, 0] == -9999))
                 {
                     TForm.XposLabel3.Text = "X: " + result3DPoints[2].Data[0, 0].ToString("f4");
                     TForm.YposLabel3.Text = "Y: " + result3DPoints[2].Data[1, 0].ToString("f4");
@@ -465,7 +468,7 @@ namespace TestWiimote3DTracking
                     TForm.ZposLabel3.Text = "Z: No IR";
                 }
 
-                if (!(result3DPoints[3].Data[0, 0] == -1 && result3DPoints[3].Data[1, 0] == -1 && result3DPoints[3].Data[2, 0] == -1))
+                if (!(result3DPoints[3].Data[0, 0] == -9999 && result3DPoints[3].Data[1, 0] == -9999 && result3DPoints[3].Data[2, 0] == -9999))
                 {
                     TForm.XposLabel4.Text = "X: " + result3DPoints[3].Data[0, 0].ToString("f4");
                     TForm.YposLabel4.Text = "Y: " + result3DPoints[3].Data[1, 0].ToString("f4");
