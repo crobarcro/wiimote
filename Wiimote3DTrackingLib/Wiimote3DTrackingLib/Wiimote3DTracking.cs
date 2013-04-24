@@ -51,9 +51,9 @@ namespace Wiimote3DTrackingLib
         private int stereoCapCount = 0;
 
         // Fundumental matrix
-        Matrix<double> F = new Matrix<double>(3, 3);
+        Matrix<double> fundMat = new Matrix<double>(3, 3);
         //Essential matrix
-        Matrix<double> E = new Matrix<double>(3, 3);
+        Matrix<double> essentialMat = new Matrix<double>(3, 3);
 
         // The rotation and perspective matrices for the 
         Matrix<double> R1 = new Matrix<double>(3, 3);
@@ -422,8 +422,8 @@ namespace Wiimote3DTrackingLib
         public void StereoCalibrate(WiimoteLib.Wiimote wm1, WiimoteLib.Wiimote wm2)
         {
 
-            Matrix<double> fundMat = new Matrix<double>(3, 3);
-            Matrix<double> essentialMat = new Matrix<double>(3, 3);
+            //Matrix<double> fundMat = new Matrix<double>(3, 3);
+            //Matrix<double> essentialMat = new Matrix<double>(3, 3);
 
             int maxIters = 100;
 
@@ -571,8 +571,8 @@ namespace Wiimote3DTrackingLib
                 Emgu.CV.CvEnum.CALIB_TYPE.CV_CALIB_USE_INTRINSIC_GUESS,
                 termCrit,
                 out wm1.WiimoteState.CameraCalibInfo.StereoCamExtrinsic,
-                out F,
-                out E);
+                out fundMat,
+                out essentialMat);
 
             wm2.WiimoteState.CameraCalibInfo.StereoCamExtrinsic = wm1.WiimoteState.CameraCalibInfo.StereoCamExtrinsic;
 
@@ -713,14 +713,8 @@ namespace Wiimote3DTrackingLib
                 
             }
 
-            // Test triangulate method
-            if (wm1.WiimoteState.IRPoints() == MAX_NUM_IR_SRCS && wm2.WiimoteState.IRPoints() == MAX_NUM_IR_SRCS)
-            {
-
-                triangulate(P1, P2, UDleftimagepoints, UDrightimagepoints, result3DPoints);
-            }
-
         }
+
 
         /// <summary>
         /// Multiples a [4, 1] matrix by a [4, 4] matrix (created to multiple view matrix by Q matrix
@@ -742,216 +736,315 @@ namespace Wiimote3DTrackingLib
             }
         }
 
-private void cvCorrectMatches(CvMat *points1_, CvMat *points2_, CvMat *new_points1, CvMat *new_points2)
-{
-    cv::Ptr<CvMat> tmp33;
-    cv::Ptr<CvMat> tmp31, tmp31_2;
-    cv::Ptr<CvMat> T1i, T2i;
-    cv::Ptr<CvMat> R1, R2;
-    cv::Ptr<CvMat> TFT, TFTt, RTFTR;
-    cv::Ptr<CvMat> U, S, V;
-    cv::Ptr<CvMat> e1, e2;
-    cv::Ptr<CvMat> polynomial;
-    cv::Ptr<CvMat> result;
-    cv::Ptr<CvMat> points1, points2;
-    cv::Ptr<CvMat> F;
-	
-    if (!CV_IS_MAT(F_) || !CV_IS_MAT(points1_) || !CV_IS_MAT(points2_) )
-        CV_Error( CV_StsUnsupportedFormat, "Input parameters must be matrices" );
-    if (!( F_->cols == 3 && F_->rows == 3))
-        CV_Error( CV_StsUnmatchedSizes, "The fundamental matrix must be a 3x3 matrix");
-    if (!(((F_->type & CV_MAT_TYPE_MASK) >> 3) == 0 ))
-        CV_Error( CV_StsUnsupportedFormat, "The fundamental matrix must be a single-channel matrix" );
-    if (!(points1_->rows == 1 && points2_->rows == 1 && points1_->cols == points2_->cols))
-        CV_Error( CV_StsUnmatchedSizes, "The point-matrices must have two rows, and an equal number of columns" );
-    if (((points1_->type & CV_MAT_TYPE_MASK) >> 3) != 1 )
-        CV_Error( CV_StsUnmatchedSizes, "The first set of points must contain two channels; one for x and one for y" );
-    if (((points2_->type & CV_MAT_TYPE_MASK) >> 3) != 1 )
-        CV_Error( CV_StsUnmatchedSizes, "The second set of points must contain two channels; one for x and one for y" );
-    if (new_points1 != NULL) {
-        CV_Assert(CV_IS_MAT(new_points1));
-        if (new_points1->cols != points1_->cols || new_points1->rows != 1)
-            CV_Error( CV_StsUnmatchedSizes, "The first output matrix must have the same dimensions as the input matrices" );
-        if (CV_MAT_CN(new_points1->type) != 2)
-            CV_Error( CV_StsUnsupportedFormat, "The first output matrix must have two channels; one for x and one for y" );
-    }
-    if (new_points2 != NULL) {
-        CV_Assert(CV_IS_MAT(new_points2));
-        if (new_points2->cols != points2_->cols || new_points2->rows != 1)
-            CV_Error( CV_StsUnmatchedSizes, "The second output matrix must have the same dimensions as the input matrices" );
-        if (CV_MAT_CN(new_points2->type) != 2)
-            CV_Error( CV_StsUnsupportedFormat, "The second output matrix must have two channels; one for x and one for y" );
-    }
-	
-    // Make sure F uses double precision
-    F = cvCreateMat(3,3,CV_64FC1);
-    cvConvert(F_, F);
-	
-    // Make sure points1 uses double precision
-    points1 = cvCreateMat(points1_->rows,points1_->cols,CV_64FC2);
-    cvConvert(points1_, points1);
-	
-    // Make sure points2 uses double precision
-    points2 = cvCreateMat(points2_->rows,points2_->cols,CV_64FC2);
-    cvConvert(points2_, points2);
-	
-    tmp33 = cvCreateMat(3,3,CV_64FC1);
-    tmp31 = cvCreateMat(3,1,CV_64FC1), tmp31_2 = cvCreateMat(3,1,CV_64FC1);
-    T1i = cvCreateMat(3,3,CV_64FC1), T2i = cvCreateMat(3,3,CV_64FC1);
-    R1 = cvCreateMat(3,3,CV_64FC1), R2 = cvCreateMat(3,3,CV_64FC1);
-    TFT = cvCreateMat(3,3,CV_64FC1), TFTt = cvCreateMat(3,3,CV_64FC1), RTFTR = cvCreateMat(3,3,CV_64FC1);
-    U = cvCreateMat(3,3,CV_64FC1);
-    S = cvCreateMat(3,3,CV_64FC1);
-    V = cvCreateMat(3,3,CV_64FC1);
-    e1 = cvCreateMat(3,1,CV_64FC1), e2 = cvCreateMat(3,1,CV_64FC1);
-	
-    double x1, y1, x2, y2;
-    double scale;
-    double f1, f2, a, b, c, d;
-    polynomial = cvCreateMat(1,7,CV_64FC1);
-    result = cvCreateMat(1,6,CV_64FC2);
-    double t_min, s_val, t, s;
-    for (int p = 0; p < points1->cols; ++p) {
-        // Replace F by T2-t * F * T1-t
-        x1 = points1->data.db[p*2];
-        y1 = points1->data.db[p*2+1];
-        x2 = points2->data.db[p*2];
-        y2 = points2->data.db[p*2+1];
-		
-        cvSetZero(T1i);
-        cvSetReal2D(T1i,0,0,1);
-        cvSetReal2D(T1i,1,1,1);
-        cvSetReal2D(T1i,2,2,1);
-        cvSetReal2D(T1i,0,2,x1);
-        cvSetReal2D(T1i,1,2,y1);
-        cvSetZero(T2i);
-        cvSetReal2D(T2i,0,0,1);
-        cvSetReal2D(T2i,1,1,1);
-        cvSetReal2D(T2i,2,2,1);
-        cvSetReal2D(T2i,0,2,x2);
-        cvSetReal2D(T2i,1,2,y2);
-        cvGEMM(T2i,F,1,0,0,tmp33,CV_GEMM_A_T);
-        cvSetZero(TFT);
-        cvGEMM(tmp33,T1i,1,0,0,TFT);
-        
-        // Compute the right epipole e1 from F * e1 = 0
-        cvSetZero(U);
-        cvSetZero(S);
-        cvSetZero(V);
-        cvSVD(TFT,S,U,V);
-        scale = sqrt(cvGetReal2D(V,0,2)*cvGetReal2D(V,0,2) + cvGetReal2D(V,1,2)*cvGetReal2D(V,1,2));
-        cvSetReal2D(e1,0,0,cvGetReal2D(V,0,2)/scale);
-        cvSetReal2D(e1,1,0,cvGetReal2D(V,1,2)/scale);
-        cvSetReal2D(e1,2,0,cvGetReal2D(V,2,2)/scale);
-        if (cvGetReal2D(e1,2,0) < 0) {
-            cvSetReal2D(e1,0,0,-cvGetReal2D(e1,0,0));
-            cvSetReal2D(e1,1,0,-cvGetReal2D(e1,1,0));
-            cvSetReal2D(e1,2,0,-cvGetReal2D(e1,2,0));
-        }
-		
-        // Compute the left epipole e2 from e2' * F = 0  =>  F' * e2 = 0
-        cvSetZero(TFTt);
-        cvTranspose(TFT, TFTt);
-        cvSetZero(U);
-        cvSetZero(S);
-        cvSetZero(V);
-        cvSVD(TFTt,S,U,V);
-        cvSetZero(e2);
-        scale = sqrt(cvGetReal2D(V,0,2)*cvGetReal2D(V,0,2) + cvGetReal2D(V,1,2)*cvGetReal2D(V,1,2));
-        cvSetReal2D(e2,0,0,cvGetReal2D(V,0,2)/scale);
-        cvSetReal2D(e2,1,0,cvGetReal2D(V,1,2)/scale);
-        cvSetReal2D(e2,2,0,cvGetReal2D(V,2,2)/scale);
-        if (cvGetReal2D(e2,2,0) < 0) {
-            cvSetReal2D(e2,0,0,-cvGetReal2D(e2,0,0));
-            cvSetReal2D(e2,1,0,-cvGetReal2D(e2,1,0));
-            cvSetReal2D(e2,2,0,-cvGetReal2D(e2,2,0));
-        }
-		
-        // Replace F by R2 * F * R1'
-        cvSetZero(R1);
-        cvSetReal2D(R1,0,0,cvGetReal2D(e1,0,0));
-        cvSetReal2D(R1,0,1,cvGetReal2D(e1,1,0));
-        cvSetReal2D(R1,1,0,-cvGetReal2D(e1,1,0));
-        cvSetReal2D(R1,1,1,cvGetReal2D(e1,0,0));
-        cvSetReal2D(R1,2,2,1);
-        cvSetZero(R2);
-        cvSetReal2D(R2,0,0,cvGetReal2D(e2,0,0));
-        cvSetReal2D(R2,0,1,cvGetReal2D(e2,1,0));
-        cvSetReal2D(R2,1,0,-cvGetReal2D(e2,1,0));
-        cvSetReal2D(R2,1,1,cvGetReal2D(e2,0,0));
-        cvSetReal2D(R2,2,2,1);
-        cvGEMM(R2,TFT,1,0,0,tmp33);
-        cvGEMM(tmp33,R1,1,0,0,RTFTR,CV_GEMM_B_T);
-		
-        // Set f1 = e1(3), f2 = e2(3), a = F22, b = F23, c = F32, d = F33
-        f1 = cvGetReal2D(e1,2,0);
-        f2 = cvGetReal2D(e2,2,0);
-        a = cvGetReal2D(RTFTR,1,1);
-        b = cvGetReal2D(RTFTR,1,2);
-        c = cvGetReal2D(RTFTR,2,1);
-        d = cvGetReal2D(RTFTR,2,2);
-		
-        // Form the polynomial g(t) = k6*tâ¶ + k5*tâµ + k4*tâ´ + k3*tÂ³ + k2*tÂ² + k1*t + k0
-        // from f1, f2, a, b, c and d
-        cvSetReal2D(polynomial,0,6,( +b*c*c*f1*f1*f1*f1*a-a*a*d*f1*f1*f1*f1*c ));
-        cvSetReal2D(polynomial,0,5,( +f2*f2*f2*f2*c*c*c*c+2*a*a*f2*f2*c*c-a*a*d*d*f1*f1*f1*f1+b*b*c*c*f1*f1*f1*f1+a*a*a*a ));
-        cvSetReal2D(polynomial,0,4,( +4*a*a*a*b+2*b*c*c*f1*f1*a+4*f2*f2*f2*f2*c*c*c*d+4*a*b*f2*f2*c*c+4*a*a*f2*f2*c*d-2*a*a*d*f1*f1*c-a*d*d*f1*f1*f1*f1*b+b*b*c*f1*f1*f1*f1*d ));
-        cvSetReal2D(polynomial,0,3,( +6*a*a*b*b+6*f2*f2*f2*f2*c*c*d*d+2*b*b*f2*f2*c*c+2*a*a*f2*f2*d*d-2*a*a*d*d*f1*f1+2*b*b*c*c*f1*f1+8*a*b*f2*f2*c*d ));
-        cvSetReal2D(polynomial,0,2,( +4*a*b*b*b+4*b*b*f2*f2*c*d+4*f2*f2*f2*f2*c*d*d*d-a*a*d*c+b*c*c*a+4*a*b*f2*f2*d*d-2*a*d*d*f1*f1*b+2*b*b*c*f1*f1*d ));
-        cvSetReal2D(polynomial,0,1,( +f2*f2*f2*f2*d*d*d*d+b*b*b*b+2*b*b*f2*f2*d*d-a*a*d*d+b*b*c*c ));
-        cvSetReal2D(polynomial,0,0,( -a*d*d*b+b*b*c*d ));
-		
-        // Solve g(t) for t to get 6 roots
-        cvSetZero(result);
-        cvSolvePoly(polynomial, result, 100, 20);
-		
-        // Evaluate the cost function s(t) at the real part of the 6 roots
-        t_min = DBL_MAX;
-        s_val = 1./(f1*f1) + (c*c)/(a*a+f2*f2*c*c);
-        for (int ti = 0; ti < 6; ++ti) {
-            t = result->data.db[2*ti];
-            s = (t*t)/(1 + f1*f1*t*t) + ((c*t + d)*(c*t + d))/((a*t + b)*(a*t + b) + f2*f2*(c*t + d)*(c*t + d));
-            if (s < s_val) {
-                s_val = s;
-                t_min = t;
+        public void Location3D_2(Matrix<double>[] result3DPoints, WiimoteLib.Wiimote wm1, WiimoteLib.Wiimote wm2)
+        {
+            // capture an image of the IR points from both wiimote cameras
+            StereoCapture(wm1, wm2, leftimagepoints, rightimagepoints);
+
+            int i = 0;
+
+            // undistort the points in the left had camera
+            UDleftimagepoints = wm1.WiimoteState.CameraCalibInfo.CamIntrinsic.Undistort(leftimagepoints, R1, P1);
+
+            // undistort the points in the right hand camera
+            UDrightimagepoints = wm2.WiimoteState.CameraCalibInfo.CamIntrinsic.Undistort(rightimagepoints, R2, P2);
+
+            System.Drawing.PointF[] tmpLeftPnt = new System.Drawing.PointF[1];
+            tmpLeftPnt.Initialize();
+            System.Drawing.PointF[] tmpRightPnt = new System.Drawing.PointF[1];
+            tmpRightPnt.Initialize();
+            Matrix<double>[] XYDpoint = new Matrix<double>[1];
+            XYDpoint[0] = new Matrix<double>(4, 1);
+
+            // check for up to four points, the max number of sources currently
+            for (i = 0; i < MAX_NUM_IR_SRCS; i++)
+            {
+                // if a point was not found, or was invalid, it will be set to have
+                // coordinates outside the view or the imager. We look for this
+                // in the original undistorted points and if so set the 3D point 
+                // location to a predetermined value
+                if (leftimagepoints[i].X <= wiimoteCamSize.Width &&
+                    leftimagepoints[i].Y < wiimoteCamSize.Height &&
+                    rightimagepoints[i].X <= wiimoteCamSize.Width &&
+                    rightimagepoints[i].Y <= wiimoteCamSize.Height)
+                {
+
+                    cvCorrectMatches(tmpLeftPnt, tmpRightPnt);
+
+                    triangulate(P1, P2, tmpLeftPnt, tmpRightPnt, XYDpoint);
+
+                    result3DPoints[i] = XYDpoint[0];
+
+                }
+                else
+                {
+                    // if the 2D point is not found or contained invalid values, set 
+                    // all the values in the 3D location to the value -9999
+                    result3DPoints[i].Data[0, 0] = -9999;
+                    result3DPoints[i].Data[1, 0] = -9999;
+                    result3DPoints[i].Data[2, 0] = -9999;
+                    result3DPoints[i].Data[3, 0] = -9999;
+                }
+
             }
+
         }
-		
-        // find the optimal x1 and y1 as the points on l1 and l2 closest to the origin
-        tmp31->data.db[0] = t_min*t_min*f1;
-        tmp31->data.db[1] = t_min;
-        tmp31->data.db[2] = t_min*t_min*f1*f1+1;
-        tmp31->data.db[0] /= tmp31->data.db[2];
-        tmp31->data.db[1] /= tmp31->data.db[2];
-        tmp31->data.db[2] /= tmp31->data.db[2];
-        cvGEMM(T1i,R1,1,0,0,tmp33,CV_GEMM_B_T);
-        cvGEMM(tmp33,tmp31,1,0,0,tmp31_2);
-        x1 = tmp31_2->data.db[0];
-        y1 = tmp31_2->data.db[1];
-		
-        tmp31->data.db[0] = f2*pow(c*t_min+d,2);
-        tmp31->data.db[1] = -(a*t_min+b)*(c*t_min+d);
-        tmp31->data.db[2] = f2*f2*pow(c*t_min+d,2) + pow(a*t_min+b,2);
-        tmp31->data.db[0] /= tmp31->data.db[2];
-        tmp31->data.db[1] /= tmp31->data.db[2];
-        tmp31->data.db[2] /= tmp31->data.db[2];
-        cvGEMM(T2i,R2,1,0,0,tmp33,CV_GEMM_B_T);
-        cvGEMM(tmp33,tmp31,1,0,0,tmp31_2);
-        x2 = tmp31_2->data.db[0];
-        y2 = tmp31_2->data.db[1];
-		
-        // Return the points in the matrix format that the user wants
-        points1->data.db[p*2] = x1;
-        points1->data.db[p*2+1] = y1;
-        points2->data.db[p*2] = x2;
-        points2->data.db[p*2+1] = y2;
-    }
-    
-    if( new_points1 )
-        cvConvert( points1, new_points1 );
-    if( new_points2 )
-        cvConvert( points2, new_points2 );
-}
+
+        private void cvCorrectMatches(System.Drawing.PointF[] points1, System.Drawing.PointF[] points2)
+        {
+            //cv::Ptr<CvMat> tmp33;
+            //cv::Ptr<CvMat> tmp31, tmp31_2;
+            //cv::Ptr<CvMat> T1i, T2i;
+            //cv::Ptr<CvMat> R1, R2;
+            //cv::Ptr<CvMat> TFT, TFTt, RTFTR;
+            //cv::Ptr<CvMat> U, S, V;
+            //cv::Ptr<CvMat> e1, e2;
+            //cv::Ptr<CvMat> polynomial;
+            //cv::Ptr<CvMat> result;
+            //cv::Ptr<CvMat> points1, points2;
+
+            //if (!CV_IS_MAT(F_) || !CV_IS_MAT(points1_) || !CV_IS_MAT(points2_) )
+            //    CV_Error( CV_StsUnsupportedFormat, "Input parameters must be matrices" );
+            //if (!( F_->cols == 3 && F_->rows == 3))
+            //    CV_Error( CV_StsUnmatchedSizes, "The fundamental matrix must be a 3x3 matrix");
+            //if (!(((F_->type & CV_MAT_TYPE_MASK) >> 3) == 0 ))
+            //    CV_Error( CV_StsUnsupportedFormat, "The fundamental matrix must be a single-channel matrix" );
+            //if (!(points1_->rows == 1 && points2_->rows == 1 && points1_->cols == points2_->cols))
+            //    CV_Error( CV_StsUnmatchedSizes, "The point-matrices must have two rows, and an equal number of columns" );
+            //if (((points1_->type & CV_MAT_TYPE_MASK) >> 3) != 1 )
+            //    CV_Error( CV_StsUnmatchedSizes, "The first set of points must contain two channels; one for x and one for y" );
+            //if (((points2_->type & CV_MAT_TYPE_MASK) >> 3) != 1 )
+            //    CV_Error( CV_StsUnmatchedSizes, "The second set of points must contain two channels; one for x and one for y" );
+            //if (new_points1 != NULL) {
+            //    CV_Assert(CV_IS_MAT(new_points1));
+            //    if (new_points1->cols != points1_->cols || new_points1->rows != 1)
+            //        CV_Error( CV_StsUnmatchedSizes, "The first output matrix must have the same dimensions as the input matrices" );
+            //    if (CV_MAT_CN(new_points1->type) != 2)
+            //        CV_Error( CV_StsUnsupportedFormat, "The first output matrix must have two channels; one for x and one for y" );
+            //}
+            //if (new_points2 != NULL) {
+            //    CV_Assert(CV_IS_MAT(new_points2));
+            //    if (new_points2->cols != points2_->cols || new_points2->rows != 1)
+            //        CV_Error( CV_StsUnmatchedSizes, "The second output matrix must have the same dimensions as the input matrices" );
+            //    if (CV_MAT_CN(new_points2->type) != 2)
+            //        CV_Error( CV_StsUnsupportedFormat, "The second output matrix must have two channels; one for x and one for y" );
+            //}
+
+            //// Make sure F uses double precision
+            Matrix<double> F = fundMat;
+            //cvConvert(F_, F);
+
+            //// Make sure points1 uses double precision
+            //points1 = cvCreateMat(points1_->rows,points1_->cols,CV_64FC2);
+            //cvConvert(points1_, points1);
+
+            //// Make sure points2 uses double precision
+            //points2 = cvCreateMat(points2_->rows,points2_->cols,CV_64FC2);
+            //cvConvert(points2_, points2);
+
+            Matrix<double> tmp33 = new Matrix<double>(3, 3);
+            Matrix<double> tmp31 = new Matrix<double>(3, 1);
+            Matrix<double> tmp31_2 = new Matrix<double>(3, 1);
+            Matrix<double> T1i = new Matrix<double>(3, 3);
+            Matrix<double> T2i = new Matrix<double>(3, 3);
+            Matrix<double> R1 = new Matrix<double>(3, 3);
+            Matrix<double> R2 = new Matrix<double>(3, 3);
+            Matrix<double> TFT = new Matrix<double>(3, 3);
+            Matrix<double> TFTt = new Matrix<double>(3, 3);
+            Matrix<double> RTFTR = new Matrix<double>(3, 3);
+
+            Matrix<double> U = new Matrix<double>(3, 3);
+            Matrix<double> S = new Matrix<double>(3, 3);
+            Matrix<double> V = new Matrix<double>(3, 3);
+            Matrix<double> e1 = new Matrix<double>(3, 1);
+            Matrix<double> e2 = new Matrix<double>(3, 1);
+
+            double x1, y1, x2, y2;
+            double scale;
+            double f1, f2, a, b, c, d;
+            double t_min, s_val, t, s;
+
+            Matrix<double> polynomial = new Matrix<double>(1, 7);
+
+            Matrix<double> result = new Matrix<double>(1, 6);
+
+            for (int p = 0; p < points1.Length; ++p)
+            {
+                // Replace F by T2-t * F * T1-t
+                x1 = points1[p].X;
+                y1 = points1[p].Y;
+                x2 = points2[p].X;
+                y2 = points2[p].Y;
+
+                T1i.SetZero();
+                T1i.Data[0, 1] = 1;
+                T1i.Data[1, 1] = 1;
+                T1i.Data[2, 2] = 1;
+                T1i.Data[0, 2] = x1;
+                T1i.Data[1, 2] = y1;
+
+                T2i.SetZero();
+                T2i.Data[0, 0] = 1;
+                T2i.Data[1, 1] = 1;
+                T2i.Data[2, 2] = 1;
+                T2i.Data[0, 2] = x2;
+                T2i.Data[1, 2] = y2;
+
+                //cvGEMM(T2i,F,1,0,0,tmp33,CV_GEMM_A_T)
+                cv.cvGEMM(T2i.Ptr, F.Ptr, 1, (IntPtr)null, 0, tmp33.Ptr, Emgu.CV.CvEnum.GEMM_TYPE.CV_GEMM_A_T);
+
+                TFT.SetZero();
+                //cvGEMM(tmp33,T1i,1,0,0,TFT);
+                cv.cvGEMM(tmp33.Ptr, T1i.Ptr, 1, (IntPtr)null, 0, TFT.Ptr, Emgu.CV.CvEnum.GEMM_TYPE.CV_GEMM_DEFAULT);
+
+                // Compute the right epipole e1 from F * e1 = 0
+                U.SetZero();
+                S.SetZero();
+                V.SetZero();
+
+                cv.cvSVD(TFT.Ptr, S.Ptr, U.Ptr, V.Ptr, Emgu.CV.CvEnum.SVD_TYPE.CV_SVD_DEFAULT);
+
+                scale = Math.Sqrt(V.Data[0, 2] * V.Data[0, 2] + V.Data[1, 2] * V.Data[1, 2]);
+
+                e1.Data[0, 0] = V.Data[0, 2] / scale;
+                e1.Data[1, 0] = V.Data[1, 2] / scale;
+                e1.Data[2, 0] = V.Data[2, 2] / scale;
+
+                if (e1.Data[2, 0] < 0)
+                {
+                    e1.Data[0, 0] = -e1.Data[0, 0];
+                    e1.Data[1, 0] = -e1.Data[1, 0];
+                    e1.Data[2, 0] = -e1.Data[2, 0];
+                }
+
+                // Compute the left epipole e2 from e2' * F = 0  =>  F' * e2 = 0
+                TFTt.SetZero();
+                cv.cvTranspose(TFT.Ptr, TFTt.Ptr);
+
+                U.SetZero();
+                S.SetZero();
+                V.SetZero();
+
+                cv.cvSVD(TFTt.Ptr, S.Ptr, U.Ptr, V.Ptr, Emgu.CV.CvEnum.SVD_TYPE.CV_SVD_DEFAULT);
+
+                e2.SetZero();
+
+                scale = Math.Sqrt(V.Data[0, 2] * V.Data[0, 2] + V.Data[1, 2] * V.Data[1, 2]);
+
+                e2.Data[0, 0] = V.Data[0, 2] / scale;
+                e2.Data[1, 0] = V.Data[1, 2] / scale;
+                e2.Data[2, 0] = V.Data[2, 2] / scale;
+
+                if (e2.Data[2, 0] < 0)
+                {
+                    e2.Data[0, 0] = -e1.Data[0, 0];
+                    e2.Data[1, 0] = -e1.Data[1, 0];
+                    e2.Data[2, 0] = -e1.Data[2, 0];
+                }
+
+                // Replace F by R2 * F * R1'
+                R1.SetZero();
+                R1.Data[0, 0] = e1.Data[0, 0];
+                R1.Data[0, 1] = e1.Data[1, 0];
+                R1.Data[1, 0] = -e1.Data[1, 0];
+                R1.Data[1, 1] = e1.Data[0, 0];
+                R1.Data[2, 2] = 1;
+
+                R2.SetZero();
+                R2.Data[0, 0] = e2.Data[0, 0];
+                R2.Data[0, 1] = e2.Data[1, 0];
+                R2.Data[1, 0] = -e2.Data[1, 0];
+                R2.Data[1, 1] = e2.Data[0, 0];
+                R2.Data[2, 2] = 1;
+
+                cv.cvGEMM(R2.Ptr, TFT.Ptr, 1, (IntPtr)null, 0, tmp33.Ptr, Emgu.CV.CvEnum.GEMM_TYPE.CV_GEMM_DEFAULT);
+
+                cv.cvGEMM(tmp33.Ptr, R1.Ptr, 1, (IntPtr)null, 0, RTFTR.Ptr, Emgu.CV.CvEnum.GEMM_TYPE.CV_GEMM_B_T);
+
+                // Set f1 = e1(3), f2 = e2(3), a = F22, b = F23, c = F32, d = F33
+                f1 = e1.Data[2, 0];
+                f2 = e2.Data[2, 0];
+                a = RTFTR.Data[1, 1];
+                b = RTFTR.Data[1, 2];
+                c = RTFTR.Data[2, 1];
+                d = RTFTR.Data[2, 2];
+
+                // Form the polynomial g(t) = k6*tâ¶ + k5*tâµ + k4*tâ´ + k3*tÂ³ + k2*tÂ² + k1*t + k0
+                // from f1, f2, a, b, c and d
+                polynomial.Data[0, 6] = +b * c * c * f1 * f1 * f1 * f1 * a - a * a * d * f1 * f1 * f1 * f1 * c;
+                polynomial.Data[0, 5] = +f2 * f2 * f2 * f2 * c * c * c * c + 2 * a * a * f2 * f2 * c * c - a * a * d * d * f1 * f1 * f1 * f1 + b * b * c * c * f1 * f1 * f1 * f1 + a * a * a * a;
+                polynomial.Data[0, 4] = +4 * a * a * a * b + 2 * b * c * c * f1 * f1 * a + 4 * f2 * f2 * f2 * f2 * c * c * c * d + 4 * a * b * f2 * f2 * c * c + 4 * a * a * f2 * f2 * c * d - 2 * a * a * d * f1 * f1 * c - a * d * d * f1 * f1 * f1 * f1 * b + b * b * c * f1 * f1 * f1 * f1 * d;
+                polynomial.Data[0, 3] = +6 * a * a * b * b + 6 * f2 * f2 * f2 * f2 * c * c * d * d + 2 * b * b * f2 * f2 * c * c + 2 * a * a * f2 * f2 * d * d - 2 * a * a * d * d * f1 * f1 + 2 * b * b * c * c * f1 * f1 + 8 * a * b * f2 * f2 * c * d;
+                polynomial.Data[0, 2] = +4 * a * b * b * b + 4 * b * b * f2 * f2 * c * d + 4 * f2 * f2 * f2 * f2 * c * d * d * d - a * a * d * c + b * c * c * a + 4 * a * b * f2 * f2 * d * d - 2 * a * d * d * f1 * f1 * b + 2 * b * b * c * f1 * f1 * d;
+                polynomial.Data[0, 1] = +f2 * f2 * f2 * f2 * d * d * d * d + b * b * b * b + 2 * b * b * f2 * f2 * d * d - a * a * d * d + b * b * c * c;
+                polynomial.Data[0, 0] = -a * d * d * b + b * b * c * d;
+
+                // Solve g(t) for t to get 6 roots
+                result.SetZero();
+                cv.cvSolvePoly(polynomial.Ptr, result.Ptr, 100, 20);
+
+                // Evaluate the cost function s(t) at the real part of the 6 roots
+                t_min = System.Double.MaxValue;
+
+                s_val = (1 / (f1 * f1)) + ((c * c) / (a * a + f2 * f2 * c * c));
+
+                for (int ti = 0; ti < 6; ++ti)
+                {
+
+                    //t = result->data.db[2*ti];
+                    t = result.Data[0, ti];
+
+                    s = (t * t) / (1 + f1 * f1 * t * t) + ((c * t + d) * (c * t + d)) / ((a * t + b) * (a * t + b) + f2 * f2 * (c * t + d) * (c * t + d));
+
+                    if (s < s_val)
+                    {
+                        s_val = s;
+                        t_min = t;
+                    }
+
+                }
+
+                // find the optimal x1 and y1 as the points on l1 and l2 closest to the origin
+                tmp31.Data[0, 0] = t_min * t_min * f1;
+                tmp31.Data[0, 1] = t_min;
+                tmp31.Data[0, 2] = t_min * t_min * f1 * f1 + 1;
+                tmp31.Data[0, 0] /= tmp31.Data[0, 2];
+                tmp31.Data[0, 1] /= tmp31.Data[0, 2];
+                tmp31.Data[0, 2] /= tmp31.Data[0, 2];
+
+                cv.cvGEMM(T1i.Ptr, R1.Ptr, 1, (IntPtr)null, 0, tmp33.Ptr, Emgu.CV.CvEnum.GEMM_TYPE.CV_GEMM_B_T);
+
+                cv.cvGEMM(tmp33.Ptr, tmp31.Ptr, 1, (IntPtr)null, 0, tmp31_2.Ptr, Emgu.CV.CvEnum.GEMM_TYPE.CV_GEMM_DEFAULT);
+
+                x1 = tmp31_2.Data[0, 0];
+                y1 = tmp31_2.Data[0, 1];
+
+                tmp31.Data[0, 0] = f2 * Math.Pow(c * t_min + d, 2);
+                tmp31.Data[0, 1] = -(a * t_min + b) * (c * t_min + d);
+                tmp31.Data[0, 2] = f2 * f2 * Math.Pow(c * t_min + d, 2) + Math.Pow(a * t_min + b, 2);
+                tmp31.Data[0, 0] /= tmp31.Data[0, 2];
+                tmp31.Data[0, 1] /= tmp31.Data[0, 2];
+                tmp31.Data[0, 2] /= tmp31.Data[0, 2];
+
+                cv.cvGEMM(T2i.Ptr, R2.Ptr, 1, (IntPtr)null, 0, tmp33.Ptr, Emgu.CV.CvEnum.GEMM_TYPE.CV_GEMM_B_T);
+
+                cv.cvGEMM(tmp33.Ptr, tmp31.Ptr, 1, (IntPtr)null, 0, tmp31_2.Ptr, Emgu.CV.CvEnum.GEMM_TYPE.CV_GEMM_DEFAULT);
+
+                x2 = tmp31.Data[0, 0];
+                y2 = tmp31.Data[0, 1];
+
+                // Return the points in the matrix format that the user wants
+                points1[p].X = (float)x1;
+                points1[p].Y = (float)y1;
+                points2[p].X = (float)x2;
+                points2[p].Y = (float)y2;
+            }
+
+            //if( new_points1 )
+            //    cvConvert( points1, new_points1 );
+            //if( new_points2 )
+            //    cvConvert( points2, new_points2 );
+        }
 
         private void triangulate(Matrix<double> projMatr1, Matrix<double> projMatr2, System.Drawing.PointF[] projPoints1, System.Drawing.PointF[] projPoints2, Matrix<double>[] points4D)
         {
@@ -1017,13 +1110,12 @@ private void cvCorrectMatches(CvMat *points1_, CvMat *points2_, CvMat *new_point
             /* We can compute reprojection error if need */
             //{
             //    int i;
-
+            
             Matrix<double>[] point3D = new Matrix<double>[points4D.Length];
+            //double[] point3D_dat = new double[4];
+            //Matrix<double> point3D = new Matrix<double>(4,1);
 
-            //double point3D_dat[4];
-            //point3D = cvMat(4,1,CV_64F,point3D_dat);
-
-            //Matrix<double> point2D = new Matrix<double>(3, 1);
+            Matrix<double> point2D = new Matrix<double>(3, 1);
             //double point2D_dat[3];
             //point2D = cvMat(3,1,CV_64F,point2D_dat);
 
@@ -1038,24 +1130,26 @@ private void cvCorrectMatches(CvMat *points1_, CvMat *points2_, CvMat *new_point
                 points4D[i].Data[2, 0] = points4D[i].Data[2, 0] / W;
                 points4D[i].Data[3, 0] = 1;
 
-                //        /* !!! Project this point for each camera */
-                //        for (int currCamera = 0; currCamera < 2; currCamera++)
-                //        {
-                //            cvMatMul(projMatrs[currCamera], &point3D, &point2D);
+                /* !!! Project this point for each camera */
+                for (int currCamera = 0; currCamera < 2; currCamera++)
+                {
+                    point2D = projMatrs[currCamera] * points4D[i];
 
-                //            float x, y;
-                //            float xr, yr, wr;
-                //            x = (float)cvmGet(projPoints[currCamera], 0, i);
-                //            y = (float)cvmGet(projPoints[currCamera], 1, i);
+                    //cvMatMul(projMatrs[currCamera], &point3D, &point2D);
 
-                //            wr = (float)point2D_dat[2];
-                //            xr = (float)(point2D_dat[0] / wr);
-                //            yr = (float)(point2D_dat[1] / wr);
+                    float x, y;
+                    float xr, yr, wr;
+                    x = projPoints[i][currCamera].X;
+                    y = projPoints[i][currCamera].Y;
 
-                //            float deltaX, deltaY;
-                //            deltaX = (float)fabs(x - xr);
-                //            deltaY = (float)fabs(y - yr);
-                //        }
+                    wr = (float)point2D.Data[2, 0];
+                    xr = (float)(point2D.Data[0, 0] / wr);
+                    yr = (float)(point2D.Data[1, 0] / wr);
+                    
+                    float deltaX, deltaY;
+                    deltaX = (float)Math.Abs(x - xr);
+                    deltaY = (float)Math.Abs(y - yr);
+                }
                 //
             }
 
