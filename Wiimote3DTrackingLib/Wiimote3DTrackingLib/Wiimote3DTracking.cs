@@ -45,6 +45,12 @@ namespace Wiimote3DTrackingLib
         private int capCount = 0;
         private int stereoCapCount = 0;
 
+        // The Q matrix will be generated during the stereo calibration
+        // and used to reconstruct the 3D location of an IR point from 
+        // its location in the viewer
+        Matrix<double> Q = new Matrix<double>(4, 4);
+
+
 
         // Some test points for testing stereo calibration 
         public PointF[][] tp1 = new PointF[17][] {
@@ -373,7 +379,7 @@ namespace Wiimote3DTrackingLib
             Matrix<double> R2 = new Matrix<double>(3, 3);
             Matrix<double> P1 = new Matrix<double>(3, 4);
             Matrix<double> P2 = new Matrix<double>(3, 4);
-            Matrix<double> Q = new Matrix<double>(4, 4);
+            //Matrix<double> Q = new Matrix<double>(4, 4);
 
             int maxIters = 100;
 
@@ -425,6 +431,9 @@ namespace Wiimote3DTrackingLib
                 out essentialMat);
 
             wm2.WiimoteState.CameraCalibInfo.StereoCamExtrinsic = wm1.WiimoteState.CameraCalibInfo.StereoCamExtrinsic;
+             
+            Rectangle roi1 = new Rectangle();
+            Rectangle roi2 = new Rectangle();
 
             Emgu.CV.CvInvoke.cvStereoRectify(wm1.WiimoteState.CameraCalibInfo.CamIntrinsic.IntrinsicMatrix.Ptr,
                 wm2.WiimoteState.CameraCalibInfo.CamIntrinsic.IntrinsicMatrix.Ptr,
@@ -438,7 +447,11 @@ namespace Wiimote3DTrackingLib
                 P1.Ptr,
                 P2.Ptr,
                 Q.Ptr,
-                Emgu.CV.CvEnum.STEREO_RECTIFY_TYPE.CALIB_ZERO_DISPARITY);
+                Emgu.CV.CvEnum.STEREO_RECTIFY_TYPE.CALIB_ZERO_DISPARITY,
+                -1.0,
+                Size.Empty,
+                ref roi1,
+                ref roi2);
                 
         }
 
@@ -452,7 +465,7 @@ namespace Wiimote3DTrackingLib
             Matrix<double> R2 = new Matrix<double>(3, 3);
             Matrix<double> P1 = new Matrix<double>(3, 4);
             Matrix<double> P2 = new Matrix<double>(3, 4);
-            Matrix<double> Q = new Matrix<double>(4, 4);
+            //Matrix<double> Q = new Matrix<double>(4, 4);
 
             int maxIters = 100;
 
@@ -495,21 +508,78 @@ namespace Wiimote3DTrackingLib
 
             wm2.WiimoteState.CameraCalibInfo.StereoCamExtrinsic = wm1.WiimoteState.CameraCalibInfo.StereoCamExtrinsic;
 
+            //Emgu.CV.CvInvoke.cvStereoRectify(wm1.WiimoteState.CameraCalibInfo.CamIntrinsic.IntrinsicMatrix.Ptr,
+            //    wm2.WiimoteState.CameraCalibInfo.CamIntrinsic.IntrinsicMatrix.Ptr,
+            //    wm1.WiimoteState.CameraCalibInfo.CamIntrinsic.DistortionCoeffs.Ptr,
+            //    wm2.WiimoteState.CameraCalibInfo.CamIntrinsic.DistortionCoeffs.Ptr,
+            //    wiimoteCamSize,
+            //    wm1.WiimoteState.CameraCalibInfo.StereoCamExtrinsic.RotationVector.Ptr,
+            //    wm1.WiimoteState.CameraCalibInfo.StereoCamExtrinsic.TranslationVector.Ptr,
+            //    R1.Ptr,
+            //    R2.Ptr,
+            //    P1.Ptr,
+            //    P2.Ptr,
+            //    Q.Ptr,
+            //    Emgu.CV.CvEnum.STEREO_RECTIFY_TYPE.CALIB_ZERO_DISPARITY);
+
+            Rectangle roi1 = new Rectangle();
+            Rectangle roi2 = new Rectangle();
+
             Emgu.CV.CvInvoke.cvStereoRectify(wm1.WiimoteState.CameraCalibInfo.CamIntrinsic.IntrinsicMatrix.Ptr,
-                wm2.WiimoteState.CameraCalibInfo.CamIntrinsic.IntrinsicMatrix.Ptr,
-                wm1.WiimoteState.CameraCalibInfo.CamIntrinsic.DistortionCoeffs.Ptr,
-                wm2.WiimoteState.CameraCalibInfo.CamIntrinsic.DistortionCoeffs.Ptr,
-                wiimoteCamSize,
-                wm1.WiimoteState.CameraCalibInfo.StereoCamExtrinsic.RotationVector.Ptr,
-                wm1.WiimoteState.CameraCalibInfo.StereoCamExtrinsic.TranslationVector.Ptr,
-                R1.Ptr,
-                R2.Ptr,
-                P1.Ptr,
-                P2.Ptr,
-                Q.Ptr,
-                Emgu.CV.CvEnum.STEREO_RECTIFY_TYPE.CALIB_ZERO_DISPARITY);
+                            wm2.WiimoteState.CameraCalibInfo.CamIntrinsic.IntrinsicMatrix.Ptr,
+                            wm1.WiimoteState.CameraCalibInfo.CamIntrinsic.DistortionCoeffs.Ptr,
+                            wm2.WiimoteState.CameraCalibInfo.CamIntrinsic.DistortionCoeffs.Ptr,
+                            wiimoteCamSize,
+                            wm1.WiimoteState.CameraCalibInfo.StereoCamExtrinsic.RotationVector.Ptr,
+                            wm1.WiimoteState.CameraCalibInfo.StereoCamExtrinsic.TranslationVector.Ptr,
+                            R1.Ptr,
+                            R2.Ptr,
+                            P1.Ptr,
+                            P2.Ptr,
+                            Q.Ptr,
+                            Emgu.CV.CvEnum.STEREO_RECTIFY_TYPE.CALIB_ZERO_DISPARITY,
+                            -1.0,
+                            Size.Empty,
+                            ref roi1,
+                            ref roi2);
 
         }
+
+        public void Location3D(Matrix<float>[] result3DPoints, PointF[] leftimagepoints, PointF[] rightimagepoints)
+        {
+
+            int i = 0;
+
+            //Emgu.CV.CvArray<float> XYDpoint;
+
+            Matrix<float> XYDpoint = new Matrix<float>(1, 3);
+
+            //Matrix<float>[] result3DPoints = new Matrix<float>[leftimagepoints.Length];
+
+            //Emgu.CV.Structure.MCvPoint3D32f[] result3DPoints = new Emgu.CV.Structure.MCvPoint3D32f[imagepoints.Length];
+
+            
+            for (i = 0; i < leftimagepoints.Length; i++)
+            {
+                //result3DPoints[i] = new Matrix<float>(1, 3);
+
+                // get the x-coordinate in the left camera
+                XYDpoint.Data[0, 0] = leftimagepoints[i].X;
+
+                // get the y-coordinate in the right camera
+                XYDpoint.Data[0, 1] = leftimagepoints[i].Y;
+
+                // the disparity between the points is the right camera x-coordinate
+                // subtracted from the left x-coordinate
+                XYDpoint.Data[0, 2] = leftimagepoints[i].X - rightimagepoints[i].X;
+
+                // Call cvPerspectiveTransform to ge the 3D location
+                CvInvoke.cvPerspectiveTransform(XYDpoint.Ptr, result3DPoints[i].Ptr, Q.Ptr);
+                
+            }
+
+        }
+
 
         /// <summary>
         /// Captures an image of the calibration square for use in calibration 
