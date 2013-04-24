@@ -48,6 +48,9 @@
             this.wm2IRLabel2 = new System.Windows.Forms.Label();
             this.wm2IRLabel1 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.Log3DCheckBox = new System.Windows.Forms.CheckBox();
+            this.LogUDCheckBox = new System.Windows.Forms.CheckBox();
+            this.LogRawCheckBox = new System.Windows.Forms.CheckBox();
             this.StopLoggingButton = new System.Windows.Forms.Button();
             this.StartLoggingButton = new System.Windows.Forms.Button();
             this.yCalibTextBox = new System.Windows.Forms.TextBox();
@@ -86,9 +89,20 @@
             this.NextCalImageButton = new System.Windows.Forms.Button();
             this.DeleteImageButton = new System.Windows.Forms.Button();
             this.CalibReviewLabel = new System.Windows.Forms.Label();
-            this.LogRawCheckBox = new System.Windows.Forms.CheckBox();
-            this.LogUDCheckBox = new System.Windows.Forms.CheckBox();
-            this.Log3DCheckBox = new System.Windows.Forms.CheckBox();
+            this.SaveStereoCalibImagesButton = new System.Windows.Forms.Button();
+            this.LoadStereoCalibImagesButton = new System.Windows.Forms.Button();
+            this.FrequencyLabel = new System.Windows.Forms.Label();
+            this.FreqInputTextBox = new System.Windows.Forms.TextBox();
+            this.EnlargeViewsButton = new System.Windows.Forms.Button();
+            this.ReduceViewsButton = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
+            this.ReduceWM1SensitivityButton = new System.Windows.Forms.Button();
+            this.IncreaseWM1SensitivityButton = new System.Windows.Forms.Button();
+            this.ReduceWM2SensitivityButton = new System.Windows.Forms.Button();
+            this.IncreaseWM2SensitivityButton = new System.Windows.Forms.Button();
+            this.label2 = new System.Windows.Forms.Label();
+            this.SaveSystemButton = new System.Windows.Forms.Button();
+            this.button3 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.wm1IRPictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.wm2IRPictureBox)).BeginInit();
             this.groupBox1.SuspendLayout();
@@ -121,7 +135,7 @@
             // IRpointslabel
             // 
             this.IRpointslabel.AutoSize = true;
-            this.IRpointslabel.Location = new System.Drawing.Point(88, 144);
+            this.IRpointslabel.Location = new System.Drawing.Point(81, 115);
             this.IRpointslabel.Name = "IRpointslabel";
             this.IRpointslabel.Size = new System.Drawing.Size(66, 13);
             this.IRpointslabel.TabIndex = 2;
@@ -129,7 +143,7 @@
             // 
             // countsrcsbutton
             // 
-            this.countsrcsbutton.Location = new System.Drawing.Point(7, 139);
+            this.countsrcsbutton.Location = new System.Drawing.Point(6, 110);
             this.countsrcsbutton.Name = "countsrcsbutton";
             this.countsrcsbutton.Size = new System.Drawing.Size(75, 23);
             this.countsrcsbutton.TabIndex = 3;
@@ -140,7 +154,7 @@
             // wm1IRPictureBox
             // 
             this.wm1IRPictureBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.wm1IRPictureBox.Location = new System.Drawing.Point(453, 1);
+            this.wm1IRPictureBox.Location = new System.Drawing.Point(460, 4);
             this.wm1IRPictureBox.Name = "wm1IRPictureBox";
             this.wm1IRPictureBox.Size = new System.Drawing.Size(385, 237);
             this.wm1IRPictureBox.TabIndex = 4;
@@ -149,7 +163,7 @@
             // wm1IRLabel1
             // 
             this.wm1IRLabel1.AutoSize = true;
-            this.wm1IRLabel1.Location = new System.Drawing.Point(290, 26);
+            this.wm1IRLabel1.Location = new System.Drawing.Point(291, 23);
             this.wm1IRLabel1.Name = "wm1IRLabel1";
             this.wm1IRLabel1.Size = new System.Drawing.Size(35, 13);
             this.wm1IRLabel1.TabIndex = 5;
@@ -158,7 +172,7 @@
             // wm1IRLabel2
             // 
             this.wm1IRLabel2.AutoSize = true;
-            this.wm1IRLabel2.Location = new System.Drawing.Point(290, 45);
+            this.wm1IRLabel2.Location = new System.Drawing.Point(291, 44);
             this.wm1IRLabel2.Name = "wm1IRLabel2";
             this.wm1IRLabel2.Size = new System.Drawing.Size(35, 13);
             this.wm1IRLabel2.TabIndex = 6;
@@ -167,7 +181,7 @@
             // wm1IRLabel3
             // 
             this.wm1IRLabel3.AutoSize = true;
-            this.wm1IRLabel3.Location = new System.Drawing.Point(290, 66);
+            this.wm1IRLabel3.Location = new System.Drawing.Point(291, 65);
             this.wm1IRLabel3.Name = "wm1IRLabel3";
             this.wm1IRLabel3.Size = new System.Drawing.Size(35, 13);
             this.wm1IRLabel3.TabIndex = 7;
@@ -176,7 +190,7 @@
             // wm1IRLabel4
             // 
             this.wm1IRLabel4.AutoSize = true;
-            this.wm1IRLabel4.Location = new System.Drawing.Point(290, 86);
+            this.wm1IRLabel4.Location = new System.Drawing.Point(291, 86);
             this.wm1IRLabel4.Name = "wm1IRLabel4";
             this.wm1IRLabel4.Size = new System.Drawing.Size(35, 13);
             this.wm1IRLabel4.TabIndex = 8;
@@ -193,9 +207,9 @@
             // 
             // CalibrateWM1Button
             // 
-            this.CalibrateWM1Button.Location = new System.Drawing.Point(6, 110);
+            this.CalibrateWM1Button.Location = new System.Drawing.Point(130, 81);
             this.CalibrateWM1Button.Name = "CalibrateWM1Button";
-            this.CalibrateWM1Button.Size = new System.Drawing.Size(137, 23);
+            this.CalibrateWM1Button.Size = new System.Drawing.Size(125, 23);
             this.CalibrateWM1Button.TabIndex = 10;
             this.CalibrateWM1Button.Text = "Calibrate Single Wiimote";
             this.CalibrateWM1Button.UseVisualStyleBackColor = true;
@@ -205,7 +219,7 @@
             // 
             this.ResetCalibButton.Location = new System.Drawing.Point(6, 81);
             this.ResetCalibButton.Name = "ResetCalibButton";
-            this.ResetCalibButton.Size = new System.Drawing.Size(137, 23);
+            this.ResetCalibButton.Size = new System.Drawing.Size(122, 23);
             this.ResetCalibButton.TabIndex = 11;
             this.ResetCalibButton.Text = "Reset Image Capture";
             this.ResetCalibButton.UseVisualStyleBackColor = true;
@@ -213,8 +227,9 @@
             // 
             // wm2IRPictureBox
             // 
+            this.wm2IRPictureBox.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.wm2IRPictureBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.wm2IRPictureBox.Location = new System.Drawing.Point(453, 363);
+            this.wm2IRPictureBox.Location = new System.Drawing.Point(460, 247);
             this.wm2IRPictureBox.Name = "wm2IRPictureBox";
             this.wm2IRPictureBox.Size = new System.Drawing.Size(385, 262);
             this.wm2IRPictureBox.TabIndex = 12;
@@ -222,9 +237,9 @@
             // 
             // StereoConnectButton
             // 
-            this.StereoConnectButton.Location = new System.Drawing.Point(6, 19);
+            this.StereoConnectButton.Location = new System.Drawing.Point(65, 21);
             this.StereoConnectButton.Name = "StereoConnectButton";
-            this.StereoConnectButton.Size = new System.Drawing.Size(174, 23);
+            this.StereoConnectButton.Size = new System.Drawing.Size(111, 23);
             this.StereoConnectButton.TabIndex = 13;
             this.StereoConnectButton.Text = "Connect 2";
             this.StereoConnectButton.UseVisualStyleBackColor = true;
@@ -232,7 +247,7 @@
             // 
             // DisconnectAllButton
             // 
-            this.DisconnectAllButton.Location = new System.Drawing.Point(6, 191);
+            this.DisconnectAllButton.Location = new System.Drawing.Point(3, 156);
             this.DisconnectAllButton.Name = "DisconnectAllButton";
             this.DisconnectAllButton.Size = new System.Drawing.Size(102, 23);
             this.DisconnectAllButton.TabIndex = 14;
@@ -243,7 +258,7 @@
             // wm2IRLabel4
             // 
             this.wm2IRLabel4.AutoSize = true;
-            this.wm2IRLabel4.Location = new System.Drawing.Point(290, 209);
+            this.wm2IRLabel4.Location = new System.Drawing.Point(369, 86);
             this.wm2IRLabel4.Name = "wm2IRLabel4";
             this.wm2IRLabel4.Size = new System.Drawing.Size(35, 13);
             this.wm2IRLabel4.TabIndex = 18;
@@ -252,7 +267,7 @@
             // wm2IRLabel3
             // 
             this.wm2IRLabel3.AutoSize = true;
-            this.wm2IRLabel3.Location = new System.Drawing.Point(290, 192);
+            this.wm2IRLabel3.Location = new System.Drawing.Point(369, 65);
             this.wm2IRLabel3.Name = "wm2IRLabel3";
             this.wm2IRLabel3.Size = new System.Drawing.Size(35, 13);
             this.wm2IRLabel3.TabIndex = 17;
@@ -261,7 +276,7 @@
             // wm2IRLabel2
             // 
             this.wm2IRLabel2.AutoSize = true;
-            this.wm2IRLabel2.Location = new System.Drawing.Point(290, 168);
+            this.wm2IRLabel2.Location = new System.Drawing.Point(369, 44);
             this.wm2IRLabel2.Name = "wm2IRLabel2";
             this.wm2IRLabel2.Size = new System.Drawing.Size(35, 13);
             this.wm2IRLabel2.TabIndex = 16;
@@ -270,7 +285,7 @@
             // wm2IRLabel1
             // 
             this.wm2IRLabel1.AutoSize = true;
-            this.wm2IRLabel1.Location = new System.Drawing.Point(290, 149);
+            this.wm2IRLabel1.Location = new System.Drawing.Point(369, 23);
             this.wm2IRLabel1.Name = "wm2IRLabel1";
             this.wm2IRLabel1.Size = new System.Drawing.Size(65, 13);
             this.wm2IRLabel1.TabIndex = 15;
@@ -278,6 +293,10 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.FreqInputTextBox);
+            this.groupBox1.Controls.Add(this.FrequencyLabel);
+            this.groupBox1.Controls.Add(this.LoadStereoCalibImagesButton);
+            this.groupBox1.Controls.Add(this.SaveStereoCalibImagesButton);
             this.groupBox1.Controls.Add(this.Log3DCheckBox);
             this.groupBox1.Controls.Add(this.LogUDCheckBox);
             this.groupBox1.Controls.Add(this.LogRawCheckBox);
@@ -295,18 +314,49 @@
             this.groupBox1.Controls.Add(this.ResetDualCalibButton);
             this.groupBox1.Controls.Add(this.dualcapturebutton);
             this.groupBox1.Controls.Add(this.StereoConnectButton);
-            this.groupBox1.Location = new System.Drawing.Point(6, 220);
+            this.groupBox1.Location = new System.Drawing.Point(6, 185);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(246, 372);
+            this.groupBox1.Size = new System.Drawing.Size(261, 407);
             this.groupBox1.TabIndex = 19;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Dual Wiimote Controls";
             // 
+            // Log3DCheckBox
+            // 
+            this.Log3DCheckBox.AutoSize = true;
+            this.Log3DCheckBox.Location = new System.Drawing.Point(173, 221);
+            this.Log3DCheckBox.Name = "Log3DCheckBox";
+            this.Log3DCheckBox.Size = new System.Drawing.Size(61, 17);
+            this.Log3DCheckBox.TabIndex = 29;
+            this.Log3DCheckBox.Text = "Log 3D";
+            this.Log3DCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // LogUDCheckBox
+            // 
+            this.LogUDCheckBox.AutoSize = true;
+            this.LogUDCheckBox.Location = new System.Drawing.Point(103, 221);
+            this.LogUDCheckBox.Name = "LogUDCheckBox";
+            this.LogUDCheckBox.Size = new System.Drawing.Size(63, 17);
+            this.LogUDCheckBox.TabIndex = 28;
+            this.LogUDCheckBox.Text = "Log UD";
+            this.LogUDCheckBox.UseVisualStyleBackColor = true;
+            // 
+            // LogRawCheckBox
+            // 
+            this.LogRawCheckBox.AutoSize = true;
+            this.LogRawCheckBox.Location = new System.Drawing.Point(27, 221);
+            this.LogRawCheckBox.Name = "LogRawCheckBox";
+            this.LogRawCheckBox.Size = new System.Drawing.Size(69, 17);
+            this.LogRawCheckBox.TabIndex = 27;
+            this.LogRawCheckBox.Text = "Log Raw";
+            this.LogRawCheckBox.UseVisualStyleBackColor = true;
+            // 
             // StopLoggingButton
             // 
-            this.StopLoggingButton.Location = new System.Drawing.Point(7, 343);
+            this.StopLoggingButton.Enabled = false;
+            this.StopLoggingButton.Location = new System.Drawing.Point(7, 269);
             this.StopLoggingButton.Name = "StopLoggingButton";
-            this.StopLoggingButton.Size = new System.Drawing.Size(172, 23);
+            this.StopLoggingButton.Size = new System.Drawing.Size(91, 23);
             this.StopLoggingButton.TabIndex = 26;
             this.StopLoggingButton.Text = "Stop Logging";
             this.StopLoggingButton.UseVisualStyleBackColor = true;
@@ -314,9 +364,9 @@
             // 
             // StartLoggingButton
             // 
-            this.StartLoggingButton.Location = new System.Drawing.Point(8, 314);
+            this.StartLoggingButton.Location = new System.Drawing.Point(6, 244);
             this.StartLoggingButton.Name = "StartLoggingButton";
-            this.StartLoggingButton.Size = new System.Drawing.Size(172, 23);
+            this.StartLoggingButton.Size = new System.Drawing.Size(91, 23);
             this.StartLoggingButton.TabIndex = 25;
             this.StartLoggingButton.Text = "Start Logging";
             this.StartLoggingButton.UseVisualStyleBackColor = true;
@@ -324,21 +374,21 @@
             // 
             // yCalibTextBox
             // 
-            this.yCalibTextBox.Location = new System.Drawing.Point(182, 106);
+            this.yCalibTextBox.Location = new System.Drawing.Point(182, 52);
             this.yCalibTextBox.Name = "yCalibTextBox";
             this.yCalibTextBox.Size = new System.Drawing.Size(52, 20);
             this.yCalibTextBox.TabIndex = 24;
             // 
             // xCalibTextBox
             // 
-            this.xCalibTextBox.Location = new System.Drawing.Point(124, 106);
+            this.xCalibTextBox.Location = new System.Drawing.Point(124, 52);
             this.xCalibTextBox.Name = "xCalibTextBox";
             this.xCalibTextBox.Size = new System.Drawing.Size(52, 20);
             this.xCalibTextBox.TabIndex = 23;
             // 
             // calibObjSizeButton
             // 
-            this.calibObjSizeButton.Location = new System.Drawing.Point(7, 104);
+            this.calibObjSizeButton.Location = new System.Drawing.Point(7, 50);
             this.calibObjSizeButton.Name = "calibObjSizeButton";
             this.calibObjSizeButton.Size = new System.Drawing.Size(111, 23);
             this.calibObjSizeButton.TabIndex = 22;
@@ -348,9 +398,10 @@
             // 
             // showTrackingFormButton
             // 
-            this.showTrackingFormButton.Location = new System.Drawing.Point(73, 249);
+            this.showTrackingFormButton.Enabled = false;
+            this.showTrackingFormButton.Location = new System.Drawing.Point(124, 377);
             this.showTrackingFormButton.Name = "showTrackingFormButton";
-            this.showTrackingFormButton.Size = new System.Drawing.Size(174, 23);
+            this.showTrackingFormButton.Size = new System.Drawing.Size(131, 23);
             this.showTrackingFormButton.TabIndex = 21;
             this.showTrackingFormButton.Text = "Show Tracking Form";
             this.showTrackingFormButton.UseVisualStyleBackColor = true;
@@ -358,9 +409,10 @@
             // 
             // StopTrackingButton
             // 
-            this.StopTrackingButton.Location = new System.Drawing.Point(72, 220);
+            this.StopTrackingButton.Enabled = false;
+            this.StopTrackingButton.Location = new System.Drawing.Point(151, 348);
             this.StopTrackingButton.Name = "StopTrackingButton";
-            this.StopTrackingButton.Size = new System.Drawing.Size(174, 23);
+            this.StopTrackingButton.Size = new System.Drawing.Size(104, 23);
             this.StopTrackingButton.TabIndex = 20;
             this.StopTrackingButton.Text = "Stop Tracking";
             this.StopTrackingButton.UseVisualStyleBackColor = true;
@@ -368,9 +420,10 @@
             // 
             // StartTrackingButton
             // 
-            this.StartTrackingButton.Location = new System.Drawing.Point(73, 191);
+            this.StartTrackingButton.Enabled = false;
+            this.StartTrackingButton.Location = new System.Drawing.Point(51, 348);
             this.StartTrackingButton.Name = "StartTrackingButton";
-            this.StartTrackingButton.Size = new System.Drawing.Size(173, 23);
+            this.StartTrackingButton.Size = new System.Drawing.Size(96, 23);
             this.StartTrackingButton.TabIndex = 19;
             this.StartTrackingButton.Text = "Begin Tracking";
             this.StartTrackingButton.UseVisualStyleBackColor = true;
@@ -378,9 +431,10 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(73, 162);
+            this.button2.Enabled = false;
+            this.button2.Location = new System.Drawing.Point(130, 319);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(173, 23);
+            this.button2.Size = new System.Drawing.Size(125, 23);
             this.button2.TabIndex = 18;
             this.button2.Text = "Test Stereo Calibration";
             this.button2.UseVisualStyleBackColor = true;
@@ -388,7 +442,7 @@
             // 
             // CalibrateStereoButton
             // 
-            this.CalibrateStereoButton.Location = new System.Drawing.Point(7, 133);
+            this.CalibrateStereoButton.Location = new System.Drawing.Point(30, 166);
             this.CalibrateStereoButton.Name = "CalibrateStereoButton";
             this.CalibrateStereoButton.Size = new System.Drawing.Size(173, 23);
             this.CalibrateStereoButton.TabIndex = 17;
@@ -399,7 +453,7 @@
             // captureTwoCountabel
             // 
             this.captureTwoCountabel.AutoSize = true;
-            this.captureTwoCountabel.Location = new System.Drawing.Point(124, 54);
+            this.captureTwoCountabel.Location = new System.Drawing.Point(121, 84);
             this.captureTwoCountabel.Name = "captureTwoCountabel";
             this.captureTwoCountabel.Size = new System.Drawing.Size(56, 13);
             this.captureTwoCountabel.TabIndex = 16;
@@ -407,9 +461,9 @@
             // 
             // ResetDualCalibButton
             // 
-            this.ResetDualCalibButton.Location = new System.Drawing.Point(7, 79);
+            this.ResetDualCalibButton.Location = new System.Drawing.Point(7, 137);
             this.ResetDualCalibButton.Name = "ResetDualCalibButton";
-            this.ResetDualCalibButton.Size = new System.Drawing.Size(173, 23);
+            this.ResetDualCalibButton.Size = new System.Drawing.Size(140, 23);
             this.ResetDualCalibButton.TabIndex = 15;
             this.ResetDualCalibButton.Text = "Reset Dual Image Capture";
             this.ResetDualCalibButton.UseVisualStyleBackColor = true;
@@ -417,7 +471,7 @@
             // 
             // dualcapturebutton
             // 
-            this.dualcapturebutton.Location = new System.Drawing.Point(7, 49);
+            this.dualcapturebutton.Location = new System.Drawing.Point(7, 79);
             this.dualcapturebutton.Name = "dualcapturebutton";
             this.dualcapturebutton.Size = new System.Drawing.Size(111, 23);
             this.dualcapturebutton.TabIndex = 14;
@@ -436,7 +490,7 @@
             this.groupBox2.Controls.Add(this.IRpointslabel);
             this.groupBox2.Location = new System.Drawing.Point(6, 6);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(246, 180);
+            this.groupBox2.Size = new System.Drawing.Size(261, 144);
             this.groupBox2.TabIndex = 20;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Single Wiimote Controls";
@@ -444,7 +498,7 @@
             // wm1IRSourceslabel
             // 
             this.wm1IRSourceslabel.AutoSize = true;
-            this.wm1IRSourceslabel.Location = new System.Drawing.Point(290, 111);
+            this.wm1IRSourceslabel.Location = new System.Drawing.Point(291, 107);
             this.wm1IRSourceslabel.Name = "wm1IRSourceslabel";
             this.wm1IRSourceslabel.Size = new System.Drawing.Size(35, 13);
             this.wm1IRSourceslabel.TabIndex = 21;
@@ -453,7 +507,7 @@
             // wm2IRSourceslabel
             // 
             this.wm2IRSourceslabel.AutoSize = true;
-            this.wm2IRSourceslabel.Location = new System.Drawing.Point(290, 234);
+            this.wm2IRSourceslabel.Location = new System.Drawing.Point(369, 107);
             this.wm2IRSourceslabel.Name = "wm2IRSourceslabel";
             this.wm2IRSourceslabel.Size = new System.Drawing.Size(35, 13);
             this.wm2IRSourceslabel.TabIndex = 22;
@@ -461,7 +515,7 @@
             // 
             // PrintPointsButton
             // 
-            this.PrintPointsButton.Location = new System.Drawing.Point(172, 191);
+            this.PrintPointsButton.Location = new System.Drawing.Point(186, 156);
             this.PrintPointsButton.Name = "PrintPointsButton";
             this.PrintPointsButton.Size = new System.Drawing.Size(75, 23);
             this.PrintPointsButton.TabIndex = 18;
@@ -476,7 +530,7 @@
             this.tabControl1.Location = new System.Drawing.Point(3, 1);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(281, 624);
+            this.tabControl1.Size = new System.Drawing.Size(281, 630);
             this.tabControl1.TabIndex = 23;
             // 
             // tabPage1
@@ -488,7 +542,7 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(273, 598);
+            this.tabPage1.Size = new System.Drawing.Size(273, 604);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Setup";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -637,7 +691,7 @@
             // 
             // ReviewButton
             // 
-            this.ReviewButton.Location = new System.Drawing.Point(293, 363);
+            this.ReviewButton.Location = new System.Drawing.Point(290, 162);
             this.ReviewButton.Name = "ReviewButton";
             this.ReviewButton.Size = new System.Drawing.Size(75, 23);
             this.ReviewButton.TabIndex = 0;
@@ -647,7 +701,7 @@
             // 
             // StopReviewButton
             // 
-            this.StopReviewButton.Location = new System.Drawing.Point(293, 393);
+            this.StopReviewButton.Location = new System.Drawing.Point(371, 162);
             this.StopReviewButton.Name = "StopReviewButton";
             this.StopReviewButton.Size = new System.Drawing.Size(75, 23);
             this.StopReviewButton.TabIndex = 24;
@@ -657,9 +711,9 @@
             // 
             // PrevCalImageButton
             // 
-            this.PrevCalImageButton.Location = new System.Drawing.Point(293, 422);
+            this.PrevCalImageButton.Location = new System.Drawing.Point(290, 191);
             this.PrevCalImageButton.Name = "PrevCalImageButton";
-            this.PrevCalImageButton.Size = new System.Drawing.Size(32, 23);
+            this.PrevCalImageButton.Size = new System.Drawing.Size(35, 23);
             this.PrevCalImageButton.TabIndex = 25;
             this.PrevCalImageButton.Text = "<-";
             this.PrevCalImageButton.UseVisualStyleBackColor = true;
@@ -667,9 +721,9 @@
             // 
             // NextCalImageButton
             // 
-            this.NextCalImageButton.Location = new System.Drawing.Point(331, 421);
+            this.NextCalImageButton.Location = new System.Drawing.Point(330, 191);
             this.NextCalImageButton.Name = "NextCalImageButton";
-            this.NextCalImageButton.Size = new System.Drawing.Size(37, 23);
+            this.NextCalImageButton.Size = new System.Drawing.Size(35, 23);
             this.NextCalImageButton.TabIndex = 26;
             this.NextCalImageButton.Text = "->";
             this.NextCalImageButton.UseVisualStyleBackColor = true;
@@ -678,7 +732,7 @@
             // DeleteImageButton
             // 
             this.DeleteImageButton.Enabled = false;
-            this.DeleteImageButton.Location = new System.Drawing.Point(293, 452);
+            this.DeleteImageButton.Location = new System.Drawing.Point(371, 191);
             this.DeleteImageButton.Name = "DeleteImageButton";
             this.DeleteImageButton.Size = new System.Drawing.Size(75, 23);
             this.DeleteImageButton.TabIndex = 27;
@@ -689,48 +743,166 @@
             // CalibReviewLabel
             // 
             this.CalibReviewLabel.AutoSize = true;
-            this.CalibReviewLabel.Location = new System.Drawing.Point(293, 482);
+            this.CalibReviewLabel.Location = new System.Drawing.Point(287, 225);
             this.CalibReviewLabel.Name = "CalibReviewLabel";
             this.CalibReviewLabel.Size = new System.Drawing.Size(39, 13);
             this.CalibReviewLabel.TabIndex = 28;
             this.CalibReviewLabel.Text = "Image:";
             // 
-            // LogRawCheckBox
+            // SaveStereoCalibImagesButton
             // 
-            this.LogRawCheckBox.AutoSize = true;
-            this.LogRawCheckBox.Location = new System.Drawing.Point(8, 291);
-            this.LogRawCheckBox.Name = "LogRawCheckBox";
-            this.LogRawCheckBox.Size = new System.Drawing.Size(69, 17);
-            this.LogRawCheckBox.TabIndex = 27;
-            this.LogRawCheckBox.Text = "Log Raw";
-            this.LogRawCheckBox.UseVisualStyleBackColor = true;
+            this.SaveStereoCalibImagesButton.Enabled = false;
+            this.SaveStereoCalibImagesButton.Location = new System.Drawing.Point(7, 108);
+            this.SaveStereoCalibImagesButton.Name = "SaveStereoCalibImagesButton";
+            this.SaveStereoCalibImagesButton.Size = new System.Drawing.Size(91, 23);
+            this.SaveStereoCalibImagesButton.TabIndex = 30;
+            this.SaveStereoCalibImagesButton.Text = "Save Calib Im";
+            this.SaveStereoCalibImagesButton.UseVisualStyleBackColor = true;
+            this.SaveStereoCalibImagesButton.Click += new System.EventHandler(this.SaveStereoCalibImagesButton_Click);
             // 
-            // LogUDCheckBox
+            // LoadStereoCalibImagesButton
             // 
-            this.LogUDCheckBox.AutoSize = true;
-            this.LogUDCheckBox.Location = new System.Drawing.Point(84, 291);
-            this.LogUDCheckBox.Name = "LogUDCheckBox";
-            this.LogUDCheckBox.Size = new System.Drawing.Size(63, 17);
-            this.LogUDCheckBox.TabIndex = 28;
-            this.LogUDCheckBox.Text = "Log UD";
-            this.LogUDCheckBox.UseVisualStyleBackColor = true;
+            this.LoadStereoCalibImagesButton.Location = new System.Drawing.Point(104, 108);
+            this.LoadStereoCalibImagesButton.Name = "LoadStereoCalibImagesButton";
+            this.LoadStereoCalibImagesButton.Size = new System.Drawing.Size(86, 23);
+            this.LoadStereoCalibImagesButton.TabIndex = 31;
+            this.LoadStereoCalibImagesButton.Text = "Load Calib Im";
+            this.LoadStereoCalibImagesButton.UseVisualStyleBackColor = true;
+            this.LoadStereoCalibImagesButton.Click += new System.EventHandler(this.LoadStereoCalibImagesButton_Click);
             // 
-            // Log3DCheckBox
+            // FrequencyLabel
             // 
-            this.Log3DCheckBox.AutoSize = true;
-            this.Log3DCheckBox.Location = new System.Drawing.Point(154, 291);
-            this.Log3DCheckBox.Name = "Log3DCheckBox";
-            this.Log3DCheckBox.Size = new System.Drawing.Size(61, 17);
-            this.Log3DCheckBox.TabIndex = 29;
-            this.Log3DCheckBox.Text = "Log 3D";
-            this.Log3DCheckBox.UseVisualStyleBackColor = true;
+            this.FrequencyLabel.AutoSize = true;
+            this.FrequencyLabel.Location = new System.Drawing.Point(103, 249);
+            this.FrequencyLabel.Name = "FrequencyLabel";
+            this.FrequencyLabel.Size = new System.Drawing.Size(55, 13);
+            this.FrequencyLabel.TabIndex = 32;
+            this.FrequencyLabel.Text = "Sample/s:";
+            // 
+            // FreqInputTextBox
+            // 
+            this.FreqInputTextBox.Location = new System.Drawing.Point(164, 246);
+            this.FreqInputTextBox.Name = "FreqInputTextBox";
+            this.FreqInputTextBox.Size = new System.Drawing.Size(39, 20);
+            this.FreqInputTextBox.TabIndex = 33;
+            this.FreqInputTextBox.Text = "2";
+            // 
+            // EnlargeViewsButton
+            // 
+            this.EnlargeViewsButton.Location = new System.Drawing.Point(328, 123);
+            this.EnlargeViewsButton.Name = "EnlargeViewsButton";
+            this.EnlargeViewsButton.Size = new System.Drawing.Size(23, 23);
+            this.EnlargeViewsButton.TabIndex = 29;
+            this.EnlargeViewsButton.Text = "+";
+            this.EnlargeViewsButton.UseVisualStyleBackColor = true;
+            this.EnlargeViewsButton.Click += new System.EventHandler(this.EnlargeViewsButton_Click);
+            // 
+            // ReduceViewsButton
+            // 
+            this.ReduceViewsButton.Location = new System.Drawing.Point(357, 123);
+            this.ReduceViewsButton.Name = "ReduceViewsButton";
+            this.ReduceViewsButton.Size = new System.Drawing.Size(23, 23);
+            this.ReduceViewsButton.TabIndex = 30;
+            this.ReduceViewsButton.Text = "-";
+            this.ReduceViewsButton.UseVisualStyleBackColor = true;
+            this.ReduceViewsButton.Click += new System.EventHandler(this.ReduceViewsButton_Click);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(291, 258);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(136, 13);
+            this.label1.TabIndex = 31;
+            this.label1.Text = "Adjust Wiimote 1 Sensitivity";
+            // 
+            // ReduceWM1SensitivityButton
+            // 
+            this.ReduceWM1SensitivityButton.Location = new System.Drawing.Point(357, 282);
+            this.ReduceWM1SensitivityButton.Name = "ReduceWM1SensitivityButton";
+            this.ReduceWM1SensitivityButton.Size = new System.Drawing.Size(35, 23);
+            this.ReduceWM1SensitivityButton.TabIndex = 33;
+            this.ReduceWM1SensitivityButton.Text = "-";
+            this.ReduceWM1SensitivityButton.UseVisualStyleBackColor = true;
+            this.ReduceWM1SensitivityButton.Click += new System.EventHandler(this.ReduceWM1SensitivityButton_Click);
+            // 
+            // IncreaseWM1SensitivityButton
+            // 
+            this.IncreaseWM1SensitivityButton.Location = new System.Drawing.Point(319, 282);
+            this.IncreaseWM1SensitivityButton.Name = "IncreaseWM1SensitivityButton";
+            this.IncreaseWM1SensitivityButton.Size = new System.Drawing.Size(35, 23);
+            this.IncreaseWM1SensitivityButton.TabIndex = 32;
+            this.IncreaseWM1SensitivityButton.Text = "+";
+            this.IncreaseWM1SensitivityButton.UseVisualStyleBackColor = true;
+            this.IncreaseWM1SensitivityButton.Click += new System.EventHandler(this.IncreaseWM1SensitivityButton_Click);
+            // 
+            // ReduceWM2SensitivityButton
+            // 
+            this.ReduceWM2SensitivityButton.Location = new System.Drawing.Point(357, 345);
+            this.ReduceWM2SensitivityButton.Name = "ReduceWM2SensitivityButton";
+            this.ReduceWM2SensitivityButton.Size = new System.Drawing.Size(35, 23);
+            this.ReduceWM2SensitivityButton.TabIndex = 36;
+            this.ReduceWM2SensitivityButton.Text = "-";
+            this.ReduceWM2SensitivityButton.UseVisualStyleBackColor = true;
+            this.ReduceWM2SensitivityButton.Click += new System.EventHandler(this.ReduceWM2SensitivityButton_Click);
+            // 
+            // IncreaseWM2SensitivityButton
+            // 
+            this.IncreaseWM2SensitivityButton.Location = new System.Drawing.Point(319, 345);
+            this.IncreaseWM2SensitivityButton.Name = "IncreaseWM2SensitivityButton";
+            this.IncreaseWM2SensitivityButton.Size = new System.Drawing.Size(35, 23);
+            this.IncreaseWM2SensitivityButton.TabIndex = 35;
+            this.IncreaseWM2SensitivityButton.Text = "+";
+            this.IncreaseWM2SensitivityButton.UseVisualStyleBackColor = true;
+            this.IncreaseWM2SensitivityButton.Click += new System.EventHandler(this.IncreaseWM2SensitivityButton_Click);
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(291, 321);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(136, 13);
+            this.label2.TabIndex = 34;
+            this.label2.Text = "Adjust Wiimote 2 Sensitivity";
+            // 
+            // SaveSystemButton
+            // 
+            this.SaveSystemButton.Enabled = false;
+            this.SaveSystemButton.Location = new System.Drawing.Point(286, 391);
+            this.SaveSystemButton.Name = "SaveSystemButton";
+            this.SaveSystemButton.Size = new System.Drawing.Size(160, 23);
+            this.SaveSystemButton.TabIndex = 37;
+            this.SaveSystemButton.Text = "Save System";
+            this.SaveSystemButton.UseVisualStyleBackColor = true;
+            this.SaveSystemButton.Click += new System.EventHandler(this.SaveSystemButton_Click);
+            // 
+            // button3
+            // 
+            this.button3.Enabled = false;
+            this.button3.Location = new System.Drawing.Point(286, 420);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(160, 23);
+            this.button3.TabIndex = 38;
+            this.button3.Text = "Load System";
+            this.button3.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
-            this.ClientSize = new System.Drawing.Size(850, 633);
+            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.ClientSize = new System.Drawing.Size(855, 639);
+            this.Controls.Add(this.button3);
+            this.Controls.Add(this.SaveSystemButton);
+            this.Controls.Add(this.ReduceWM2SensitivityButton);
+            this.Controls.Add(this.IncreaseWM2SensitivityButton);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.ReduceWM1SensitivityButton);
+            this.Controls.Add(this.IncreaseWM1SensitivityButton);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.ReduceViewsButton);
+            this.Controls.Add(this.EnlargeViewsButton);
             this.Controls.Add(this.CalibReviewLabel);
             this.Controls.Add(this.DeleteImageButton);
             this.Controls.Add(this.NextCalImageButton);
@@ -830,6 +1002,20 @@
         private System.Windows.Forms.CheckBox Log3DCheckBox;
         private System.Windows.Forms.CheckBox LogUDCheckBox;
         private System.Windows.Forms.CheckBox LogRawCheckBox;
+        private System.Windows.Forms.Button SaveStereoCalibImagesButton;
+        private System.Windows.Forms.Button LoadStereoCalibImagesButton;
+        private System.Windows.Forms.TextBox FreqInputTextBox;
+        private System.Windows.Forms.Label FrequencyLabel;
+        private System.Windows.Forms.Button EnlargeViewsButton;
+        private System.Windows.Forms.Button ReduceViewsButton;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button ReduceWM1SensitivityButton;
+        private System.Windows.Forms.Button IncreaseWM1SensitivityButton;
+        private System.Windows.Forms.Button ReduceWM2SensitivityButton;
+        private System.Windows.Forms.Button IncreaseWM2SensitivityButton;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Button SaveSystemButton;
+        private System.Windows.Forms.Button button3;
     }
 }
 

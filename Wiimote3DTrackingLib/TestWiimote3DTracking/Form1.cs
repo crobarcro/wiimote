@@ -7,6 +7,9 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
+using System.IO;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Windows.Forms;
 using WiimoteLib;
 using Wiimote3DTrackingLib;
@@ -24,13 +27,19 @@ namespace TestWiimote3DTracking
 
         Wiimote3DTrackingLib.StereoTracking wiitrack;
 
+        const double MAX_DRAWSCALE = 2.0;
+        const double DRAWSCALE_ENLARGE_AMOUNT = 0.05;
+
         private Double drawscale = 0.4;
+
+
         private Double drawx = new Double();
         private  Double drawy = new Double();
         private Bitmap b1;
         private Bitmap b2;
         private Graphics g1;
         private Graphics g2;
+        private object _bitmaplocker = new object();
 
         private Guid _wm1ID;
         private Guid _wm2ID;
@@ -57,31 +66,12 @@ namespace TestWiimote3DTracking
         {
             InitializeComponent();
 
-            //drawx = drawscale * 1024;
-            //drawy = drawscale * 768;
-
-            drawx = drawscale * 1016;
-            drawy = drawscale * 760;
-
-            b1 = new Bitmap((int)drawx, (int)drawy, PixelFormat.Format24bppRgb);
-            b2 = new Bitmap((int)drawx, (int)drawy, PixelFormat.Format24bppRgb);
-            g1 = Graphics.FromImage(b1);
-            g2 = Graphics.FromImage(b2);
 
             wm1 = new Wiimote();
 
             wm2 = new Wiimote();
 
-            Size tempsize = new Size();
-
-            tempsize = this.wm1IRPictureBox.Size;
-            tempsize.Width = (int)drawx;
-            tempsize.Height = (int)drawy;
-
-            this.wm1IRPictureBox.Size = tempsize;
-            this.wm2IRPictureBox.Size = tempsize;
-
-            this.wm2IRPictureBox.Location = new System.Drawing.Point(this.wm1IRPictureBox.Location.X, this.wm1IRPictureBox.Location.Y + (int)(21 * this.wm1IRPictureBox.Size.Height / 20));
+            ResizeControls();
 
             wm1IRLabel1.Text = "No IR";
             wm1IRLabel2.Text = "No IR";
@@ -105,6 +95,51 @@ namespace TestWiimote3DTracking
             for (int i = 0; i < 4; i++)
             {
                 result3DPoints[i] = new Matrix<double>(4, 1);
+            }
+
+        }
+
+        private void ResizeControls()
+        {
+            //drawx = drawscale * 1024;
+            //drawy = drawscale * 768;
+
+            drawx = drawscale * 1016;
+            drawy = drawscale * 760;
+
+            lock (_bitmaplocker)
+            {
+
+                b1 = new Bitmap((int)(Math.Ceiling(drawx)), (int)(Math.Ceiling(drawy)), PixelFormat.Format24bppRgb);
+                b2 = new Bitmap((int)(Math.Ceiling(drawx)), (int)(Math.Ceiling(drawy)), PixelFormat.Format24bppRgb);
+                g1 = Graphics.FromImage(b1);
+                g2 = Graphics.FromImage(b2);
+
+                if (2 * (int)(Math.Ceiling(drawy)) + 15 > 630)
+                {
+                    this.tabControl1.Height = 2 * (int)(Math.Ceiling(drawy)) + 15;
+
+                    this.Height = this.tabControl1.Height + 5;
+                }
+                else
+                {
+                    this.tabControl1.Height = 630;
+
+                    this.Height = this.tabControl1.Height + 5;
+                }
+
+                Size tempsize = new Size();
+
+                tempsize = this.wm1IRPictureBox.Size;
+                tempsize.Width = (int)(Math.Ceiling(drawx));
+                tempsize.Height = (int)(Math.Ceiling(drawy));
+
+                this.wm1IRPictureBox.Size = tempsize;
+                this.wm2IRPictureBox.Size = tempsize;
+
+                this.wm1IRPictureBox.Location = new System.Drawing.Point(this.wm1IRPictureBox.Location.X, 5);
+                this.wm2IRPictureBox.Location = new System.Drawing.Point(this.wm1IRPictureBox.Location.X, this.wm1IRPictureBox.Location.Y + 5 + (int)(Math.Ceiling(drawy)));
+
             }
 
         }
@@ -184,6 +219,8 @@ namespace TestWiimote3DTracking
                 wiitrack.StereoCalibCapture(wm1, wm2);
 
                 this.captureTwoCountabel.Text = "Captured " + wiitrack.StereoCalibrateImageCount.ToString() + " Image Pairs";
+
+                this.SaveStereoCalibImagesButton.Enabled = true;
             }
             else
             {
@@ -248,6 +285,8 @@ namespace TestWiimote3DTracking
             wiitrack.ResetStereoCamCalibrateCapture();
 
             this.captureTwoCountabel.Text = "Captured " + wiitrack.CalibrateImageCount.ToString() + " Image Pairs";
+
+            this.SaveStereoCalibImagesButton.Enabled = false;
         }
 
         private void StereoConnectButton_Click(object sender, EventArgs e)
@@ -375,7 +414,12 @@ namespace TestWiimote3DTracking
 
             //_displayirpoints = false;
 
-            wiitrack.StartLogging(500.0, wm1, wm2, this.Log3DCheckBox.Checked, this.LogRawCheckBox.Checked, this.LogUDCheckBox.Checked, logfile);
+            wiitrack.StartLogging(1000.0 * 1.0 / (double.Parse(FreqInputTextBox.Text)), wm1, wm2, this.Log3DCheckBox.Checked, this.LogRawCheckBox.Checked, this.LogUDCheckBox.Checked, logfile);
+
+            this.StopLoggingButton.Enabled = true;
+
+            this.StartLoggingButton.Enabled = false;
+
         }
 
         private void StopLoggingButton_Click(object sender, EventArgs e)
@@ -383,6 +427,10 @@ namespace TestWiimote3DTracking
             wiitrack.StopLogging();
 
             _displayirpoints = true;
+
+            this.StartLoggingButton.Enabled = true;
+
+            this.StopLoggingButton.Enabled = false;
         }
 
 
@@ -487,9 +535,9 @@ namespace TestWiimote3DTracking
 
             DrawCross(g, calibpoints[1], penwidth, Color.Blue);
 
-            DrawCross(g, calibpoints[2], penwidth, Color.Black);
+            DrawCross(g, calibpoints[2], penwidth, Color.DarkGoldenrod);
 
-            DrawCross(g, calibpoints[3], penwidth, Color.Purple);
+            DrawCross(g, calibpoints[3], penwidth, Color.DarkGreen);
 
         }
 
@@ -534,6 +582,264 @@ namespace TestWiimote3DTracking
             CalibReviewLabel.Text = "Image: " + (calibimageviewidx + 1).ToString();
 
             captureTwoCountabel.Text = "Captured " + wiitrack.StereoCalibrateImageCount.ToString() + " Image Pairs";
+        }
+
+        private void SaveStereoCalibImagesButton_Click(object sender, EventArgs e)
+        {
+            if (wiitrack.StereoCalibrateImageCount > 0)
+            {
+                string calibimagefile = "test_save.csv";
+
+                SaveFileDialog openFileDialog1 = new SaveFileDialog();
+
+                openFileDialog1.InitialDirectory = Directory.GetCurrentDirectory();
+                openFileDialog1.Filter = "Comma-separated values file (*.csv)|*.csv|All files (*.*)|*.*";
+                openFileDialog1.FilterIndex = 1;
+                openFileDialog1.RestoreDirectory = false;
+
+                if (openFileDialog1.ShowDialog() == DialogResult.OK)
+                {
+                    calibimagefile = openFileDialog1.FileName;
+                }
+
+                wiitrack.SaveStereoCalibrationImages(calibimagefile);
+            }
+            else
+            {
+                MessageBox.Show("No calibration images to save!");
+            }
+
+        }
+
+        private void LoadStereoCalibImagesButton_Click(object sender, EventArgs e)
+        {
+
+            string calibimagefile = "test_save.csv";
+
+            OpenFileDialog openFileDialog1 = new OpenFileDialog();
+
+            openFileDialog1.InitialDirectory = Directory.GetCurrentDirectory();
+            openFileDialog1.Filter = "Comma-separated values file (*.csv)|*.csv|All files (*.*)|*.*";
+            openFileDialog1.FilterIndex = 1;
+            openFileDialog1.RestoreDirectory = false;
+
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                calibimagefile = openFileDialog1.FileName;
+            }
+
+            wiitrack.LoadStereoCalibrationImages(calibimagefile);
+
+        }
+
+        private void EnlargeViewsButton_Click(object sender, EventArgs e)
+        {
+            if (drawscale <= MAX_DRAWSCALE)
+            {
+                drawscale = drawscale + DRAWSCALE_ENLARGE_AMOUNT;
+
+                ResizeControls();
+            }
+        }
+
+        private void ReduceViewsButton_Click(object sender, EventArgs e)
+        {
+            if (drawscale > 0 + DRAWSCALE_ENLARGE_AMOUNT)
+            {
+                drawscale = drawscale - DRAWSCALE_ENLARGE_AMOUNT;
+
+                ResizeControls();
+
+            }
+        }
+
+        private void IncreaseWM1SensitivityButton_Click(object sender, EventArgs e)
+        {
+            if (wm1.WiimoteState.ConnectionState == WiimoteLib.ConnectionState.Connected)
+            {
+                switch (wm1.WiimoteState.IRState.Sensitivity)
+                {
+                    case IRSensitivity.WiiLevel1:
+                        wm1.SetIRSensitivity(IRSensitivity.WiiLevel2);
+                        break;
+                    case IRSensitivity.WiiLevel2:
+                        wm1.SetIRSensitivity(IRSensitivity.WiiLevel3);
+                        break;
+                    case IRSensitivity.WiiLevel3:
+                        wm1.SetIRSensitivity(IRSensitivity.WiiLevel4);
+                        break;
+                    case IRSensitivity.WiiLevel4:
+                        wm1.SetIRSensitivity(IRSensitivity.WiiLevel5);
+                        break;
+                    case IRSensitivity.WiiLevel5:
+                        wm1.SetIRSensitivity(IRSensitivity.Maximum);
+                        break;
+                    default:
+                        break;
+
+                }
+
+            }
+        }
+
+        private void ReduceWM1SensitivityButton_Click(object sender, EventArgs e)
+        {
+            if (wm1.WiimoteState.ConnectionState == WiimoteLib.ConnectionState.Connected)
+            {
+                switch (wm1.WiimoteState.IRState.Sensitivity)
+                {
+                    case IRSensitivity.WiiLevel1:
+                        // do nothing
+                        break;
+                    case IRSensitivity.WiiLevel2:
+                        wm1.SetIRSensitivity(IRSensitivity.WiiLevel1);
+                        break;
+                    case IRSensitivity.WiiLevel3:
+                        wm1.SetIRSensitivity(IRSensitivity.WiiLevel2);
+                        break;
+                    case IRSensitivity.WiiLevel4:
+                        wm1.SetIRSensitivity(IRSensitivity.WiiLevel3);
+                        break;
+                    case IRSensitivity.WiiLevel5:
+                        wm1.SetIRSensitivity(IRSensitivity.WiiLevel4);
+                        break;
+                    case IRSensitivity.Maximum:
+                        wm1.SetIRSensitivity(IRSensitivity.WiiLevel5);
+                        break;
+                    default:
+                        break;
+                }
+
+            }
+        }
+
+        private void IncreaseWM2SensitivityButton_Click(object sender, EventArgs e)
+        {
+            if (wm2.WiimoteState.ConnectionState == WiimoteLib.ConnectionState.Connected)
+            {
+                switch (wm2.WiimoteState.IRState.Sensitivity)
+                {
+                    case IRSensitivity.WiiLevel1:
+                        wm2.SetIRSensitivity(IRSensitivity.WiiLevel2);
+                        break;
+                    case IRSensitivity.WiiLevel2:
+                        wm2.SetIRSensitivity(IRSensitivity.WiiLevel3);
+                        break;
+                    case IRSensitivity.WiiLevel3:
+                        wm2.SetIRSensitivity(IRSensitivity.WiiLevel4);
+                        break;
+                    case IRSensitivity.WiiLevel4:
+                        wm2.SetIRSensitivity(IRSensitivity.WiiLevel5);
+                        break;
+                    case IRSensitivity.WiiLevel5:
+                        wm2.SetIRSensitivity(IRSensitivity.Maximum);
+                        break;
+                    default:
+                        break;
+
+                }
+
+            }
+        }
+
+        private void ReduceWM2SensitivityButton_Click(object sender, EventArgs e)
+        {
+            if (wm2.WiimoteState.ConnectionState == WiimoteLib.ConnectionState.Connected)
+            {
+                switch (wm2.WiimoteState.IRState.Sensitivity)
+                {
+                    case IRSensitivity.WiiLevel1:
+                        // do nothing
+                        break;
+                    case IRSensitivity.WiiLevel2:
+                        wm2.SetIRSensitivity(IRSensitivity.WiiLevel1);
+                        break;
+                    case IRSensitivity.WiiLevel3:
+                        wm2.SetIRSensitivity(IRSensitivity.WiiLevel2);
+                        break;
+                    case IRSensitivity.WiiLevel4:
+                        wm2.SetIRSensitivity(IRSensitivity.WiiLevel3);
+                        break;
+                    case IRSensitivity.WiiLevel5:
+                        wm2.SetIRSensitivity(IRSensitivity.WiiLevel4);
+                        break;
+                    case IRSensitivity.Maximum:
+                        wm2.SetIRSensitivity(IRSensitivity.WiiLevel5);
+                        break;
+                    default:
+                        break;
+                }
+
+            }
+        }
+
+
+        private void SaveSystemButton_Click(object sender, EventArgs e)
+        {
+            string filename;
+
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+
+            saveFileDialog1.InitialDirectory = Directory.GetCurrentDirectory();
+            saveFileDialog1.Filter = "Data file (*.dat)|*.dat|All files (*.*)|*.*";
+            saveFileDialog1.FilterIndex = 1;
+            saveFileDialog1.RestoreDirectory = false;
+
+            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                filename = saveFileDialog1.FileName;
+
+                Stream s = File.Open(filename, FileMode.Create);
+
+                BinaryFormatter b = new BinaryFormatter();
+
+                b.Serialize(s, wiitrack);
+
+                s.Close();
+            }
+            else
+            {
+                return;
+            }
+
+        }
+
+
+        private void showTrackingFormButton_Click(object sender, EventArgs e)
+        {
+            TForm.Show();
+        }
+
+
+        private void calibObjSizeButton_Click(object sender, EventArgs e)
+        {
+            float Width;
+            float Height;
+
+            try
+            {
+                Width = float.Parse(xCalibTextBox.Text);
+            }
+            catch
+            {
+                MessageBox.Show("Invalid Width");
+                return;
+            }
+
+            try
+            {
+                Height = float.Parse(yCalibTextBox.Text);
+            }
+            catch
+            {
+                MessageBox.Show("Invalid Height");
+                return;
+            }
+
+            wiitrack.setCalibObjSize(Width, Height);
+
+            this.captureTwoCountabel.Text = "Captured " + wiitrack.CalibrateImageCount.ToString() + " Image Pairs";
+
         }
 
         #endregion
@@ -1050,43 +1356,6 @@ namespace TestWiimote3DTracking
         }
 
         #endregion
-
-        private void showTrackingFormButton_Click(object sender, EventArgs e)
-        {
-            TForm.Show();
-        }
-
-
-        private void calibObjSizeButton_Click(object sender, EventArgs e)
-        {
-            float Width;
-            float Height;
-
-            try
-            {
-                Width = float.Parse(xCalibTextBox.Text);
-            }
-            catch
-            {
-                MessageBox.Show("Invalid Width");
-                return;
-            }
-
-            try
-            {
-                Height = float.Parse(yCalibTextBox.Text);
-            }
-            catch
-            {
-                MessageBox.Show("Invalid Height");
-                return;
-            }
-
-            wiitrack.setCalibObjSize(Width, Height);
-
-            this.captureTwoCountabel.Text = "Captured " + wiitrack.CalibrateImageCount.ToString() + " Image Pairs";
-
-        }
 
     }
 }

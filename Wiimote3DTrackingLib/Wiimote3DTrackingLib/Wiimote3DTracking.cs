@@ -18,7 +18,7 @@ namespace Wiimote3DTrackingLib
     // A delegate type for hooking up change notifications.
     public delegate void LogEventHandler(object sender, EventArgs e);
 
-    public class StereoTracking
+    [Serializable] public class StereoTracking
     {
         // Timer object for data logging at set intervals
         private System.Timers.Timer datalogtimer;
@@ -47,10 +47,16 @@ namespace Wiimote3DTrackingLib
         // and not performing a triangulation
         private bool DOUNDISTORTPOINTS = false;
 
+        // boolean to determine if we should add the 3D locations to the log file
+        // when logging
         private bool DOLOG3D = false;
 
+        // boolean to determine if we should add the raw data points to the log
+        // file when logging
         private bool DOLOGRAW = false;
 
+        // boolean to determine whether we should add the undistorted points to
+        // the log file when logging
         private bool DOLOGUNDISTORTED = false;
 
         // wiimote objects for use when logging data
@@ -60,7 +66,7 @@ namespace Wiimote3DTrackingLib
         private static Size wiimoteCamSize = new System.Drawing.Size(1024, 768);
         //private static Size wiimoteCamSize = new System.Drawing.Size(1016, 760);
 
-        // // define a Y offset that takes account of the sensor bar position adjustment
+        // define a Y offset that takes account of the sensor bar position adjustment
         private static int yWiiIROffset = 51;
 
         // The expected number of IR sources
@@ -98,10 +104,11 @@ namespace Wiimote3DTrackingLib
 
         // Fundumental matrix
         Matrix<double> fundMat = new Matrix<double>(3, 3);
+
         //Essential matrix
         Matrix<double> essentialMat = new Matrix<double>(3, 3);
 
-        // The rotation and perspective matrices for the 
+        // The rotation and perspective matrices 
         Matrix<double> R1 = new Matrix<double>(3, 3);
         Matrix<double> R2 = new Matrix<double>(3, 3);
         Matrix<double> P1 = new Matrix<double>(3, 4);
@@ -121,45 +128,6 @@ namespace Wiimote3DTrackingLib
 
         // boolean value determining if the system has been calibrated
         private bool _isStereoCalib = false;
-
-        // Some test points for testing stereo calibration 
-        //public PointF[][] tp1 = new PointF[17][] {
-        //    new PointF[] {new PointF(171,81), new PointF(174,440), new PointF(516,468), new PointF(542,105)},
-        //    new PointF[] {new PointF(59,135), new PointF(71,464), new PointF(385,507), new PointF(409,171)},
-        //    new PointF[] {new PointF(276,184), new PointF(318,570), new PointF(625,471), new PointF(616,124)},
-        //    new PointF[] {new PointF(293,61), new PointF(300,460), new PointF(631,415), new PointF(655,55)},
-        //    new PointF[] {new PointF(267,53), new PointF(206,479), new PointF(540,480), new PointF(603,120)},
-        //    new PointF[] {new PointF(119,75), new PointF(99,471), new PointF(400,572), new PointF(458,115)},
-        //    new PointF[] {new PointF(211,81), new PointF(81,450), new PointF(488,544), new PointF(587,161)},
-        //    new PointF[] {new PointF(153,137), new PointF(74,499), new PointF(446,608), new PointF(590,275)},
-        //    new PointF[] {new PointF(219,123), new PointF(192,566), new PointF(571,551), new PointF(610,161)},
-        //    new PointF[] {new PointF(226,207), new PointF(197,644), new PointF(576,614), new PointF(623,228)},
-        //    new PointF[] {new PointF(119,176), new PointF(76,632), new PointF(511,666), new PointF(575,235)},
-        //    new PointF[] {new PointF(103,132), new PointF(53,416), new PointF(338,433), new PointF(410,175)},
-        //    new PointF[] {new PointF(269,140), new PointF(315,454), new PointF(597,399), new PointF(567,101)},
-        //    new PointF[] {new PointF(164,328), new PointF(160,662), new PointF(479,650), new PointF(491,332)},
-        //    new PointF[] {new PointF(362,133), new PointF(411,479), new PointF(619,420), new PointF(577,127)},
-        //    new PointF[] {new PointF(158,222), new PointF(217,560), new PointF(533,496), new PointF(482,176)},
-        //    new PointF[] {new PointF(151,225), new PointF(173,562), new PointF(493,532), new PointF(475,212)}};
-
-        //public PointF[][] tp2 = new PointF[17][] {
-        //    new PointF[] {new PointF(466,72), new PointF(443,441), new PointF(795,477), new PointF(852,108)},
-        //    new PointF[] {new PointF(338,129), new PointF(326,463), new PointF(649,513), new PointF(702,174)},
-        //    new PointF[] {new PointF(612,185), new PointF(615,577), new PointF(900,481), new PointF(920,127)},
-        //    new PointF[] {new PointF(631,60), new PointF(597,465), new PointF(911,425), new PointF(966,58)},
-        //    new PointF[] {new PointF(612,49), new PointF(525,482), new PointF(823,490), new PointF(905,123)},
-        //    new PointF[] {new PointF(439,69), new PointF(391,471), new PointF(744,582), new PointF(835,116)},
-        //    new PointF[] {new PointF(518,78), new PointF(402,451), new PointF(828,555), new PointF(906,167)},
-        //    new PointF[] {new PointF(513,134), new PointF(375,498), new PointF(744,617), new PointF(941,282)},
-        //    new PointF[] {new PointF(573,121), new PointF(518,573), new PointF(872,565), new PointF(933,167)},
-        //    new PointF[] {new PointF(585,208), new PointF(522,651), new PointF(878,629), new PointF(952,234)},
-        //    new PointF[] {new PointF(479,172), new PointF(409,636), new PointF(840,680), new PointF(925,240)},
-        //    new PointF[] {new PointF(370,128), new PointF(288,415), new PointF(560,437), new PointF(656,177)},
-        //    new PointF[] {new PointF(534,138), new PointF(559,458), new PointF(834,407), new PointF(821,104)},
-        //    new PointF[] {new PointF(428,326), new PointF(412,666), new PointF(727,659), new PointF(745,336)},
-        //    new PointF[] {new PointF(642,134), new PointF(679,486), new PointF(857,428), new PointF(822,130)},
-        //    new PointF[] {new PointF(426,220), new PointF(475,562), new PointF(788,505), new PointF(744,178)},
-        //    new PointF[] {new PointF(415,223), new PointF(429,563), new PointF(745,539), new PointF(731,215)}};
 
         public StereoTracking()
         {
@@ -185,11 +153,6 @@ namespace Wiimote3DTrackingLib
             calibRectSize.Width = sideLen;
             calibRectSize.Height = sideLen;
 
-            InitializeStereoTrackingImages();
-
-            leftimagepoints.Initialize();
-            rightimagepoints.Initialize();
-
             Initialise();
         }
 
@@ -204,22 +167,52 @@ namespace Wiimote3DTrackingLib
             calibRectSize.Width = Width;
             calibRectSize.Height = Height;
 
+            Initialise();
+
+        }
+
+        private void Initialise()
+        {
             InitializeStereoTrackingImages();
 
             leftimagepoints.Initialize();
             rightimagepoints.Initialize();
 
-            Initialise();
-            
-        }
-
-        private void Initialise()
-        {
-
             _logfilename = "data.log";
 
             datalogtimer = new System.Timers.Timer();
             datalogtimer.Elapsed += new ElapsedEventHandler(DataLogTimerEvent);
+        }
+
+        /// <summary>
+        /// Clears the stored stereo calibration image arrays starting from a 
+        /// given position by setting the X and Y values of all coordinates in 
+        /// each image to zero. 
+        /// </summary>
+        /// <param name="startidx">Starting index from which to clear
+        /// the arrays.</param>
+        private void ClearStereoCalibrationImages(int startidx)
+        {
+
+            int i = startidx;
+
+            while (i < MAX_NUM_OF_CAL_IMAGES)
+            {
+                for (int j = 0; j < MAX_NUM_OF_CAL_IMAGES; j++)
+                {
+                    wm1capturedImages[i][j].X = 0f;
+                    wm1capturedImages[i][j].Y = 0f;
+                    wm2capturedImages[i][j].X = 0f;
+                    wm2capturedImages[i][j].Y = 0f;
+                }
+
+                i = i + 1;
+            }
+
+            if (startidx + 1 < stereoCapCount)
+            {
+                stereoCapCount = startidx + 1;
+            }
         }
 
         /// <summary>
@@ -955,43 +948,6 @@ namespace Wiimote3DTrackingLib
 
         private void cvCorrectMatches(System.Drawing.PointF[] points1, System.Drawing.PointF[] points2)
         {
-            //cv::Ptr<CvMat> tmp33;
-            //cv::Ptr<CvMat> tmp31, tmp31_2;
-            //cv::Ptr<CvMat> T1i, T2i;
-            //cv::Ptr<CvMat> R1, R2;
-            //cv::Ptr<CvMat> TFT, TFTt, RTFTR;
-            //cv::Ptr<CvMat> U, S, V;
-            //cv::Ptr<CvMat> e1, e2;
-            //cv::Ptr<CvMat> polynomial;
-            //cv::Ptr<CvMat> result;
-            //cv::Ptr<CvMat> points1, points2;
-
-            //if (!CV_IS_MAT(F_) || !CV_IS_MAT(points1_) || !CV_IS_MAT(points2_) )
-            //    CV_Error( CV_StsUnsupportedFormat, "Input parameters must be matrices" );
-            //if (!( F_->cols == 3 && F_->rows == 3))
-            //    CV_Error( CV_StsUnmatchedSizes, "The fundamental matrix must be a 3x3 matrix");
-            //if (!(((F_->type & CV_MAT_TYPE_MASK) >> 3) == 0 ))
-            //    CV_Error( CV_StsUnsupportedFormat, "The fundamental matrix must be a single-channel matrix" );
-            //if (!(points1_->rows == 1 && points2_->rows == 1 && points1_->cols == points2_->cols))
-            //    CV_Error( CV_StsUnmatchedSizes, "The point-matrices must have two rows, and an equal number of columns" );
-            //if (((points1_->type & CV_MAT_TYPE_MASK) >> 3) != 1 )
-            //    CV_Error( CV_StsUnmatchedSizes, "The first set of points must contain two channels; one for x and one for y" );
-            //if (((points2_->type & CV_MAT_TYPE_MASK) >> 3) != 1 )
-            //    CV_Error( CV_StsUnmatchedSizes, "The second set of points must contain two channels; one for x and one for y" );
-            //if (new_points1 != NULL) {
-            //    CV_Assert(CV_IS_MAT(new_points1));
-            //    if (new_points1->cols != points1_->cols || new_points1->rows != 1)
-            //        CV_Error( CV_StsUnmatchedSizes, "The first output matrix must have the same dimensions as the input matrices" );
-            //    if (CV_MAT_CN(new_points1->type) != 2)
-            //        CV_Error( CV_StsUnsupportedFormat, "The first output matrix must have two channels; one for x and one for y" );
-            //}
-            //if (new_points2 != NULL) {
-            //    CV_Assert(CV_IS_MAT(new_points2));
-            //    if (new_points2->cols != points2_->cols || new_points2->rows != 1)
-            //        CV_Error( CV_StsUnmatchedSizes, "The second output matrix must have the same dimensions as the input matrices" );
-            //    if (CV_MAT_CN(new_points2->type) != 2)
-            //        CV_Error( CV_StsUnsupportedFormat, "The second output matrix must have two channels; one for x and one for y" );
-            //}
 
             //// Make sure F uses double precision
             Matrix<double> F = fundMat;
@@ -1598,6 +1554,7 @@ namespace Wiimote3DTrackingLib
 
         }
 
+
         public int CaptureOneWM(WiimoteLib.Wiimote wm, coord[] coords)
         {
             // Captures the IR sensor output from the wiimotes
@@ -1631,7 +1588,16 @@ namespace Wiimote3DTrackingLib
 
         }
 
-
+        /// <summary>
+        /// Retrieves the last set of IR camera image coordinates reported by 
+        /// a wiimote.
+        /// </summary>
+        /// <param name="wm">Wimmote, the object corresponding to the wiimote
+        /// we wish to extract the coordinates from</param>
+        /// <param name="coords">An array of coord objects in which to store the 
+        /// coordinates reported by each IR sensor</param>
+        /// <returns>integer, 0 if coordinates were successfully retreived, or
+        /// -2 if the IR sensor data could not be extracted. </returns>
         int GetCoords(WiimoteLib.Wiimote wm, coord[] coords)
         {
 
@@ -1652,7 +1618,7 @@ namespace Wiimote3DTrackingLib
 
                         c.pt = i + 1;
 
-                        if (c.x > wiimoteCamSize.Width || c.x < 0 || c.y > wiimoteCamSize.Height || c.y < 0)
+                        if (c.x > wiimoteCamSize.Width | c.x < 0 | c.y > wiimoteCamSize.Height | c.y < 0)
                         {
                             // the IR data is invalid for this source, put the 
                             // coordinate outside the view
@@ -1670,15 +1636,16 @@ namespace Wiimote3DTrackingLib
                     }
                     else
                     {
-                        coords[i].x = 4*wiimoteCamSize.Width + 1 + i;
-                        coords[i].y = 4*wiimoteCamSize.Height + 1 + i;
+                        coords[i].x = 4 * wiimoteCamSize.Width + 1 + i;
+                        coords[i].y = 4 * wiimoteCamSize.Height + 1 + i;
                         coords[i].pt = i+1;
                     }
                 }
             }
             else
             {
-                // return 1 as we could not get info from controller, it may be disconnected
+                // return -2 as we could not get info from controller, it 
+                // may be disconnected
                 return -2;
             }
 
@@ -1686,7 +1653,13 @@ namespace Wiimote3DTrackingLib
 
         }
 
-
+        /// <summary>
+        /// Retrieve the set of stereo calibration images at a given index.
+        /// </summary>
+        /// <param name="imageidx">The zero-based index of the desired pair 
+        /// of images</param>
+        /// <returns>An array of two PointF arrays of size 4, each of which
+        /// contains the corresponding points from the calibration image.</returns>
         public System.Drawing.PointF[][] GetStereoCalibImage(int imageidx)
         {
 
@@ -1708,6 +1681,105 @@ namespace Wiimote3DTrackingLib
             }
 
         }
+
+        /// <summary>
+        /// Saves the captured stereo calibration images to disk if any have 
+        /// been stored.
+        /// </summary>
+        /// <param name="filename">string containing the file path in which 
+        /// to store the saved images. These are saved as text with the 
+        /// format XA1,YA1,XA2,YA2,XA3,YA3,XA4,YA4,XB1,YB1,XB2,YB2,XB3,YB3,XB4,YB4
+        /// where A refers to Wiimote 1 (the left hand camera) and B refers to
+        /// Wiimote 2 (the right hand camera) and the numbers refer to the coordinate
+        /// number in the image in each case.</param>
+        /// <returns>integer, 0 if successful, or otherwise -1.</returns>
+        public int SaveStereoCalibrationImages(string filename)
+        {
+            if (stereoCapCount > 0)
+            {
+                int i, j;
+
+                StreamWriter calibStreamWriter = new StreamWriter(filename);
+
+                for (i = 0; i < stereoCapCount; i++)
+                {
+                    for (j = 0; j < MAX_NUM_IR_SRCS; j++)
+                    {
+                        if (j > 0)
+                        {
+                            calibStreamWriter.Write(",");
+                        }
+
+                        calibStreamWriter.Write("{0},{1}", wm1capturedImages[i][j].X, wm1capturedImages[i][j].Y);
+                    }
+
+                    for (j = 0; j < MAX_NUM_IR_SRCS; j++)
+                    {
+                        calibStreamWriter.Write(",");
+
+                        calibStreamWriter.Write("{0},{1}", wm2capturedImages[i][j].X, wm2capturedImages[i][j].Y);
+                    }
+
+                    calibStreamWriter.Write("\n");
+                }
+
+                calibStreamWriter.Close();
+
+                return 0;
+            }
+            else
+            {
+                return -1;
+            }
+
+        }
+
+        /// <summary>
+        /// Loads a set of stereo calibration images from a file.
+        /// </summary>
+        /// <param name="filename">The filename containing the image points. This
+        /// file must be in the format as created by SaveStereoCalibrationImages.</param>
+        /// <returns>0 if successful.</returns>
+        public int LoadStereoCalibrationImages(string filename)
+        {
+            StreamReader calibStreamReader = new StreamReader(filename);
+
+            string textline = "";
+
+            string[] values = new string[16];
+
+            int i = 0;
+
+            while (!calibStreamReader.EndOfStream | i > MAX_NUM_OF_CAL_IMAGES - 1)
+            {
+                textline = calibStreamReader.ReadLine();
+
+                values = textline.Split(',');
+
+                for (int j = 0; j < MAX_NUM_IR_SRCS; j++)
+                {
+                    wm1capturedImages[i][j].X = float.Parse(values[2 * j]);
+
+                    wm1capturedImages[i][j].Y = float.Parse(values[2 * j + 1]);
+
+                    wm2capturedImages[i][j].X = float.Parse(values[2 * j + 8]);
+
+                    wm2capturedImages[i][j].Y = float.Parse(values[2 * j + 9]);
+                }
+
+                i++;
+
+                stereoCapCount = i;
+
+            }
+
+            calibStreamReader.Close();
+
+            ClearStereoCalibrationImages(stereoCapCount - 1);
+
+            return 0;
+        }
+
 
         /// <summary>
         /// Begins logging data from a pair of Wiimotes.
@@ -1772,15 +1844,6 @@ namespace Wiimote3DTrackingLib
             StartLogging(interval, wm1, wm2, dolog3D, dolograwdata, dologundistorted);
 
         }
-
-        //public void StartLogging(double interval, WiimoteLib.Wiimote wm1, WiimoteLib.Wiimote wm2, string filename)
-        //{
-
-        //    _logfilename = filename;
-
-        //    StartLogging(interval, wm1, wm2);
-
-        //}
 
         public void StopLogging()
         {
