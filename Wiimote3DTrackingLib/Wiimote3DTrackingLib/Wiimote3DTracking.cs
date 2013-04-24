@@ -150,10 +150,10 @@ namespace Wiimote3DTrackingLib
 
                 for (i = 0; i < stereoCapCount; i++)
                 {
-                    Debug.WriteLine("new PointF[] {" + wm1capturedImages[i][0].ToString() +
-                        ", " + wm1capturedImages[i][1].ToString() +
-                        ", " + wm1capturedImages[i][2].ToString() +
-                        ", " + wm1capturedImages[i][3].ToString() + "}");
+                    Debug.WriteLine("new PointF[] {new PointF(" + wm1capturedImages[i][0].X.ToString() + "," + wm1capturedImages[i][0].Y.ToString() + "), new Pointf(" +
+                         wm1capturedImages[i][1].X.ToString() + "," + wm1capturedImages[i][1].Y.ToString() + "), new Pointf(" +
+                         wm1capturedImages[i][2].X.ToString() + "," + wm1capturedImages[i][2].Y.ToString() + "), new Pointf(" +
+                         wm1capturedImages[i][3].X.ToString() + "," + wm1capturedImages[i][3].Y.ToString() + ")" + "}, ");
 
                     //Debug.WriteLine(wm2capturedImages[i][0].ToString() +
                     //    " " + wm2capturedImages[i][1].ToString() +
@@ -161,7 +161,7 @@ namespace Wiimote3DTrackingLib
                     //    " " + wm2capturedImages[i][3].ToString());
                 }
 
-                Debug.WriteLine("}");
+                Debug.WriteLine("};");
 
                 Debug.WriteLine("camera 2 calibration points:");
 
@@ -169,13 +169,13 @@ namespace Wiimote3DTrackingLib
 
                 for (i = 0; i < stereoCapCount; i++)
                 {
-                    Debug.WriteLine("new PointF[] {" + wm2capturedImages[i][0].ToString() +
-                        ", " + wm2capturedImages[i][1].ToString() +
-                        ", " + wm2capturedImages[i][2].ToString() +
-                        ", " + wm2capturedImages[i][3].ToString() + "},");
+                    Debug.WriteLine("new PointF[] {new PointF(" + wm2capturedImages[i][0].X.ToString() + "," + wm2capturedImages[i][0].Y.ToString() + "), new Pointf(" +
+                         wm2capturedImages[i][1].X.ToString() + "," + wm2capturedImages[i][1].Y.ToString() + "), new Pointf(" +
+                         wm2capturedImages[i][2].X.ToString() + "," + wm2capturedImages[i][2].Y.ToString() + "), new Pointf(" +
+                         wm2capturedImages[i][3].X.ToString() + "," + wm2capturedImages[i][3].Y.ToString() + ")" + "}, ");
                 }
 
-                Debug.WriteLine("}");
+                Debug.WriteLine("};");
             }
             else
             {
